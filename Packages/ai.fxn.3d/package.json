@@ -1,0 +1,39 @@
+{
+    "name": "ai.fxn.fxn3d",
+    "version": "0.0.1",
+    "displayName": "Function",
+    "description": "Use AI prediction functions in Unity Engine.",
+    "unity": "2021.2",
+    "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+    },
+    "keywords": [
+        "fxn",
+        "natml",
+        "machine learning",
+        "ml",
+        "aritificial intelligence",
+        "ai",
+        "computer vision",
+        "opencv",
+        "android",
+        "ios",
+        "macos",
+        "windows",
+        "coreml",
+        "nnapi",
+        "directml",
+        "tensorflow",
+        "pytorch",
+        "torch",
+        "natdevice",
+        "natcorder"
+    ],
+    "author": {
+        "name": "NatML Inc",
+        "email": "hi@fxn.ai",
+        "url": "https://github.com/fxnai"
+    },
+    "license": "Apache-2.0",
+    "repository": "github:fxnai/fxn3d"
+}
