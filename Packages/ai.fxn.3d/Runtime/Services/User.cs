@@ -17,23 +17,32 @@ namespace Function.Services {
     public sealed class UserService {
 
         #region --Client API--
+        public const string ProfileFields = @"
+        username
+        created
+        name
+        avatar
+        bio
+        website
+        github
+        ";
+        public const string UserFields = @"
+        ... on User {
+            email
+        }
+        ";
+
         /// <summary>
         /// Retrieve a user.
         /// </summary>
         /// <param name="username">Username. If `null` then this will retrieve the currently authenticated user.</param>
         public async Task<User?> Retrieve (string? username = null) {
-            var profile = !string.IsNullOrEmpty(username);
+            var userFields = string.IsNullOrEmpty(username);
             var user = await client.Query<User>(
                 @$"query {(profile ? "($input: UserInput)" : string.Empty)} {{
                     user {(profile ? "(input: $input)" : "")} {{
-                        username
-                        {(profile ? string.Empty :  "email")}
-                        created
-                        name
-                        avatar
-                        bio
-                        website
-                        github
+                        {ProfileFields}
+                        {(userFields ? UserFields : string.Empty)}
                     }}
                 }}",
                 @"user",
