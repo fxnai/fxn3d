@@ -5,21 +5,29 @@
 
 namespace Function.Types {
 
+    using System.Runtime.Serialization;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+
     /// <summary>
     /// Upload URL type.
     /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum UploadType : int {
         /// <summary>
         /// Prediction feature.
         /// </summary>
-        Feature     = 1,
+        [EnumMember(Value = "FEATURE")]
+        Feature = 1,
         /// <summary>
         /// Predictor media.
         /// </summary>
-        Media       = 2,
+        [EnumMember(Value = "MEDIA")]
+        Media = 2,
         /// <summary>
         /// Predictor notebook.
         /// </summary>
-        Notebook    = 3,
+        [EnumMember(Value = "NOTEBOOK")]
+        Notebook = 3,
     }
 }

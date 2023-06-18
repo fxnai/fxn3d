@@ -14,6 +14,7 @@ namespace Function.Graph {
     using System.Threading.Tasks;
     using UnityEngine.Networking;
     using Newtonsoft.Json;
+    using Services;
 
     /// <summary>
     /// Function graph API client for .NET.
@@ -24,13 +25,19 @@ namespace Function.Graph {
 
         #region --Client API--
         /// <summary>
+        /// Client identifier.
+        /// </summary>
+        public string? Id { get; private set; }
+
+        /// <summary>
         /// Create the Unity web request client.
         /// </summary>
         /// <param name="url">Function graph API URL.</param>
         /// <param name="accessKey">Function access key.</param>
-        public UnityGraphClient (string url, string accessKey) {
+        public UnityGraphClient (string url, string? accessKey, string? id = null) {
             this.url = url;
             this.accessKey = accessKey;
+            this.Id = id;
         }
 
         /// <summary>
@@ -93,10 +100,10 @@ namespace Function.Graph {
         /// <param name="stream">Data stream.</param>
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
-        public async Task Upload (MemoryStream stream, string url, string? mime = null) {
+        public async Task Upload (Stream stream, string url, string? mime = null) {
             // Create client
             using var client = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT) {
-                uploadHandler = new UploadHandlerRaw(stream.ToArray()),
+                uploadHandler = new UploadHandlerRaw(StorageService.ReadStream(stream)),
                 downloadHandler = new DownloadHandlerBuffer(),
                 disposeDownloadHandlerOnDispose = true,
                 disposeUploadHandlerOnDispose = true,
@@ -115,7 +122,7 @@ namespace Function.Graph {
 
         #region --Operations--
         private readonly string url;
-        private readonly string accessKey;
+        private readonly string? accessKey;
         #endregion
     }
 }

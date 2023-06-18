@@ -21,7 +21,7 @@ namespace Function.Editor {
         private static bool EnableVersion () => false;
 
         [MenuItem(@"Function/Explore Predictors", false, BasePriority + 1)]
-        private static void OpenHub () => Help.BrowseURL(@"https://hub.fxn.ai");
+        private static void OpenHub () => Help.BrowseURL(@"https://fxn.ai/explore");
 
         [MenuItem(@"Function/View the Docs", false, BasePriority + 2)]
         private static void OpenDocs () => Help.BrowseURL(@"https://docs.fxn.ai");

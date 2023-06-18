@@ -23,13 +23,20 @@ namespace Function.Graph {
 
         #region --Client API--
         /// <summary>
+        /// Client identifier.
+        /// </summary>
+        public string? Id { get; private set; }
+
+        /// <summary>
         /// Create a Function graph API client.
         /// </summary>
         /// <param name="url">Function graph API URL.</param>
         /// <param name="accessKey">Function access key.</param>
-        public DotNetClient (string url, string accessKey) {
+        /// <param name="id"></param>
+        public DotNetClient (string url, string accessKey, string? id = null) {
             this.url = url;
             this.accessKey = accessKey;
+            this.Id = id;
         }
 
         /// <summary>
@@ -72,9 +79,14 @@ namespace Function.Graph {
         /// <param name="url">Data URL.</param>
         public async Task<MemoryStream> Download (string url) {
             using var client = new HttpClient();
+            // Add UA so request doesn't get blocked
+            var ua = new ProductInfoHeaderValue("FunctionDotNet", "1.0");
+            client.DefaultRequestHeaders.UserAgent.Add(ua);
+            // Download
             using var dataStream = await client.GetStreamAsync(url);
             using var memoryStream = new MemoryStream();
             await dataStream.CopyToAsync(memoryStream);
+            // Return
             return memoryStream;
         }
 
@@ -84,7 +96,7 @@ namespace Function.Graph {
         /// <param name="stream">Data stream.</param>
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
-        public async Task Upload (MemoryStream stream, string url, string? mime = null) {
+        public async Task Upload (Stream stream, string url, string? mime = null) {
             using var client = new HttpClient();
             using var content = new StreamContent(stream);
             content.Headers.ContentType = new MediaTypeHeaderValue(mime ?? @"application/octet-stream");

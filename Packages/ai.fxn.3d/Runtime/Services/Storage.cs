@@ -45,20 +45,21 @@ namespace Function.Services {
         /// <param name="dataUrlLimit">Return a data URL if the provided stream is smaller than this limit (in bytes).</param>
         public async Task<string> Upload (
             string name,
-            MemoryStream stream,
+            Stream stream,
             UploadType type,
             string? mime = null,
-            int dataUrlLimit = 0
+            int dataUrlLimit = 0,
+            string? key = null
         ) {
             mime ??= @"application/octet-stream";
             // Data URL
             if (stream.Length < dataUrlLimit) {
-                var data = Convert.ToBase64String(stream.ToArray());
+                var data = Convert.ToBase64String(ReadStream(stream));
                 var result = $"data:{mime};base64,{data}";
                 return result;
             }
             // Upload
-            var url = await CreateUploadUrl(name, type);
+            var url = await CreateUploadUrl(name, type, key: key);
             await client.Upload(stream, url, mime);
             // Return
             return url;
@@ -70,11 +71,11 @@ namespace Function.Services {
         /// <param name="name">File name.</param>
         /// <param name="type">Upload type.</param>
         /// <param name="key">File key. This is useful for grouping related files.</param>
-        public async Task<string> CreateUploadUrl (
+        public Task<string> CreateUploadUrl (
             string name,
             UploadType type,
             string? key = null
-        ) => await client.Query<string>(
+        ) => client.Query<string>(
             @$"mutation ($input: CreateUploadUrlInput!) {{
                 createUploadUrl (input: $input)
             }}",
@@ -94,17 +95,25 @@ namespace Function.Services {
         private readonly IGraphClient client;
 
         internal StorageService (IGraphClient client) => this.client = client;
+
+        internal static byte[] ReadStream (Stream stream) {
+            if (stream is MemoryStream memoryStream)
+                return memoryStream.ToArray();
+            using (var dstStream = new MemoryStream()) {
+                stream.CopyTo(dstStream);
+                return dstStream.ToArray();
+            }
+        }
+        #endregion
+
+
+        #region --Types--
+
+        private sealed class CreateUploadUrlInput {
+            public string name;
+            public UploadType type;
+            public string? key;
+        }
         #endregion
     }
-
-
-    #region --Types--
-
-    internal sealed class CreateUploadUrlInput {
-        public string name;
-        [JsonConverter(typeof(Graph.GraphEnum<UploadType>))]
-        public UploadType type;
-        public string? key;
-    }
-    #endregion
 }

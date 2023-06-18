@@ -7,14 +7,14 @@
 
 namespace Function.Types {
 
-    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Newtonsoft.Json;
-    using GraphEnumOptions = Graph.GraphEnumOptions;
+    using Services;
 
     /// <summary>
     /// Prediction feature.
     /// </summary>
-    public sealed class Feature {
+    public class Feature {
 
         /// <summary>
         /// Feature data URL.
@@ -24,7 +24,6 @@ namespace Function.Types {
         /// <summary>
         /// Feature data type.
         /// </summary>
-        [JsonConverter(typeof(Graph.GraphEnum<Dtype>), GraphEnumOptions.Lowercase)]
         public Dtype type;
 
         /// <summary>
@@ -32,59 +31,5 @@ namespace Function.Types {
         /// This is `null` if shape information is not available or applicable.
         /// </summary>
         public int[]? shape;
-
-        /// <summary>
-        /// Feature data as a `string`.
-        /// This is a convenience property and is only populated for `string` features.
-        /// </summary>
-        public string? stringValue;
-
-        /// <summary>
-        /// Feature data as a `float`.
-        /// This is a convenience property and is only populated for `float32` or `float64` scalar features.
-        /// </summary>
-        public float? floatValue;
-
-        /// <summary>
-        /// Feature data as a flattened `float` array.
-        /// This is a convenience property and is only populated for `float32` tensor features.
-        /// </summary>
-        public float[]? floatArray;
-
-        /// <summary>
-        /// Feature data as an integer.
-        /// This is a convenience property and is only populated for integer scalar features.
-        /// </summary>
-        public int? intValue;
-
-        /// <summary>
-        /// Feature data as a flattened `int32` array.
-        /// This is a convenience property and is only populated for `int32` tensor features.
-        /// </summary>
-        public int[]? intArray;
-
-        /// <summary>
-        /// Feature data as a boolean.
-        /// This is a convenience property and is only populated for `bool` scalar features.
-        /// </summary>
-        public bool? boolValue;
-
-        /// <summary>
-        /// Feature data as a flattened boolean array.
-        /// This is a convenience property and is only populated for `bool` tensor features.
-        /// </summary>
-        public bool[]? boolArray;
-
-        /// <summary>
-        /// Feature data as a list.
-        /// This is a convenience property and is only populated for `list` features.
-        /// </summary>
-        public List<object>? listValue;
-
-        /// <summary>
-        /// Feature data as a dictionary.
-        /// This is a convenience property and is only populated for `dict` features.
-        /// </summary>
-        public Dictionary<string, object>? dictValue;
     }
 }

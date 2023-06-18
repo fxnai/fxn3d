@@ -17,6 +17,21 @@ namespace Function.Services {
     public sealed class UserService {
 
         #region --Client API--
+        /// <summary>
+        /// Retrieve the current user.
+        /// </summary>
+        public Task<User?> Retrieve () => Retrieve<User?>();
+
+        /// <summary>
+        /// Retrieve a user.
+        /// </summary>
+        /// <param name="username">Username.</param>
+        public Task<Profile?> Retrieve (string username) => Retrieve<Profile?>(username);
+        #endregion
+
+
+        #region --Operations--
+        private readonly IGraphClient client;
         public const string ProfileFields = @"
         username
         created
@@ -32,42 +47,28 @@ namespace Function.Services {
         }
         ";
 
-        /// <summary>
-        /// Retrieve a user.
-        /// </summary>
-        /// <param name="username">Username. If `null` then this will retrieve the currently authenticated user.</param>
-        public async Task<User?> Retrieve (string? username = null) {
-            var userFields = string.IsNullOrEmpty(username);
-            var user = await client.Query<User>(
-                @$"query {(profile ? "($input: UserInput)" : string.Empty)} {{
-                    user {(profile ? "(input: $input)" : "")} {{
-                        {ProfileFields}
-                        {(userFields ? UserFields : string.Empty)}
-                    }}
-                }}",
-                @"user",
-                new () {
-                    ["input"] = new UserInput {
-                        username = username
-                    }
-                }
-            );
-            return user;
+        internal UserService (IGraphClient client) => this.client = client;
+        
+        private Task<T?> Retrieve<T> (string? username = null) => client.Query<T?>(
+            @$"query ($input: UserInput) {{
+                user (input: $input) {{
+                    {ProfileFields}
+                    {(string.IsNullOrEmpty(username) ? UserFields : string.Empty)}
+                }}
+            }}",
+            @"user",
+            new () {
+                ["input"] = !string.IsNullOrEmpty(username) ? new UserInput { username = username } : null
+            }
+        );
+        #endregion
+
+
+        #region --Types--
+
+        internal sealed class UserInput {
+            public string username;
         }
         #endregion
-
-
-        #region --Operations--
-        private readonly IGraphClient client;
-
-        internal UserService (IGraphClient client) => this.client = client;
-        #endregion
     }
-
-    #region --Types--
-
-    internal sealed class UserInput {
-        public string username;
-    }
-    #endregion
 }

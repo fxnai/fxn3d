@@ -16,14 +16,19 @@ namespace Function {
 
         #region --Client API--
         /// <summary>
-        /// Function graph API URL.
-        /// </summary>
-        public const string URL = @"https://api.fxn.ai/graph";
-
-        /// <summary>
         /// Manage users.
         /// </summary>
         public readonly UserService Users;
+
+        /// <summary>
+        /// Manage predictors.
+        /// </summary>
+        public readonly PredictorService Predictors;
+
+        /// <summary>
+        /// Make predictions.
+        /// </summary>
+        public readonly PredictionService Predictions;
 
         /// <summary>
         /// Upload and download files.
@@ -35,10 +40,7 @@ namespace Function {
         /// </summary>
         /// <param name="accessKey">Function access key.</param>
         /// <param name="url">Function graph API URL.</param>
-        public Function (
-            string accessKey = null,
-            string url = null
-        ) : this(new DotNetClient(url ?? URL, accessKey)) { }
+        public Function (string accessKey = null, string url = null) : this(new DotNetClient(url ?? URL, accessKey)) { }
 
         /// <summary>
         /// Create a Function client.
@@ -46,19 +48,17 @@ namespace Function {
         /// <param name="client">Function graph API client.</param>
         public Function (IGraphClient client) {
             this.client = client;
-            this.Users = new UserService(client);
-            //this.Predictors = new PredictorService(client);
-            //this.Graphs = new GraphService(client);
-            //this.Endpoints = new EndpointService(client);
-            //this.PredictorSessions = new PredictorSessionService(client);
-            //this.EndpointPredictions = new EndpointPredictionService(client);
             this.Storage = new StorageService(client);
+            this.Users = new UserService(client);
+            this.Predictors = new PredictorService(client);
+            this.Predictions = new PredictionService(client, Storage);
         }
         #endregion
 
 
         #region --Operations--
         private readonly IGraphClient client;
+        internal const string URL = @"https://api.fxn.ai/graph";
         #endregion
     }
 }

@@ -8,7 +8,11 @@ namespace Function.Types {
     /// <summary>
     /// Function user.
     /// </summary>
-    public sealed class User : Profile {
+    public class User : Profile {
 
+        /// <summary>
+        /// User email address.
+        /// </summary>
+        public string email;
     }
 }

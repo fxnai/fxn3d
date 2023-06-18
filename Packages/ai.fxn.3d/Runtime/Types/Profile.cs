@@ -8,23 +8,15 @@
 
 namespace Function.Types {
 
-    using System;
-
     /// <summary>
     /// Function user profile.
     /// </summary>
-    [Serializable]
     public class Profile {
 
         /// <summary>
         /// Username.
         /// </summary>
         public string username;
-
-        /// <summary>
-        /// User email address.
-        /// </summary>
-        public string? email; // this is private to user hence nullable
 
         /// <summary>
         /// Date created.
