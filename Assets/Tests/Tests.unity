@@ -412,6 +412,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1167683553}
   - component: {fileID: 1167683554}
+  - component: {fileID: 1167683555}
   m_Layer: 0
   m_Name: Tests
   m_TagString: Untagged
@@ -441,7 +442,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1167683551}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d251d41156bb4a94936aead25bf3b95, type: 3}
   m_Name: 
@@ -449,6 +450,19 @@ MonoBehaviour:
   image: {fileID: 2800000, guid: a607e18455587418bac245e682a95998, type: 3}
   contrast: 1.726
   rawImage: {fileID: 1654635358}
+--- !u!114 &1167683555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167683551}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc9ec0020a41d4f4494e671aa30dc54f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clip: {fileID: 8300000, guid: a5e12a32dde204e0dbda0291a9f51beb, type: 3}
 --- !u!1 &1413509856
 GameObject:
   m_ObjectHideFlags: 0

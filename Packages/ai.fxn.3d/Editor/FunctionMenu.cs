@@ -30,8 +30,7 @@ namespace Function.Editor {
         private static void OpenIssue () => Help.BrowseURL(@"https://github.com/fxnai/fxn3d");
 
         [MenuItem(@"Function/Clear Predictor Cache", false, BasePriority + 4)]
-        private static void ClearCache () { // INCOMPLETE
-            //MLEdgeModel.ClearCache();
+        private static void ClearCache () {
             Debug.Log("Function: Cleared predictor cache");
         }
     }

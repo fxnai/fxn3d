@@ -7,6 +7,7 @@ namespace Function {
 
     using System;
     using System.IO;
+    using System.Text;
     using System.Threading.Tasks;
     using UnityEngine;
     using UnityEngine.Networking;
@@ -19,20 +20,7 @@ namespace Function {
     /// </summary>
     public static class FunctionUnity {
 
-        /// <summary>
-        /// Function client identifier.
-        /// </summary>
-        public static string ClientId => Application.platform switch {
-            RuntimePlatform.Android         => @"android",
-            RuntimePlatform.IPhonePlayer    => @"ios",
-            RuntimePlatform.OSXEditor       => @"macos",
-            RuntimePlatform.OSXPlayer       => @"macos",
-            RuntimePlatform.WebGLPlayer     => @"browser",
-            RuntimePlatform.WindowsEditor   => @"windows",
-            RuntimePlatform.WindowsPlayer   => @"windows",
-            _                               => null,
-        };
-
+        #region --Client API--
         /// <summary>
         /// Create a Function client that won't break on WebGL.
         /// </summary>
@@ -73,8 +61,40 @@ namespace Function {
         /// </summary>
         /// <param name="clip">Input audio clip.</param>
         /// <param name="minUploadSize">Audio clips larger than this size in bytes will be uploaded.</param>
-        public static async Task<Feature> ToFeature (this AudioClip clip, int minUploadSize = 4096) { // INCOMPLETE
-            return default;
+        public static async Task<Feature> ToFeature (this AudioClip clip, int minUploadSize = 4096) {
+            using var stream = new MemoryStream();
+            var sampleCount = clip.samples * clip.channels;
+            var dataLength = 44 + sampleCount * sizeof(short) - 8;
+            var sampleBuffer = new float[sampleCount];
+            clip.GetData(sampleBuffer, 0);
+            stream.Write(Encoding.UTF8.GetBytes(@"RIFF"), 0, 4);
+            stream.Write(BitConverter.GetBytes(dataLength), 0, 4);
+            stream.Write(Encoding.UTF8.GetBytes(@"WAVE"), 0, 4);
+            stream.Write(Encoding.UTF8.GetBytes(@"fmt "), 0, 4);
+            stream.Write(BitConverter.GetBytes(16), 0, 4);
+            stream.Write(BitConverter.GetBytes((ushort)1), 0, 2);
+            stream.Write(BitConverter.GetBytes(clip.channels), 0, 2);
+            stream.Write(BitConverter.GetBytes(clip.frequency), 0, 4);
+            stream.Write(BitConverter.GetBytes(clip.frequency * clip.channels * sizeof(short)), 0, 4);
+            stream.Write(BitConverter.GetBytes((ushort)(clip.channels * 2)), 0, 2);
+            stream.Write(BitConverter.GetBytes((ushort)16), 0, 2);
+            stream.Write(Encoding.UTF8.GetBytes(@"data"), 0, 4);
+            stream.Write(BitConverter.GetBytes(sampleCount * sizeof(ushort)), 0, 4);
+            unsafe {
+                fixed (float* srcData = sampleBuffer)
+                    fixed (short* dstData = new short[sampleCount]) {
+                        for (var i = 0; i < sampleCount; ++i)
+                            dstData[i] = (short)(srcData[i] * short.MaxValue);
+                        using var dataStream = new UnmanagedMemoryStream((byte*)dstData, sampleCount * sizeof(short));
+                        dataStream.CopyTo(stream);
+                    }
+            }
+            // Upload
+            stream.Seek(0, SeekOrigin.Begin);
+            var client = Create();
+            var feature = await client.Predictions.ToFeature(stream, @"audio.wav", Dtype.Audio, minUploadSize: minUploadSize);
+            // Return
+            return feature;
         }
 
         /// <summary>
@@ -132,5 +152,23 @@ namespace Function {
             // Return
             return persistentPath;
         }
+        #endregion
+
+
+        #region --Operations--
+        /// <summary>
+        /// Function client identifier.
+        /// </summary>
+        internal static string ClientId => Application.platform switch {
+            RuntimePlatform.Android         => @"android",
+            RuntimePlatform.IPhonePlayer    => @"ios",
+            RuntimePlatform.OSXEditor       => @"macos",
+            RuntimePlatform.OSXPlayer       => @"macos",
+            RuntimePlatform.WebGLPlayer     => @"browser",
+            RuntimePlatform.WindowsEditor   => @"windows",
+            RuntimePlatform.WindowsPlayer   => @"windows",
+            _                               => null,
+        };
+        #endregion
     }
 }
