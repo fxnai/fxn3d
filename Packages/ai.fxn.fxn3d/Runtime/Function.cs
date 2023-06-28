@@ -26,6 +26,11 @@ namespace Function {
         public readonly PredictorService Predictors;
 
         /// <summary>
+        /// Manage predictor environment variables.
+        /// </summary>
+        public readonly EnvironmentVariableService EnvironmentVariables;
+
+        /// <summary>
         /// Make predictions.
         /// </summary>
         public readonly PredictionService Predictions;
@@ -51,6 +56,7 @@ namespace Function {
             this.Storage = new StorageService(client);
             this.Users = new UserService(client);
             this.Predictors = new PredictorService(client);
+            this.EnvironmentVariables = new EnvironmentVariableService(client);
             this.Predictions = new PredictionService(client, Storage);
         }
         #endregion
