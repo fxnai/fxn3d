@@ -1,8 +1,8 @@
 {
     "name": "ai.fxn.fxn3d",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "displayName": "Function",
-    "description": "Use AI prediction functions in Unity Engine.",
+    "description": "Run AI prediction functions in Unity Engine.",
     "unity": "2021.2",
     "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
