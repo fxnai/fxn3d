@@ -28,7 +28,7 @@ Head over to [fxn.ai](https://fxn.ai) to create an account by logging in. Once y
 
 Then add it to your Unity project in `Project Settings > Function`:
 
-![add access key to Unity](settings.gif)
+![add access key to Unity](https://raw.githubusercontent.com/fxnai/fxn3d/main/settings.gif)
 
 ## Making a Prediction
 First, create a Function client and specify your access key:
