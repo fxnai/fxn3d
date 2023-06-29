@@ -13,7 +13,7 @@ namespace Function.Tests {
     using Newtonsoft.Json;
     using Types;
 
-    internal sealed class EnvironmentTest { // INCOMPLETE
+    internal sealed class EnvironmentTest {
 
         private Function fxn;
 
@@ -22,17 +22,23 @@ namespace Function.Tests {
 
         [Test(Description = @"Should list user environment variables")]
         public async Task ListEnvironmentVariables () {
-
+            var variables = await fxn.EnvironmentVariables.List();
+            Assert.That(variables, Is.Not.Empty);
         }
 
-        [Test(Description = @"Should create an environment variable")]
+        [Test(Description = @"Should create and destroy an environment variable")]
         public async Task CreateEnvironmentVariable () {
-
-        }
-
-        [Test(Description = @"Should delete an environment variable")]
-        public async Task DeleteEnvironmentVariable () {
-
+            // Create
+            var name = "ABC_TOKEN";
+            var variable = await fxn.EnvironmentVariables.Create(
+                name: name,
+                value: "Hello world"
+            );
+            Assert.That(variable.name, Is.EqualTo(name));
+            Assert.That(variable.value, Is.Null);
+            // Delete
+            var deleted = await fxn.EnvironmentVariables.Delete(name: name);
+            Assert.That(deleted, Is.True);
         }
     }
 }

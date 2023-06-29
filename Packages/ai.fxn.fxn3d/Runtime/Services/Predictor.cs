@@ -48,7 +48,7 @@ namespace Function.Services {
             int? offset = null,
             int? count = null
         ) {
-            var user = await client.Query<PredictorProfile?>(
+            var user = await client.Query<UserWithPredictors?>(
                 @$"query ($user: UserInput, $predictors: UserPredictorsInput) {{
                     user (input: $user) {{
                         predictors (input: $predictors) {{
@@ -235,10 +235,6 @@ namespace Function.Services {
             public int? count;
         }
 
-        private sealed class PredictorProfile {
-            public Predictor[] predictors;
-        }
-
         private sealed class CreatePredictorInput {
             public string tag;
             public string notebook;
@@ -263,6 +259,10 @@ namespace Function.Services {
         private sealed class EnvironmentVariableInput {
             public string name;
             public string value;
+        }
+
+        private sealed class UserWithPredictors {
+            public Predictor[] predictors;
         }
         #endregion
     }
