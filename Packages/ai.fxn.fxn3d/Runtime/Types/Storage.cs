@@ -17,17 +17,17 @@ namespace Function.Types {
         /// <summary>
         /// Prediction feature.
         /// </summary>
-        [EnumMember(Value = "FEATURE")]
+        [EnumMember(Value = @"FEATURE")]
         Feature = 1,
         /// <summary>
         /// Predictor media.
         /// </summary>
-        [EnumMember(Value = "MEDIA")]
+        [EnumMember(Value = @"MEDIA")]
         Media = 2,
         /// <summary>
         /// Predictor notebook.
         /// </summary>
-        [EnumMember(Value = "NOTEBOOK")]
+        [EnumMember(Value = @"NOTEBOOK")]
         Notebook = 3,
     }
 }

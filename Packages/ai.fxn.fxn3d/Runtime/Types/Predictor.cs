@@ -191,12 +191,12 @@ namespace Function.Types {
         /// <summary>
         /// Resource can be accessed by any user.
         /// </summary>
-        [EnumMember(Value = "PUBLIC")]
+        [EnumMember(Value = @"PUBLIC")]
         Public = 0,
         /// <summary>
         /// Resource can only be accessed by the owner.
         /// </summary>
-        [EnumMember(Value = "PRIVATE")]
+        [EnumMember(Value = @"PRIVATE")]
         Private = 1,
     }
 
@@ -208,22 +208,22 @@ namespace Function.Types {
         /// <summary>
         /// Predictor is being provisioned.
         /// </summary>
-        [EnumMember(Value = "PROVISIONING")]
+        [EnumMember(Value = @"PROVISIONING")]
         Provisioning = 0,
         /// <summary>
         /// Predictor is active.
         /// </summary>
-        [EnumMember(Value = "ACTIVE")]
+        [EnumMember(Value = @"ACTIVE")]
         Active = 1,
         /// <summary>
         /// Predictor is invalid.
         /// </summary>
-        [EnumMember(Value = "INVALID")]
+        [EnumMember(Value = @"INVALID")]
         Invalid = 2,
         /// <summary>
         /// Predictor is archived.
         /// </summary>
-        [EnumMember(Value = "ARCHIVED")]
+        [EnumMember(Value = @"ARCHIVED")]
         Archived = 3,
     }
 
@@ -235,12 +235,12 @@ namespace Function.Types {
         /// <summary>
         /// Predictions are run in the cloud.
         /// </summary>
-        [EnumMember(Value = "CLOUD")]
+        [EnumMember(Value = @"CLOUD")]
         Cloud = 0,
         /// <summary>
         /// Predictions are run on-device.
         /// </summary>
-        [EnumMember(Value = "EDGE")]
+        [EnumMember(Value = @"EDGE")]
         Edge = 1,
     }
 }
