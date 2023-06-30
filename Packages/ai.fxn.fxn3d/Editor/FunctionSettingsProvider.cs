@@ -8,7 +8,7 @@ namespace Function.Editor {
     using System.Collections.Generic;
     using UnityEditor;
 
-    internal static class HubSettingsProvider {
+    internal static class FunctionSettingsProvider {
 
         [SettingsProvider]
         public static SettingsProvider CreateProvider () => new SettingsProvider(@"Project/Function", SettingsScope.Project) {
