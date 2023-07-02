@@ -40,9 +40,9 @@
      <Compile Include="Assets/Tests/UserTest.cs" />
      <Compile Include="Assets/Tests/StorageTest.cs" />
      <Compile Include="Assets/Tests/PredictorTest.cs" />
+     <Compile Include="Assets/Tests/EnvironmentTest.cs" />
      <Compile Include="Assets/Tests/ImageTest.cs" />
      <Compile Include="Assets/Tests/AudioToFeatureTest.cs" />
-     <Compile Include="Assets/Tests/EnvironmentTest.cs" />
      <None Include="Assets/Tests/Function.Tests.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/Applications/Unity/Hub/Editor/2021.3.17f1/Unity.app/Contents/Managed/UnityEngine/UnityEngine.dll</HintPath>

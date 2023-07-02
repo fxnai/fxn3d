@@ -17,7 +17,6 @@ namespace Function.Editor {
                 EditorGUILayout.LabelField(@"Function Account", EditorStyles.boldLabel);
                 FunctionProjectSettings.instance.AccessKey = EditorGUILayout.TextField(@"Access Key", FunctionProjectSettings.instance.AccessKey);
             },
-            deactivateHandler = FunctionProjectSettings.instance.Save,
             keywords = new HashSet<string>(new[] { @"Function", @"NatML", @"NatCorder", @"NatDevice", @"NatShare", @"Hub" }),
         };
     }

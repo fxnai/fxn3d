@@ -23,7 +23,13 @@ namespace Function.Editor {
         /// <summary>
         /// Function access key.
         /// </summary>
-        internal string AccessKey;
+        internal string AccessKey {
+            get => accessKey;
+            set {
+                accessKey = value;
+                Save(false);
+            }
+        }
 
         /// <summary>
         /// Create Function settings from the current project settings.
@@ -39,15 +45,10 @@ namespace Function.Editor {
         #region --Operations--
 
         [InitializeOnLoadMethod]
-        private static void OnLoad () {
-            var settings = CreateSettings();
-            FunctionSettings.Instance = settings;
-        }
+        private static void OnLoad () => FunctionSettings.Instance = CreateSettings();
 
-        internal void Save () {
-            Save(false);
-            FunctionSettings.Instance = CreateSettings();
-        }
+        [InitializeOnEnterPlayMode]
+        private static void OnEnterPlaymodeInEditor (EnterPlayModeOptions options) => FunctionSettings.Instance = CreateSettings();
         #endregion
     }
 }

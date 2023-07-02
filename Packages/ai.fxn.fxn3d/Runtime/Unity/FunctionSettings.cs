@@ -9,6 +9,9 @@ namespace Function.Internal {
     using System.Collections.Generic;
     using UnityEngine;
 
+    /// <summary>
+    /// Function settings for this Unity project.
+    /// </summary>
     internal sealed class FunctionSettings : ScriptableObject {
 
         #region --Client API--
@@ -27,7 +30,7 @@ namespace Function.Internal {
 
         #region --Operations--
 
-        private void OnEnable () => Instance = this;
+        private void OnEnable () => Instance = Application.isEditor ? Instance : this;
         #endregion
     }
 }
