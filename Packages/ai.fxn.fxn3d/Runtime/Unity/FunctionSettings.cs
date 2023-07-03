@@ -30,7 +30,13 @@ namespace Function.Internal {
 
         #region --Operations--
 
-        private void OnEnable () => Instance = Application.isEditor ? Instance : this;
+        private void OnEnable () {
+            // Check editor
+            if (Application.isEditor)
+                return;
+            // Set singleton
+            Instance = this;
+        }
         #endregion
     }
 }

@@ -26,10 +26,13 @@ namespace Function.Editor {
         internal string AccessKey {
             get => accessKey;
             set {
+                // Check
+                if (value == accessKey)
+                    return;
+                // Update
                 accessKey = value;
-                if (FunctionSettings.Instance)
-                    FunctionSettings.Instance.accessKey = value;
                 Save(false);
+                FunctionSettings.Instance = CreateSettings();
             }
         }
 
