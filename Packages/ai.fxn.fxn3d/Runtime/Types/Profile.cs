@@ -11,6 +11,7 @@ namespace Function.Types {
     /// <summary>
     /// Function user profile.
     /// </summary>
+    [Preserve]
     public class Profile {
 
         /// <summary>

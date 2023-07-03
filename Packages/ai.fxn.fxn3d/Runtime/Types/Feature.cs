@@ -14,6 +14,7 @@ namespace Function.Types {
     /// <summary>
     /// Prediction feature.
     /// </summary>
+    [Preserve]
     public class Feature {
 
         /// <summary>

@@ -8,6 +8,7 @@ namespace Function.Types {
     /// <summary>
     /// Function user.
     /// </summary>
+    [Preserve]
     public class User : Profile {
 
         /// <summary>

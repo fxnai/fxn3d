@@ -10,6 +10,7 @@ namespace Function.Types {
     /// <summary>
     /// Predictor environment variable.
     /// </summary>
+    [Preserve]
     public class EnvironmentVariable {
 
         /// <summary>
