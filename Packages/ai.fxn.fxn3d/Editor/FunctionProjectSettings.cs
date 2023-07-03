@@ -27,6 +27,8 @@ namespace Function.Editor {
             get => accessKey;
             set {
                 accessKey = value;
+                if (FunctionSettings.Instance)
+                    FunctionSettings.Instance.accessKey = value;
                 Save(false);
             }
         }
