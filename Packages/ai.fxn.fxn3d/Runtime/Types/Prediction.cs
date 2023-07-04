@@ -11,6 +11,7 @@ namespace Function.Types {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Graph.Converters;
+    using Internal;
 
     /// <summary>
     /// Prediction.

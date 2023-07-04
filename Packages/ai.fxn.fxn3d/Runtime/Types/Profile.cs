@@ -8,6 +8,8 @@
 
 namespace Function.Types {
 
+    using Internal;
+
     /// <summary>
     /// Function user profile.
     /// </summary>

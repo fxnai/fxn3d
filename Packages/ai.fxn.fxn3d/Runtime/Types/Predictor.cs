@@ -11,6 +11,7 @@ namespace Function.Types {
     using System.Runtime.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using Internal;
 
     /// <summary>
     /// Prediction function.

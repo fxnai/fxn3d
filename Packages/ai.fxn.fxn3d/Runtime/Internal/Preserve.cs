@@ -1,14 +1,15 @@
-/* 
+/*
 *   Function
 *   Copyright © 2023 NatML Inc. All rights reserved.
 */
 
-#nullable enable
-
-namespace Function.Types {
+namespace Function.Internal {
 
     using System;
 
+    /// <summary>
+    /// Prevent code stripping.
+    /// </summary>
     [AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
-    public sealed class PreserveAttribute : Attribute { }
+    internal sealed class PreserveAttribute : Attribute { }
 }

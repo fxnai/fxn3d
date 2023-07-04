@@ -5,6 +5,8 @@
 
 namespace Function.Types {
 
+    using Internal;
+
     /// <summary>
     /// Function user.
     /// </summary>

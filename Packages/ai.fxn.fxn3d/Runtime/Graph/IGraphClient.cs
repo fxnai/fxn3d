@@ -11,6 +11,7 @@ namespace Function.Graph {
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
+    using Internal;
 
     /// <summary>
     /// Function graph API client.
@@ -48,6 +49,7 @@ namespace Function.Graph {
     /// <summary>
     /// Function graph API request.
     /// </summary>
+    [Preserve]
     public sealed class GraphRequest {
 
         public string query = string.Empty;
@@ -57,6 +59,7 @@ namespace Function.Graph {
     /// <summary>
     /// Function graph API response.
     /// </summary>
+    [Preserve]
     public sealed class GraphResponse<T> {
 
         public Dictionary<string, T>? data;

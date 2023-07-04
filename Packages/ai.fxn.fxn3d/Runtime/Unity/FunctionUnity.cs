@@ -3,6 +3,8 @@
 *   Copyright © 2023 NatML Inc. All rights reserved.
 */
 
+#nullable enable
+
 namespace Function {
 
     using System;

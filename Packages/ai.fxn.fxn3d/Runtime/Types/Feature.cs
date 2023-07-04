@@ -9,7 +9,7 @@ namespace Function.Types {
 
     using System.Threading.Tasks;
     using Newtonsoft.Json;
-    using Services;
+    using Internal;
 
     /// <summary>
     /// Prediction feature.

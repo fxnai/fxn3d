@@ -7,6 +7,8 @@
 
 namespace Function.Types {
 
+    using Internal;
+
     /// <summary>
     /// Predictor environment variable.
     /// </summary>
