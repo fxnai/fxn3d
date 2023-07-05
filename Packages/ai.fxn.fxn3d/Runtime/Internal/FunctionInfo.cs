@@ -15,4 +15,5 @@ using static Function.Internal.Function;
 
 // Friends
 [assembly: InternalsVisibleTo(@"Function.Editor")]
-[assembly: InternalsVisibleTo(@"Function.Tests")]
+[assembly: InternalsVisibleTo(@"Function.Tests.Editor")]
+[assembly: InternalsVisibleTo(@"Function.Tests.Runtime")]

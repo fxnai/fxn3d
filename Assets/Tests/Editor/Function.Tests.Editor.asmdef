@@ -1,19 +1,12 @@
 {
-    "name": "Function.Tests",
+    "name": "Function.Tests.Editor",
     "rootNamespace": "",
     "references": [
         "Function",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
-    "includePlatforms": [
-        "Android",
-        "Editor",
-        "iOS",
-        "macOSStandalone",
-        "WebGL",
-        "WindowsStandalone64"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": true,

@@ -9,10 +9,10 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{4433136e-8739-ce42-459c-0990039d62e4}</ProjectGuid>
+    <ProjectGuid>{698ee2f3-b492-d05d-f5cb-fe41b2ddc4d2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Function.Tests</AssemblyName>
+    <AssemblyName>Function.Tests.Editor</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
@@ -41,7 +41,7 @@
      <Compile Include="Assets/Tests/Editor/StorageTest.cs" />
      <Compile Include="Assets/Tests/Editor/PredictorTest.cs" />
      <Compile Include="Assets/Tests/Editor/EnvironmentTest.cs" />
-     <None Include="Assets/Tests/Editor/Function.Tests.asmdef" />
+     <None Include="Assets/Tests/Editor/Function.Tests.Editor.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/Applications/Unity/Hub/Editor/2021.3.17f1/Unity.app/Contents/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>

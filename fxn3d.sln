@@ -1,15 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Function.Tests", "Function.Tests.csproj", "{4433136e-8739-ce42-459c-0990039d62e4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Function.Tests.Editor", "Function.Tests.Editor.csproj", "{698ee2f3-b492-d05d-f5cb-fe41b2ddc4d2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Function.Tests.Runtime", "Function.Tests.Runtime.csproj", "{5e9b267a-1535-d456-2537-d4449b313a23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4433136e-8739-ce42-459c-0990039d62e4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4433136e-8739-ce42-459c-0990039d62e4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{698ee2f3-b492-d05d-f5cb-fe41b2ddc4d2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{698ee2f3-b492-d05d-f5cb-fe41b2ddc4d2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5e9b267a-1535-d456-2537-d4449b313a23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5e9b267a-1535-d456-2537-d4449b313a23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
