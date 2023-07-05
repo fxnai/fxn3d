@@ -15,11 +15,6 @@ namespace Function.Types {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum UploadType : int {
         /// <summary>
-        /// Prediction feature.
-        /// </summary>
-        [EnumMember(Value = @"FEATURE")]
-        Feature = 1,
-        /// <summary>
         /// Predictor media.
         /// </summary>
         [EnumMember(Value = @"MEDIA")]
@@ -29,5 +24,10 @@ namespace Function.Types {
         /// </summary>
         [EnumMember(Value = @"NOTEBOOK")]
         Notebook = 3,
+        /// <summary>
+        /// Prediction value.
+        /// </summary>
+        [EnumMember(Value = @"VALUE")]
+        Value = 1,
     }
 }

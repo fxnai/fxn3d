@@ -24,12 +24,12 @@ namespace Function.Tests {
             var prediction = await fxn.Predictions.Create(
                 "@natml/auto-test-v1",
                 new () {
-                    ["image"] = await image.ToFeature(),
+                    ["image"] = await image.ToValue(),
                     ["contrast"] = contrast
                 }
             ) as CloudPrediction;
             // Display
-            var result = prediction.results[0] as Feature;
+            var result = prediction.results[0] as Value;
             rawImage.texture = await result.ToTexture();
         }
     }

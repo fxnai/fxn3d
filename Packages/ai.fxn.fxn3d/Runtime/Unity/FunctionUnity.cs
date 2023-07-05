@@ -38,14 +38,15 @@ namespace Function {
         }
 
         /// <summary>
-        /// Convert a texture to a prediction feature.
+        /// Convert a texture to a prediction value.
         /// </summary>
         /// <param name="texture">Input texture.</param>
         /// <param name="minUploadSize">Textures larger than this size in bytes will be uploaded.</param>
-        public static async Task<Feature> ToFeature (this Texture2D texture, int minUploadSize = 4096) {
+        /// <returns>Prediction value.</returns>
+        public static async Task<Value> ToValue (this Texture2D texture, int minUploadSize = 4096) {
             // Check
             if (!texture || !texture.isReadable)
-                throw new InvalidOperationException(@"Texture cannot be converted to a feature because it is not readable");
+                throw new InvalidOperationException(@"Texture cannot be converted to a prediction value because it is not readable");
             // Encode
             var png = texture.format == TextureFormat.RGBA32;
             var imageData = png ? texture.EncodeToPNG() : texture.EncodeToJPG();
@@ -53,17 +54,18 @@ namespace Function {
             // Upload
             var client = Create();
             using var stream = new MemoryStream(imageData);
-            var feature = await client.Predictions.ToFeature(stream, $"image{ext}", Dtype.Image, minUploadSize: minUploadSize);
+            var value = await client.Predictions.ToValue(stream, $"image{ext}", Dtype.Image, minUploadSize: minUploadSize);
             // Return
-            return feature;
+            return value;
         }
 
         /// <summary>
-        /// Convert an audio clip to a prediction feature.
+        /// Convert an audio clip to a prediction value.
         /// </summary>
         /// <param name="clip">Input audio clip.</param>
         /// <param name="minUploadSize">Audio clips larger than this size in bytes will be uploaded.</param>
-        public static async Task<Feature> ToFeature (this AudioClip clip, int minUploadSize = 4096) {
+        /// <returns>Prediction value.</returns>
+        public static async Task<Value> ToValue (this AudioClip clip, int minUploadSize = 4096) {
             using var stream = new MemoryStream();
             var sampleCount = clip.samples * clip.channels;
             var dataLength = 44 + sampleCount * sizeof(short) - 8;
@@ -94,22 +96,23 @@ namespace Function {
             // Upload
             stream.Seek(0, SeekOrigin.Begin);
             var client = Create();
-            var feature = await client.Predictions.ToFeature(stream, @"audio.wav", Dtype.Audio, minUploadSize: minUploadSize);
+            var value = await client.Predictions.ToValue(stream, @"audio.wav", Dtype.Audio, minUploadSize: minUploadSize);
             // Return
-            return feature;
+            return value;
         }
 
         /// <summary>
-        /// Convert a feature into a texture.
+        /// Convert an image value to a texture.
         /// </summary>
-        /// <param name="feature">Input feature.</param>
-        public static async Task<Texture2D> ToTexture (this Feature feature) {
+        /// <param name="value">Prediction value.</param>
+        /// <returns>Texture.</returns>
+        public static async Task<Texture2D> ToTexture (this Value value) {
             // Check
-            if (feature?.type != Dtype.Image)
-                throw new InvalidOperationException($"Feature cannot be converted to a texture because it has an invalid type: {feature.type}");
+            if (value?.type != Dtype.Image)
+                throw new InvalidOperationException($"Value cannot be converted to a texture because it has an invalid type: {value?.type}");
             // Download
             var client = Create();
-            using var stream = await client.Storage.Download(feature.data);
+            using var stream = await client.Storage.Download(value.data);
             // Create
             var texture = new Texture2D(16, 16);
             texture.LoadImage(stream.ToArray());
@@ -118,9 +121,22 @@ namespace Function {
         }
 
         /// <summary>
+        /// Convert an audio value to an AudioClip.
         /// </summary>
-        public static AudioClip ToAudioClip (this Feature feature) { // INCOMPLETE
-            return default;
+        /// <param name="value">Prediction value.</param>
+        /// <returns>Audio clip.</returns>
+        public static async Task<AudioClip> ToAudioClip (this Value value) {
+            // Create download URL
+            using var urlCreator = new DownloadUrlCreator(value.data);
+            var url = await urlCreator.URL();
+            // Download
+            using var www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.WAV);
+            www.SendWebRequest();
+            while (!www.isDone)
+                await Task.Yield();
+            // Create clip
+            var clip = DownloadHandlerAudioClip.GetContent(www);
+            return clip;
         }
 
         /// <summary>
@@ -171,6 +187,28 @@ namespace Function {
             RuntimePlatform.WindowsPlayer   => @"windows",
             _                               => null,
         };
+
+        private sealed class DownloadUrlCreator : IDisposable {
+
+            private readonly string url;
+            private readonly string path;
+
+            public DownloadUrlCreator (string url) {
+                this.url = url;
+                this.path = $"{Path.GetTempPath()}{Guid.NewGuid().ToString()}";
+            }
+
+            public async Task<string> URL () => url.StartsWith("data:") ? await CreateFileURL() : url;
+
+            public void Dispose () => File.Delete(path);
+
+            private async Task<string> CreateFileURL () {
+                using var dataStream = await FunctionUnity.Create().Storage.Download(url);
+                using var fileStream = new FileStream(path, FileMode.OpenOrCreate);
+                dataStream.CopyTo(fileStream);
+                return $"file://{path}";
+            }
+        }
         #endregion
     }
 }

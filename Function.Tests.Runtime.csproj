@@ -37,7 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets/Tests/Runtime/ImageTest.cs" />
-     <Compile Include="Assets/Tests/Runtime/AudioToFeatureTest.cs" />
+     <Compile Include="Assets/Tests/Runtime/AudioToValueTest.cs" />
      <Compile Include="Assets/Tests/Runtime/AccessKeyTest.cs" />
      <None Include="Assets/Tests/Runtime/Function.Tests.Runtime.asmdef" />
     <Reference Include="UnityEngine">

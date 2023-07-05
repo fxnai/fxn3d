@@ -12,7 +12,7 @@ namespace Function.Types {
     using Newtonsoft.Json.Converters;
 
     /// <summary>
-    /// Feature data type.
+    /// Value type.
     /// This follows `numpy` dtypes.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]

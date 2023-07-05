@@ -29,9 +29,9 @@ namespace Function.Services {
         /// Create a prediction.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
-        /// <param name="inputs">Input features. Only applies to `CLOUD` predictions.</param>
-        /// <param name="rawOutputs">Skip parsing output features into Pythonic data types.</param>
-        /// <param name="dataUrlLimit">Return a data URL if a given output feature is smaller than this size. Only applies to `CLOUD` predictions.</param>
+        /// <param name="inputs">Input values. Only applies to `CLOUD` predictions.</param>
+        /// <param name="rawOutputs">Skip parsing output values into plain values.</param>
+        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size. Only applies to `CLOUD` predictions.</param>
         public async Task<Prediction> Create (
             string tag,
             Dictionary<string, object>? inputs = null,
@@ -40,10 +40,10 @@ namespace Function.Services {
         ) {
             // Collect inputs
             var key = Guid.NewGuid().ToString();
-            var features = inputs != null ? await Task.WhenAll(inputs.Select(async pair => {
+            var values = inputs != null ? await Task.WhenAll(inputs.Select(async pair => {
                 var name = pair.Key;
-                var feature = await ToFeature(pair.Value, name, key: key);
-                return new FeatureInput { name = name, data = feature.data, type = feature.type, shape = feature.shape };
+                var value = await ToValue(pair.Value, name, key: key);
+                return new ValueInput { name = name, data = value.data, type = value.type, shape = value.shape };
             })) : null;
             // Query
             var prediction = await client.Query<Prediction?>(
@@ -57,7 +57,7 @@ namespace Function.Services {
                     ["input"] = new CreatePredictionInput {
                         tag = tag,
                         client = client.Id,
-                        inputs = features,
+                        inputs = values,
                         dataUrlLimit = dataUrlLimit,
                     }
                 }
@@ -65,8 +65,8 @@ namespace Function.Services {
             // Collect results
             if (prediction is CloudPrediction cloudPrediction && cloudPrediction.results != null) {
                 cloudPrediction.results = await Task.WhenAll(cloudPrediction.results.Select(async r => {
-                    var feature = (r as JObject).ToObject<Feature>();
-                    var result = rawOutputs ? feature : await ToValue(feature);
+                    var value = (r as JObject).ToObject<Value>();
+                    var result = rawOutputs ? value : await ToObject(value);
                     return result;
                 }));
             }
@@ -75,47 +75,77 @@ namespace Function.Services {
         }
 
         /// <summary>
-        /// Convert a feature to a plain C# value.
+        /// Convert a Function value to a plain object.
         /// </summary>
-        public async Task<object> ToValue (Feature feature) => ToValue(feature, await storage.Download(feature.data));
+        /// <param name="value">Function value.</param>
+        /// <returns>Plain object or `Value` if the value cannot be converted to a plain object.</returns>
+        public async Task<object> ToObject (Value value) {
+            var stream = await storage.Download(value.data);
+            switch (value.type) {
+                case Dtype.String:  return new StreamReader(stream).ReadToEnd();
+                case Dtype.Float32: return value.shape.Length > 0 ? ToArray<float>(stream) : ToScalar<float>(stream);
+                case Dtype.Float64: return value.shape.Length > 0 ? ToArray<double>(stream) : ToScalar<double>(stream);
+                case Dtype.Int8:    return value.shape.Length > 0 ? ToArray<sbyte>(stream) : ToScalar<sbyte>(stream);
+                case Dtype.Int16:   return value.shape.Length > 0 ? ToArray<short>(stream) : ToScalar<short>(stream);
+                case Dtype.Int32:   return value.shape.Length > 0 ? ToArray<int>(stream) : ToScalar<int>(stream);
+                case Dtype.Int64:   return value.shape.Length > 0 ? ToArray<long>(stream) : ToScalar<long>(stream);
+                case Dtype.Uint8:   return value.shape.Length > 0 ? ToArray<byte>(stream) : ToScalar<byte>(stream);
+                case Dtype.Uint16:  return value.shape.Length > 0 ? ToArray<ushort>(stream) : ToScalar<ushort>(stream);
+                case Dtype.Uint32:  return value.shape.Length > 0 ? ToArray<uint>(stream) : ToScalar<uint>(stream);
+                case Dtype.Uint64:  return value.shape.Length > 0 ? ToArray<ulong>(stream) : ToScalar<ulong>(stream);
+                case Dtype.Bool:    return value.shape.Length > 0 ? ToArray<bool>(stream) : ToScalar<bool>(stream);
+                case Dtype.Binary:  return stream;
+                case Dtype.List:    return JsonConvert.DeserializeObject<List<object>>(new StreamReader(stream).ReadToEnd());
+                case Dtype.Dict:    return JsonConvert.DeserializeObject<Dictionary<string, object>>(new StreamReader(stream).ReadToEnd());
+                default:            return value;
+            }
+        }
 
         /// <summary>
-        /// Create a feature from a given value.
+        /// Create a Function prediction value from an input object.
         /// </summary>
-        /// <param name="value">Input value.</param>
-        /// <param name="name">Feature name.</param>
-        /// <param name="type">Feature type. Use this to override the default type that will be assigned to the feature.</param>
-        /// <param name="minUploadSize">Features larger than this size in bytes will be uploaded.</param>
-        /// <returns>Created feature.</returns>
-        public async Task<Feature> ToFeature (object value, string name, Dtype? type = null, int minUploadSize = 4096, string? key = null) => value switch {
-            Feature     x => x,
-            string      x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.String },
-            float       x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Float32, shape = new int[0] },
-            double      x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Float64, shape = new int[0] },
-            sbyte       x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int8, shape = new int[0] },
-            short       x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int16, shape = new int[0] },
-            int         x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int32, shape = new int[0] },
-            long        x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int64, shape = new int[0] },
-            byte        x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint8, shape = new int[0] },
-            ushort      x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint16, shape = new int[0] },
-            uint        x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint32, shape = new int[0] },
-            ulong       x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint64, shape = new int[0] },
-            bool        x => new Feature { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Bool, shape = new int[0] },
-            float[]     x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Float32, shape = new int[] { x.Length } },
-            double[]    x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Float64, shape = new int[] { x.Length } },
-            sbyte[]     x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int8, shape = new int[] { x.Length } },
-            short[]     x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int16, shape = new int[] { x.Length } },
-            int[]       x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int32, shape = new int[] { x.Length } },
-            long[]      x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Int64, shape = new int[] { x.Length } },
-            byte[]      x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint8, shape = new int[] { x.Length } },
-            ushort[]    x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint16, shape = new int[] { x.Length } },
-            uint[]      x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint32, shape = new int[] { x.Length } },
-            ulong[]     x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Uint64, shape = new int[] { x.Length } },
-            bool[]      x => new Feature { data = await storage.Upload(name, ToStream(x), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Bool, shape = new int[] { x.Length } },
-            Stream      x => new Feature { data = await storage.Upload(name, x, UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
-            IList       x => new Feature { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.List },
-            IDictionary x => new Feature { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Feature, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Dict },
-            _             => throw new InvalidOperationException($"Cannot create a feature from value '{value}' of type {value.GetType()}"),
+        /// <param name="value">Input object.</param>
+        /// <param name="name">Value name.</param>
+        /// <param name="type">Value type. This only applies to `Stream` input values.</param>
+        /// <param name="shape">Value shape for tensor values.</param>
+        /// <param name="minUploadSize">Values larger than this size in bytes will be uploaded.</param>
+        /// <returns>Function value.</returns>
+        public async Task<Value> ToValue (
+            object value,
+            string name,
+            Dtype? type = null,
+            int[] shape = null,
+            int minUploadSize = 4096,
+            string? key = null
+        ) => value switch {
+            Value       x => x,
+            string      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
+            float       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new int[0] },
+            double      x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new int[0] },
+            sbyte       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new int[0] },
+            short       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new int[0] },
+            int         x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new int[0] },
+            long        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new int[0] },
+            byte        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new int[0] },
+            ushort      x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new int[0] },
+            uint        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new int[0] },
+            ulong       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new int[0] },
+            bool        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new int[0] },
+            float[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = shape ?? new int[] { x.Length } },
+            double[]    x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = shape ?? new int[] { x.Length } },
+            sbyte[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = shape ?? new int[] { x.Length } },
+            short[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = shape ?? new int[] { x.Length } },
+            int[]       x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = shape ?? new int[] { x.Length } },
+            long[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = shape ?? new int[] { x.Length } },
+            byte[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = shape ?? new int[] { x.Length } },
+            ushort[]    x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = shape ?? new int[] { x.Length } },
+            uint[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = shape ?? new int[] { x.Length } },
+            ulong[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = shape ?? new int[] { x.Length } },
+            bool[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = shape ?? new int[] { x.Length } },
+            Stream      x => new Value { data = await storage.Upload(name, x, UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
+            IList       x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
+            IDictionary x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
+            _             => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}"),
         };
         #endregion
 
@@ -144,25 +174,6 @@ namespace Function.Services {
             this.client = client;
             this.storage = storage;
         }
-
-        private object ToValue (Feature feature, MemoryStream stream) => feature.type switch {
-            Dtype.String    => new StreamReader(stream).ReadToEnd(),
-            Dtype.Float32   => feature.shape.Length > 0 ? ToArray<float>(stream) : ToScalar<float>(stream),
-            Dtype.Float64   => feature.shape.Length > 0 ? ToArray<double>(stream) : ToScalar<double>(stream),
-            Dtype.Int8      => feature.shape.Length > 0 ? ToArray<sbyte>(stream) : ToScalar<sbyte>(stream),
-            Dtype.Int16     => feature.shape.Length > 0 ? ToArray<short>(stream) : ToScalar<short>(stream),
-            Dtype.Int32     => feature.shape.Length > 0 ? ToArray<int>(stream) : ToScalar<int>(stream),
-            Dtype.Int64     => feature.shape.Length > 0 ? ToArray<long>(stream) : ToScalar<long>(stream),
-            Dtype.Uint8     => feature.shape.Length > 0 ? ToArray<byte>(stream) : ToScalar<byte>(stream),
-            Dtype.Uint16    => feature.shape.Length > 0 ? ToArray<ushort>(stream) : ToScalar<ushort>(stream),
-            Dtype.Uint32    => feature.shape.Length > 0 ? ToArray<uint>(stream) : ToScalar<uint>(stream),
-            Dtype.Uint64    => feature.shape.Length > 0 ? ToArray<ulong>(stream) : ToScalar<ulong>(stream),
-            Dtype.Bool      => feature.shape.Length > 0 ? ToArray<bool>(stream) : ToScalar<bool>(stream),
-            Dtype.Binary    => stream,
-            Dtype.List      => JsonConvert.DeserializeObject<List<object>>(new StreamReader(stream).ReadToEnd()),
-            Dtype.Dict      => JsonConvert.DeserializeObject<Dictionary<string, object>>(new StreamReader(stream).ReadToEnd()),
-            _               => feature,
-        };
 
         private static Stream ToStream (string data) {
             var buffer = Encoding.UTF8.GetBytes(data);
@@ -195,11 +206,11 @@ namespace Function.Services {
         private sealed class CreatePredictionInput {
             public string tag;
             public string client;
-            public FeatureInput[]? inputs;
+            public ValueInput[]? inputs;
             public int? dataUrlLimit;
         }
 
-        private sealed class FeatureInput : Feature {
+        private sealed class ValueInput : Value {
             public string name;
         }
         #endregion

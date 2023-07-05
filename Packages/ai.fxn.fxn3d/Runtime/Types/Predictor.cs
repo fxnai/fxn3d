@@ -150,7 +150,7 @@ namespace Function.Types {
         /// <summary>
         /// Parameter default value.
         /// </summary>
-        public Feature? defaultValue;
+        public Value? defaultValue;
     }
 
     /// <summary>
