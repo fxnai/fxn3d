@@ -10,7 +10,7 @@ namespace Function.Internal {
     using UnityEngine;
 
     /// <summary>
-    /// Function settings for this Unity project.
+    /// Function settings for the current Unity project.
     /// </summary>
     internal sealed class FunctionSettings : ScriptableObject {
 

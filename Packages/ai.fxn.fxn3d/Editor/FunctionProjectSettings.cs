@@ -10,8 +10,11 @@ namespace Function.Editor {
     using UnityEditor;
     using Internal;
 
+    /// <summary>
+    /// Function settings for the current Unity project.
+    /// </summary>
     [FilePath(@"ProjectSettings/Function.asset", FilePathAttribute.Location.ProjectFolder)]
-    internal sealed class FunctionProjectSettings : ScriptableSingleton<FunctionProjectSettings> {
+    public sealed class FunctionProjectSettings : ScriptableSingleton<FunctionProjectSettings> {
 
         #region --Data--
         [SerializeField]
