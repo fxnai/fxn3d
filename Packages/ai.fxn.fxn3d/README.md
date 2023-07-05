@@ -16,7 +16,7 @@ Add the following items to your Unity project's `Packages/manifest.json`:
     }
   ],
   "dependencies": {
-    "ai.fxn.fxn3d": "0.0.2"
+    "ai.fxn.fxn3d": "0.0.3"
   }
 }
 ```

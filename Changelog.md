@@ -1,3 +1,6 @@
+## 0.0.3
+*INCOMPLETE*
+
 ## 0.0.2
 + Added `FunctionUnity.ToAudioClip` extension method for converting a Function `Value` to an `AudioClip`.
 + Fixed Function access key not being available in builds.
