@@ -105,8 +105,9 @@ namespace Function {
         /// Convert an image value to a texture.
         /// </summary>
         /// <param name="value">Prediction value.</param>
+        /// <param name="texture">Optional destination texture.</param>
         /// <returns>Texture.</returns>
-        public static async Task<Texture2D> ToTexture (this Value value) {
+        public static async Task<Texture2D> ToTexture (this Value value, Texture2D texture = null) {
             // Check
             if (value?.type != Dtype.Image)
                 throw new InvalidOperationException($"Value cannot be converted to a texture because it has an invalid type: {value?.type}");
@@ -114,7 +115,7 @@ namespace Function {
             var client = Create();
             using var stream = await client.Storage.Download(value.data);
             // Create
-            var texture = new Texture2D(16, 16);
+            texture = texture ? texture : new Texture2D(16, 16);
             texture.LoadImage(stream.ToArray());
             // Return
             return texture;
