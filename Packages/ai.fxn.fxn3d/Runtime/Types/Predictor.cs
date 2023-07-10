@@ -16,7 +16,7 @@ namespace Function.Types {
     /// <summary>
     /// Prediction function.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class Predictor {
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Function.Types {
     /// <summary>
     /// Predictor signature.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class Signature {
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Function.Types {
     /// <summary>
     /// Predictor parameter.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class Parameter {
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Function.Types {
     /// <summary>
     /// Prediction parameter enumeration member.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class EnumerationMember {
         /// <summary>
         /// Enumeration member name.

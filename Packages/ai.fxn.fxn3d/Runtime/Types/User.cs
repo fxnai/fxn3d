@@ -5,12 +5,13 @@
 
 namespace Function.Types {
 
+    using System;
     using Internal;
 
     /// <summary>
     /// Function user.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class User : Profile {
 
         /// <summary>

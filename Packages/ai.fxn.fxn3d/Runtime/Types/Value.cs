@@ -7,6 +7,7 @@
 
 namespace Function.Types {
 
+    using System;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Internal;
@@ -14,7 +15,7 @@ namespace Function.Types {
     /// <summary>
     /// Prediction value.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class Value {
 
         /// <summary>

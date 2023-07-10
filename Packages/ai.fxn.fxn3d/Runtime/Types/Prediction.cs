@@ -16,7 +16,7 @@ namespace Function.Types {
     /// <summary>
     /// Prediction.
     /// </summary>
-    [Preserve, JsonConverter(typeof(PredictionConverter))]
+    [Preserve, Serializable, JsonConverter(typeof(PredictionConverter))]
     public abstract class Prediction {
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Function.Types {
     /// <summary>
     /// Cloud prediction.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class CloudPrediction : Prediction {
         
         /// <summary>
@@ -72,7 +72,7 @@ namespace Function.Types {
     /// <summary>
     /// Edge prediction.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class EdgePrediction : Prediction {
 
     }

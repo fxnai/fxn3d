@@ -8,12 +8,13 @@
 
 namespace Function.Types {
 
+    using System;
     using Internal;
 
     /// <summary>
     /// Function user profile.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class Profile {
 
         /// <summary>

@@ -8,23 +8,26 @@
 
 namespace Function.Types {
 
+    using System;
     using System.Diagnostics.CodeAnalysis;
+    using Internal;
 
     /// <summary>
     /// Predictor tag.
     /// </summary>
+    [Preserve, Serializable]
     public sealed class Tag {
 
         #region --Client API--
         /// <summary>
         /// Predictor owner username.
         /// </summary>
-        public readonly string username;
+        public string username;
 
         /// <summary>
         /// Predictor name.
         /// </summary>
-        public readonly string name;
+        public string name;
 
         /// <summary>
         /// Create a tag.

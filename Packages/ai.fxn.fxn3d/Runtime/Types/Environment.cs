@@ -7,12 +7,13 @@
 
 namespace Function.Types {
 
+    using System;
     using Internal;
 
     /// <summary>
     /// Predictor environment variable.
     /// </summary>
-    [Preserve]
+    [Preserve, Serializable]
     public class EnvironmentVariable {
 
         /// <summary>
