@@ -21,7 +21,7 @@ namespace Function.Types {
         /// <summary>
         /// Value URL.
         /// </summary>
-        public string data;
+        public string? data;
 
         /// <summary>
         /// Value type.

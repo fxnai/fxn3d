@@ -80,7 +80,12 @@ namespace Function.Services {
         /// <param name="value">Function value.</param>
         /// <returns>Plain object or `Value` if the value cannot be converted to a plain object.</returns>
         public async Task<object> ToObject (Value value) {
+            // Null
+            if (value.type == Dtype.Null)
+                return null;
+            // Download
             var stream = await storage.Download(value.data);
+            // Switch
             switch (value.type) {
                 case Dtype.String:  return new StreamReader(stream).ReadToEnd();
                 case Dtype.Float32: return value.shape.Length > 0 ? ToArray<float>(stream) : ToScalar<float>(stream);
@@ -145,6 +150,7 @@ namespace Function.Services {
             Stream      x => new Value { data = await storage.Upload(name, x, UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
             IList       x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
             IDictionary x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
+            null          => new Value { type = Dtype.Null },
             _             => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}"),
         };
         #endregion

@@ -18,9 +18,10 @@ namespace Function.Types {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum Dtype : int { // CHECK // Must match `Function.h`
         /// <summary>
-        /// Unknown or unsupported data type.
+        /// Null or unsupported data type.
         /// </summary>
-        Undefined   = 0,
+        [EnumMember(Value = @"null")]
+        Null = 0,
         /// <summary>
         /// Type is a `int8_t` in C/C++ and `sbyte` in C#.
         /// </summary>
@@ -159,7 +160,7 @@ namespace Function.Types {
             var t when t == typeof(ushort)  => Dtype.Uint16,
             var t when t == typeof(uint)    => Dtype.Uint32,
             var t when t == typeof(ulong)   => Dtype.Uint64,
-            _                               => Dtype.Undefined,
+            _                               => Dtype.Null,
         };
     }
 }
