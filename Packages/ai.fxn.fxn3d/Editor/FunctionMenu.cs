@@ -20,16 +20,19 @@ namespace Function.Editor {
         [MenuItem(@"Function/Function " + Function.Version, true, BasePriority)]
         private static bool EnableVersion () => false;
 
-        [MenuItem(@"Function/Explore Predictors", false, BasePriority + 1)]
-        private static void OpenHub () => Help.BrowseURL(@"https://fxn.ai/explore");
+        [MenuItem(@"Function/Get Access Key", false, BasePriority + 1)]
+        private static void OpenAccessKey () => Help.BrowseURL(@"https://fxn.ai/account/developers");
 
-        [MenuItem(@"Function/View the Docs", false, BasePriority + 2)]
+        [MenuItem(@"Function/Explore Predictors", false, BasePriority + 2)]
+        private static void OpenExplore () => Help.BrowseURL(@"https://fxn.ai/explore");
+
+        [MenuItem(@"Function/View the Docs", false, BasePriority + 3)]
         private static void OpenDocs () => Help.BrowseURL(@"https://docs.fxn.ai");
 
-        [MenuItem(@"Function/Open an Issue", false, BasePriority + 3)]
+        [MenuItem(@"Function/Open an Issue", false, BasePriority + 4)]
         private static void OpenIssue () => Help.BrowseURL(@"https://github.com/fxnai/fxn3d");
 
-        [MenuItem(@"Function/Clear Predictor Cache", false, BasePriority + 4)]
+        [MenuItem(@"Function/Clear Predictor Cache", false, BasePriority + 5)]
         private static void ClearCache () {
             Debug.Log("Function: Cleared predictor cache");
         }
