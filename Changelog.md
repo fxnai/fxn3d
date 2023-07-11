@@ -1,3 +1,6 @@
+## 0.0.4
+*INCOMPLETE*
+
 ## 0.0.3
 + Refactored `Predictor.readme` field to `card`.
 + Refactored `Dtype.Undefined` enumeration member to `Dtype.Null`.
