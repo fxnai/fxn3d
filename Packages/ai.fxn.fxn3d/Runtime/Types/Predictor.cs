@@ -61,9 +61,9 @@ namespace Function.Types {
         public string? description;
 
         /// <summary>
-        /// Predictor readme.
+        /// Predictor card.
         /// </summary>
-        public string? readme;
+        public string? card;
 
         /// <summary>
         /// Predictor media URL.
