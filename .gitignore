@@ -4,6 +4,9 @@ Temp/
 obj/
 Logs/
 
+# Function
+ProjectSettings/Function.asset
+
 # IDE
 #.vscode/
 .gradle/
