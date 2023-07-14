@@ -24,17 +24,18 @@ namespace Function {
 
         #region --Client API--
         /// <summary>
-        /// Create a Function client that won't break on WebGL.
+        /// Create a Function client for Unity.
         /// </summary>
-        /// <param name="accessKey">Function access key.</param>
+        /// <param name="accessKey">Function access key. This defaults to your access key in Project Settings.</param>
         /// <returns>Function client.</returns>
         public static Function Create (string? accessKey = null, string? url = null) {
-            accessKey = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance.accessKey;
-            url = url ?? Function.URL;
-            var useUnity = Application.platform == RuntimePlatform.WebGLPlayer;
-            IGraphClient graphClient = useUnity ? new UnityGraphClient(url, accessKey, ClientId) : new DotNetClient(url, accessKey, ClientId);
-            var client = new Function(graphClient);
-            return client;
+            var key = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance.accessKey;
+            var graph = url ?? Function.URL;
+            var client = Application.platform == RuntimePlatform.WebGLPlayer ?
+                (IGraphClient)new UnityGraphClient(graph, key, ClientId) :
+                new DotNetClient(graph, key, ClientId);
+            var fxn = new Function(client);
+            return fxn;
         }
 
         /// <summary>

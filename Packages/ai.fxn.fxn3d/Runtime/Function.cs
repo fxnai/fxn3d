@@ -63,7 +63,7 @@ namespace Function {
 
 
         #region --Operations--
-        private readonly IGraphClient client;
+        public readonly IGraphClient client;
         internal const string URL = @"https://api.fxn.ai/graph";
         #endregion
     }

@@ -31,7 +31,7 @@ Then add it to your Unity project in `Project Settings > Function`:
 ![add access key to Unity](settings.gif)
 
 ## Making a Prediction
-First, create a Function client and specify your access key:
+First, create a Function client:
 ```csharp
 using Function;
 
@@ -43,7 +43,7 @@ Then make a prediction:
 ```csharp
 // Make a prediction
 var prediction = await fxn.Predictions.Create(
-    tag: "@natml/greeting-sample",
+    tag: "@samplefxn/greeting",
     inputs: new () {
         ["name"] = "Rhea"
     }
