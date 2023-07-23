@@ -12,6 +12,7 @@ namespace Function.Internal {
     /// <summary>
     /// Function settings for the current Unity project.
     /// </summary>
+    [DefaultExecutionOrder(Int32.MinValue)]
     internal sealed class FunctionSettings : ScriptableObject {
 
         #region --Client API--
@@ -30,12 +31,10 @@ namespace Function.Internal {
 
         #region --Operations--
 
-        private void OnEnable () {
-            // Check editor
-            if (Application.isEditor)
-                return;
-            // Set singleton
-            Instance = this;
+        private void Awake () {
+            // Set singleton in player
+            if (!Application.isEditor)
+                Instance = this;
         }
         #endregion
     }

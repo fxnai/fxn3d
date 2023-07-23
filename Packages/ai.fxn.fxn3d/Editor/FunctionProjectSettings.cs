@@ -35,7 +35,6 @@ namespace Function.Editor {
                 // Update
                 accessKey = value;
                 Save(false);
-                FunctionSettings.Instance = CreateSettings();
             }
         }
 
