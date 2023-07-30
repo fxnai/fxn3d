@@ -9,7 +9,7 @@ using static Function.Internal.Function;
 
 // Metadata
 [assembly: AssemblyCompany(@"NatML Inc")]
-[assembly: AssemblyTitle(@"Function")]
+[assembly: AssemblyTitle(@"Function.Runtime")]
 [assembly: AssemblyVersionAttribute(Version)]
 [assembly: AssemblyCopyright(@"Copyright © 2023 NatML Inc. All Rights Reserved.")]
 

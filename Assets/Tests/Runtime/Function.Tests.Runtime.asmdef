@@ -2,7 +2,7 @@
     "name": "Function.Tests.Runtime",
     "rootNamespace": "",
     "references": [
-        "Function"
+        "Function.Runtime"
     ],
     "includePlatforms": [
         "Android",

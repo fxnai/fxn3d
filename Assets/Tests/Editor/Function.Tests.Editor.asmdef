@@ -2,7 +2,7 @@
     "name": "Function.Tests.Editor",
     "rootNamespace": "",
     "references": [
-        "Function",
+        "Function.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

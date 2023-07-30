@@ -1,5 +1,5 @@
 ## 0.0.4
-*INCOMPLETE*
++ Minor updates.
 
 ## 0.0.3
 + Refactored `Predictor.readme` field to `card`.
