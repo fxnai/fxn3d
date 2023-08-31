@@ -16,7 +16,7 @@ namespace Function.Services {
     using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Graph;
+    using API;
     using Types;
 
     /// <summary>
@@ -98,12 +98,12 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly IGraphClient client;
+        private readonly IFunctionClient client;
         public static string Fields = @$"
         name
         ";
 
-        internal EnvironmentVariableService (IGraphClient client) => this.client = client;
+        internal EnvironmentVariableService (IFunctionClient client) => this.client = client;
         #endregion
 
 

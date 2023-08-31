@@ -5,19 +5,19 @@
 
 #nullable enable
 
-namespace Function.Graph {
+namespace Function.API {
 
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using Internal;
+    using Graph;
 
     /// <summary>
-    /// Function graph API client.
+    /// Function API client.
     /// </summary>
-    public interface IGraphClient {
-        
+    public interface IFunctionClient {
+
         /// <summary>
         /// Client identifier.
         /// </summary>
@@ -26,10 +26,21 @@ namespace Function.Graph {
         /// <summary>
         /// Query the Function graph API.
         /// </summary>
+        /// <typeparam name="T">Deserialized response type.</typeparam>
         /// <param name="query">Graph query.</param>
         /// <param name="key">Query result key.</param>
         /// <param name="input">Query inputs.</param>
+        /// <returns>Deserialized query result.</returns>
         Task<T?> Query<T> (string query, string key, Dictionary<string, object?>? variables = default);
+
+        /// <summary>
+        /// Perform a streaming request to a Function REST endpoint.
+        /// </summary>
+        /// <typeparam name="T">Deserialized response type.</typeparam>
+        /// <param name="path">Endpoint path.</param>
+        /// <param name="payload">POST request body.</param>
+        /// <returns>Stream of deserialized responses.</returns>
+        IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload);
 
         /// <summary>
         /// Download a file.
@@ -44,29 +55,5 @@ namespace Function.Graph {
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
         Task Upload (Stream stream, string url, string? mime = null);
-    }
-
-    /// <summary>
-    /// Function graph API request.
-    /// </summary>
-    [Preserve]
-    public sealed class GraphRequest {
-
-        public string query = string.Empty;
-        public Dictionary<string, object?>? variables;
-    }
-
-    /// <summary>
-    /// Function graph API response.
-    /// </summary>
-    [Preserve]
-    public sealed class GraphResponse<T> {
-
-        public Dictionary<string, T>? data;
-        public Error[]? errors;
-
-        public sealed class Error {
-            public string message;
-        }
     }
 }

@@ -8,7 +8,7 @@
 namespace Function.Services {
 
     using System.Threading.Tasks;
-    using Graph;
+    using API;
     using Types;
 
     /// <summary>
@@ -31,7 +31,7 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly IGraphClient client;
+        private readonly IFunctionClient client;
         public const string ProfileFields = @"
         username
         created
@@ -47,7 +47,7 @@ namespace Function.Services {
         }
         ";
 
-        internal UserService (IGraphClient client) => this.client = client;
+        internal UserService (IFunctionClient client) => this.client = client;
         
         private Task<T?> Retrieve<T> (string? username = null) => client.Query<T?>(
             @$"query ($input: UserInput) {{

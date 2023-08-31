@@ -5,7 +5,7 @@
 
 #nullable enable
 
-namespace Function.Graph {
+namespace Function.API {
 
     using System;
     using System.Collections.Generic;
@@ -15,11 +15,12 @@ namespace Function.Graph {
     using System.Text;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
+    using Graph;
 
     /// <summary>
-    /// Function graph API client for .NET.
+    /// Function API client for .NET.
     /// </summary>
-    public sealed class DotNetClient : IGraphClient {
+    public sealed class DotNetClient : IFunctionClient {
 
         #region --Client API--
         /// <summary>
@@ -28,12 +29,12 @@ namespace Function.Graph {
         public string? Id { get; private set; }
 
         /// <summary>
-        /// Create a Function graph API client.
+        /// Create the .NET Function API client.
         /// </summary>
-        /// <param name="url">Function graph API URL.</param>
+        /// <param name="url">Function API URL.</param>
         /// <param name="accessKey">Function access key.</param>
         /// <param name="id"></param>
-        public DotNetClient (string url, string accessKey, string? id = null) {
+        public DotNetClient (string url, string? accessKey, string? id = null) {
             this.url = url;
             this.accessKey = accessKey;
             this.Id = id;
@@ -47,22 +48,16 @@ namespace Function.Graph {
         /// <param name="input">Query inputs.</param>
         public async Task<T?> Query<T> (string query, string key, Dictionary<string, object?>? variables = default) {
             // Serialize payload
-            var payload = new GraphRequest {
-                query = query,
-                variables = variables
-            };
-            var serializationSettings = new JsonSerializerSettings {
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            var payload = new GraphRequest { query = query, variables = variables };
+            var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
             // Create client
             using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("fxn-client", Id);
+            client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
+            // Request
             using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
-            // Add auth token
-            var authHeader = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
-            client.DefaultRequestHeaders.Authorization = authHeader;
-            // Post
-            using var response = await client.PostAsync(url, content);
+            using var response = await client.PostAsync($"{this.url}/graph", content);
             // Parse
             var responseStr = await response.Content.ReadAsStringAsync();
             var responsePayload = JsonConvert.DeserializeObject<GraphResponse<T>>(responseStr);
@@ -74,12 +69,49 @@ namespace Function.Graph {
         }
 
         /// <summary>
+        /// Perform a streaming request to a Function REST endpoint.
+        /// </summary>
+        /// <typeparam name="T">Deserialized response type.</typeparam>
+        /// <param name="path">Endpoint path.</param>
+        /// <param name="payload">POST request body.</param>
+        /// <returns>Stream of deserialized responses.</returns>
+        public async IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload) {
+            // Serialize payload
+            var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+            var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
+            // Create client
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("fxn-client", Id);
+            client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
+            // Request
+            using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
+            using var message = new HttpRequestMessage(HttpMethod.Post, $"{this.url}{path}");
+            message.Content = content;
+            using var response = await client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
+            // Consume stream
+            using var stream = await response.Content.ReadAsStreamAsync();
+            var buffer = new byte[65536]; // CHECK // Could be problemati with `dataUrlLimit`
+            while (true) {
+                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                if (bytesRead == 0)
+                    break;
+                var responseStr = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                if ((int)response.StatusCode >= 400) {
+                    var errorPayload = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseStr);
+                    var error = errorPayload.TryGetValue(@"error", out var msg) ? msg : "An unknown error occurred";
+                    throw new InvalidOperationException(error);
+                }
+                yield return JsonConvert.DeserializeObject<T>(responseStr);
+            }
+        }
+
+        /// <summary>
         /// Download a file.
         /// </summary>
         /// <param name="url">Data URL.</param>
         public async Task<MemoryStream> Download (string url) {
+            // Create client
             using var client = new HttpClient();
-            // Add UA so request doesn't get blocked
             var ua = new ProductInfoHeaderValue("FunctionDotNet", "1.0");
             client.DefaultRequestHeaders.UserAgent.Add(ua);
             // Download
@@ -108,7 +140,7 @@ namespace Function.Graph {
 
         #region --Operations--
         private readonly string url;
-        private readonly string accessKey;
+        private readonly string? accessKey;
         #endregion
     }
 }

@@ -10,7 +10,7 @@ namespace Function.Types {
     using System;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
-    using Graph.Converters;
+    using API.Converters;
     using Internal;
 
     /// <summary>

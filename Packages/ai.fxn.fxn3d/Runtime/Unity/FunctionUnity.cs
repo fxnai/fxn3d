@@ -13,7 +13,7 @@ namespace Function {
     using System.Threading.Tasks;
     using UnityEngine;
     using UnityEngine.Networking;
-    using Graph;
+    using API;
     using Internal;
     using Types;
 
@@ -32,7 +32,7 @@ namespace Function {
             var key = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance.accessKey;
             var graph = url ?? Function.URL;
             var client = Application.platform == RuntimePlatform.WebGLPlayer ?
-                (IGraphClient)new UnityGraphClient(graph, key, ClientId) :
+                (IFunctionClient)new UnityClient(graph, key, ClientId) :
                 new DotNetClient(graph, key, ClientId);
             var fxn = new Function(client);
             return fxn;

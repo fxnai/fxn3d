@@ -5,7 +5,7 @@
 
 #nullable enable
 
-namespace Function.Graph.Converters {
+namespace Function.API.Converters {
 
     using System;
     using Newtonsoft.Json;

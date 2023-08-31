@@ -6,7 +6,7 @@
 namespace Function {
 
     using System;
-    using Graph;
+    using API;
     using Services;
 
     /// <summary>
@@ -44,14 +44,14 @@ namespace Function {
         /// Create a Function client.
         /// </summary>
         /// <param name="accessKey">Function access key.</param>
-        /// <param name="url">Function graph API URL.</param>
+        /// <param name="url">Function API URL.</param>
         public Function (string accessKey = null, string url = null) : this(new DotNetClient(url ?? URL, accessKey)) { }
 
         /// <summary>
         /// Create a Function client.
         /// </summary>
-        /// <param name="client">Function graph API client.</param>
-        public Function (IGraphClient client) {
+        /// <param name="client">Function API client.</param>
+        public Function (IFunctionClient client) {
             this.client = client;
             this.Storage = new StorageService(client);
             this.Users = new UserService(client);
@@ -63,8 +63,8 @@ namespace Function {
 
 
         #region --Operations--
-        public readonly IGraphClient client;
-        internal const string URL = @"https://api.fxn.ai/graph";
+        public readonly IFunctionClient client;
+        internal const string URL = @"https://api.fxn.ai";
         #endregion
     }
 }

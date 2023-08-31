@@ -16,7 +16,7 @@ namespace Function.Services {
     using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Graph;
+    using API;
     using Types;
 
     /// <summary>
@@ -63,15 +63,39 @@ namespace Function.Services {
                 }
             );
             // Collect results
-            if (prediction is CloudPrediction cloudPrediction && cloudPrediction.results != null) {
-                cloudPrediction.results = await Task.WhenAll(cloudPrediction.results.Select(async r => {
-                    var value = (r as JObject).ToObject<Value>();
-                    var result = rawOutputs ? value : await ToObject(value);
-                    return result;
-                }));
-            }
+            if (prediction is CloudPrediction cloudPrediction)
+                cloudPrediction.results = await ParseResults(cloudPrediction.results, rawOutputs);
             // Return
             return prediction;
+        }
+
+        /// <summary>
+        /// Create a streaming prediction.
+        /// </summary>
+        /// <param name="tag">Predictor tag.</param>
+        /// <param name="inputs">Input values. Only applies to `CLOUD` predictions.</param>
+        /// <param name="rawOutputs">Skip parsing output values into plain values.</param>
+        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size. Only applies to `CLOUD` predictions.</param>
+        public async IAsyncEnumerable<Prediction> Stream (
+            string tag,
+            Dictionary<string, object>? inputs = null,
+            bool rawOutputs = false,
+            int? dataUrlLimit = null
+        ) {
+            // Collect inputs
+            var key = Guid.NewGuid().ToString();
+            var values = inputs != null ?
+                (await Task.WhenAll(inputs.Select(async pair => (name: pair.Key, value: await ToValue(pair.Value, pair.Key, key: key))))).ToDictionary(pair => pair.name, pair => pair.value as object) :
+                null;
+            // Stream
+            var path = $"/predict/{tag}?stream=true&rawOutputs=true&dataUrlLimit={dataUrlLimit}";
+            await foreach (var prediction in client.Stream<Prediction?>(path, values)) {
+                // Collect results
+                if (prediction is CloudPrediction cloudPrediction)
+                    cloudPrediction.results = await ParseResults(cloudPrediction.results, rawOutputs);
+                // Yield
+                yield return prediction;
+            }
         }
 
         /// <summary>
@@ -157,7 +181,7 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly IGraphClient client;
+        private readonly IFunctionClient client;
         private readonly StorageService storage;
         public const string Fields = @"
         id
@@ -176,9 +200,19 @@ namespace Function.Services {
         }
         ";
 
-        internal PredictionService (IGraphClient client, StorageService storage) {
+        internal PredictionService (IFunctionClient client, StorageService storage) {
             this.client = client;
             this.storage = storage;
+        }
+
+        private async Task<object[]> ParseResults (object[] values, bool raw) {
+            if (values == null)
+                return null;
+            var results = await Task.WhenAll(values.Select(async r => {
+                var value = (r as JObject).ToObject<Value>();
+                return raw ? value : await ToObject(value);
+            }));
+            return results;
         }
 
         private static Stream ToStream (string data) {

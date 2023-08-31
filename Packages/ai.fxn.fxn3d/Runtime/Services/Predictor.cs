@@ -10,7 +10,7 @@ namespace Function.Services {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Graph;
+    using API;
     using Types;
 
     /// <summary>
@@ -170,7 +170,7 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly IGraphClient client;
+        private readonly IFunctionClient client;
         public static string Fields = @$"
         tag
         owner {{
@@ -213,7 +213,7 @@ namespace Function.Services {
         license
         ";
 
-        internal PredictorService (IGraphClient client) => this.client = client;
+        internal PredictorService (IFunctionClient client) => this.client = client;
         #endregion
 
 

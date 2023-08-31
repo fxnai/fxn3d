@@ -11,7 +11,7 @@ namespace Function.Services {
     using System.IO;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
-    using Graph;
+    using API;
     using Types;
 
     /// <summary>
@@ -92,9 +92,9 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly IGraphClient client;
+        private readonly IFunctionClient client;
 
-        internal StorageService (IGraphClient client) => this.client = client;
+        internal StorageService (IFunctionClient client) => this.client = client;
 
         internal static byte[] ReadStream (Stream stream) {
             if (stream is MemoryStream memoryStream)
