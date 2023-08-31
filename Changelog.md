@@ -1,3 +1,6 @@
+## 0.0.6
+*INCOMPLETE*
+
 ## 0.0.5
 + Added `Function.Predictions.Stream` method for making streaming predictions.
 + Refactored `IGraphClient` interface to `IFunctionClient`.

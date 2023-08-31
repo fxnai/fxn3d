@@ -15,7 +15,7 @@ namespace Function.Internal {
     /// </summary>
     public static class Function {
 
-        public const string Version = @"0.0.5";
+        public const string Version = @"0.0.6";
     }
 
     /// <summary>
