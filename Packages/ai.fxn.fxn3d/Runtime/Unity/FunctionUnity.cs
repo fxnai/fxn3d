@@ -29,7 +29,7 @@ namespace Function {
         /// <param name="accessKey">Function access key. This defaults to your access key in Project Settings.</param>
         /// <returns>Function client.</returns>
         public static Function Create (string? accessKey = null, string? url = null) {
-            var key = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance.accessKey;
+            var key = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance?.accessKey;
             var graph = url ?? Function.URL;
             var client = Application.platform == RuntimePlatform.WebGLPlayer ?
                 (IFunctionClient)new UnityClient(graph, key, ClientId) :
