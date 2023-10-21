@@ -52,6 +52,9 @@ namespace Function.Types {
         /// <returns>Whether the tag was successfully parsed.</returns>
         public static bool TryParse (string input, [NotNullWhen(true)] out Tag? tag) {
             tag = null;
+            // Check input
+            if (string.IsNullOrEmpty(input))
+                return false;
             // Check username prefix
             input = input.ToLowerInvariant();
             if (!input.StartsWith("@"))

@@ -38,10 +38,7 @@ namespace Function.Tests {
                     ["width"] = 3.9,
                 }
             };
-            var prediction = await fxn.Predictions.Create(
-                tag: tag,
-                inputs: inputs
-            ) as CloudPrediction;
+            var prediction = await fxn.Predictions.Create(tag: tag, inputs: inputs);
             var name = prediction?.results?[0];
             var age = prediction?.results?[1];
             var ratio = prediction?.results?[2];

@@ -1,5 +1,7 @@
 ## 0.0.6
-*INCOMPLETE*
++ Fixed `NullReferenceException` when calling `Tag.TryParse` with `null` input string.
++ Removed `CloudPrediction` class. Use `Prediction` class instead.
++ Removed `EdgePrediction` class. Use `Prediction` class instead.
 
 ## 0.0.5
 + Added `Function.Predictions.Stream` method for making streaming predictions.

@@ -63,8 +63,7 @@ namespace Function.Services {
                 }
             );
             // Collect results
-            if (prediction is CloudPrediction cloudPrediction)
-                cloudPrediction.results = await ParseResults(cloudPrediction.results, rawOutputs);
+            prediction.results = await ParseResults(prediction.results, rawOutputs);
             // Return
             return prediction;
         }
@@ -91,8 +90,7 @@ namespace Function.Services {
             var path = $"/predict/{tag}?stream=true&rawOutputs=true&dataUrlLimit={dataUrlLimit}";
             await foreach (var prediction in client.Stream<Prediction?>(path, values)) {
                 // Collect results
-                if (prediction is CloudPrediction cloudPrediction)
-                    cloudPrediction.results = await ParseResults(cloudPrediction.results, rawOutputs);
+                prediction.results = await ParseResults(prediction.results, rawOutputs);
                 // Yield
                 yield return prediction;
             }

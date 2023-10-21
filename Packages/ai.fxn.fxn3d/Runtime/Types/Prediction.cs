@@ -10,14 +10,13 @@ namespace Function.Types {
     using System;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
-    using API.Converters;
     using Internal;
 
     /// <summary>
     /// Prediction.
     /// </summary>
-    [Preserve, Serializable, JsonConverter(typeof(PredictionConverter))]
-    public abstract class Prediction {
+    [Preserve, Serializable]
+    public class Prediction {
 
         /// <summary>
         /// Prediction ID.
@@ -39,14 +38,7 @@ namespace Function.Types {
         /// </summary>
         [JsonConverter(typeof(IsoDateTimeConverter))]
         public DateTime created;
-    }
 
-    /// <summary>
-    /// Cloud prediction.
-    /// </summary>
-    [Preserve, Serializable]
-    public class CloudPrediction : Prediction {
-        
         /// <summary>
         /// Prediction results.
         /// </summary>
@@ -67,13 +59,5 @@ namespace Function.Types {
         /// Prediction logs.
         /// </summary>
         public string? logs;
-    }
-
-    /// <summary>
-    /// Edge prediction.
-    /// </summary>
-    [Preserve, Serializable]
-    public class EdgePrediction : Prediction {
-
     }
 }

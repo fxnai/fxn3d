@@ -27,7 +27,7 @@ namespace Function.Tests {
                     ["image"] = await image.ToValue(),
                     ["contrast"] = contrast
                 }
-            ) as CloudPrediction;
+            );
             // Display
             var result = prediction.results[0] as Value;
             rawImage.texture = await result.ToTexture();
