@@ -17,6 +17,7 @@ namespace Function.Services {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using API;
+    using Internal;
     using Types;
 
     /// <summary>
@@ -38,6 +39,9 @@ namespace Function.Services {
             bool rawOutputs = false,
             int? dataUrlLimit = null
         ) {
+            // Check cache
+            if (cache.TryGetValue(tag, out var p))
+                return Predict(tag, p, inputs);
             // Collect inputs
             var key = Guid.NewGuid().ToString();
             var values = inputs != null ? await Task.WhenAll(inputs.Select(async pair => {
@@ -62,8 +66,13 @@ namespace Function.Services {
                     }
                 }
             );
-            // Collect results
-            prediction.results = await ParseResults(prediction.results, rawOutputs);
+            // Parse
+            var predictor = prediction.type == PredictorType.Edge ? await Load(prediction) : IntPtr.Zero;
+            var edgePrediction = predictor != IntPtr.Zero && inputs != null ? Predict(tag, predictor, inputs) : null;
+            prediction.results = edgePrediction?.results ?? await ParseResults(prediction.results, rawOutputs);
+            prediction.latency = edgePrediction?.latency ?? prediction.latency;
+            prediction.error = edgePrediction?.error ?? prediction.error;
+            prediction.logs = edgePrediction?.error ?? prediction.logs;
             // Return
             return prediction;
         }
@@ -94,6 +103,21 @@ namespace Function.Services {
                 // Yield
                 yield return prediction;
             }
+        }
+
+        /// <summary>
+        /// Delete an edge predictor that is loaded in memory.
+        /// </summary>
+        /// <param name="tag">Predictor tag.</param>
+        /// <returns>Whether the edge predictor was successfully deleted from memory.</returns>
+        public async Task<bool> Delete (string tag) {
+            // Check
+            if (!cache.TryGetValue(tag, out var predictor))
+                return false;
+            // Release
+            predictor.ReleasePredictor().CheckStatus();
+            // Return
+            return true;
         }
 
         /// <summary>
@@ -141,7 +165,7 @@ namespace Function.Services {
             object value,
             string name,
             Dtype? type = null,
-            int[] shape = null,
+            int[]? shape = null,
             int minUploadSize = 4096,
             string? key = null
         ) => value switch {
@@ -181,26 +205,72 @@ namespace Function.Services {
         #region --Operations--
         private readonly IFunctionClient client;
         private readonly StorageService storage;
+        private readonly Dictionary<string, IntPtr> cache;
         public const string Fields = @"
         id
         tag
         type
         created
-        ... on CloudPrediction {
-            results {
-                data
-                type
-                shape
-            }
-            latency
-            error
-            logs
+        implementation
+        configuration
+        resources {
+            id
+            url
         }
+        results {
+            data
+            type
+            shape
+        }
+        latency
+        error
+        logs
         ";
 
         internal PredictionService (IFunctionClient client, StorageService storage) {
             this.client = client;
             this.storage = storage;
+            this.cache = new Dictionary<string, IntPtr>();
+        }
+
+        private async Task<IntPtr> Load (Prediction prediction) { // INCOMPLETE
+            return default;
+        }
+
+        private Prediction Predict ( // INCOMPLETE // Latency, error, logs
+            string tag,
+            IntPtr predictor,
+            Dictionary<string, object> inputs
+        ) {
+            // Marshal inouts
+            Function.CreateValueMap(out var inputMap).CheckStatus();
+            foreach (var pair in inputs)
+                inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).CheckStatus();
+            // Predict
+            predictor.Predict(inputMap, out var outputMap).CheckStatus();
+            // Marshal outputs
+            outputMap.GetValueMapSize(out var count).CheckStatus();
+            var results = new List<object>();
+            var name = new StringBuilder(1024);
+            for (var idx = 0; idx < count; ++idx) {
+                name.Clear();
+                outputMap.GetValueMapKey(idx, name, name.Capacity).CheckStatus();
+                outputMap.GetValueMapValue(name.ToString(), out var value).CheckStatus();
+                results.Add(ToObject(value));
+            }
+            // Create prediction
+            var prediction = new Prediction {
+                id = Guid.NewGuid().ToString("N"),
+                tag = tag,
+                type = PredictorType.Edge,
+                created = DateTime.Now,
+                results = results.ToArray(),
+                latency = 0, 
+                error = null,
+                logs = null,
+            };
+            // Return
+            return prediction;
         }
 
         private async Task<object[]> ParseResults (object[] values, bool raw) {
@@ -211,6 +281,14 @@ namespace Function.Services {
                 return raw ? value : await ToObject(value);
             }));
             return results;
+        }
+
+        private static IntPtr ToValue (object value) { // INCOMPLETE
+            return default;
+        }
+
+        private static object ToObject (IntPtr value) { // INCOMPLETE
+            return default;
         }
 
         private static Stream ToStream (string data) {

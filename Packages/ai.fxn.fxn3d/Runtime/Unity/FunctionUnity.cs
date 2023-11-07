@@ -108,7 +108,7 @@ namespace Function {
         /// <param name="value">Prediction value.</param>
         /// <param name="texture">Optional destination texture.</param>
         /// <returns>Texture.</returns>
-        public static async Task<Texture2D> ToTexture (this Value value, Texture2D texture = null) {
+        public static async Task<Texture2D> ToTexture (this Value value, Texture2D? texture = null) {
             // Check
             if (value?.type != Dtype.Image)
                 throw new InvalidOperationException($"Value cannot be converted to a texture because it has an invalid type: {value?.type}");
