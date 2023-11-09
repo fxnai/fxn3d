@@ -147,16 +147,16 @@ namespace Function.Internal {
 
 
         #region --FXNConfiguration--
-        [DllImport(Assembly, EntryPoint = @"FXNConfigurationCreate")]
-        public static extern Status CreateConfiguration (out IntPtr configuration);
-
-        [DllImport(Assembly, EntryPoint = @"FXNConfigurationRelease")]
-        public static extern Status ReleaseConfiguration (this IntPtr configuration);
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetUniqueID")]
         public static extern Status GetConfigurationUniqueID (
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder identifier,
             int size
         );
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationCreate")]
+        public static extern Status CreateConfiguration (out IntPtr configuration);
+
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationRelease")]
+        public static extern Status ReleaseConfiguration (this IntPtr configuration);
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetToken")]
         public static extern Status SetConfigurationToken (
             this IntPtr configuration,
