@@ -59,5 +59,40 @@ namespace Function.Types {
         /// Prediction logs.
         /// </summary>
         public string? logs;
+
+        /// <summary>
+        /// Predictor implementation.
+        /// This is only populated for `EDGE` predictions.
+        /// </summary>
+        public string? implementation;
+
+        /// <summary>
+        /// Predictor resources.
+        // This is only populated for `EDGE` predictions.
+        /// </summary>
+        public PredictionResource[]? resources;
+
+        /// <summary>
+        /// Prediction configuration token.
+        /// This is only populated for `EDGE` predictions.
+        /// </summary>
+        public string? configuration;
+    }
+
+    /// <summary>
+    /// Prediction resource.
+    /// </summary>
+    [Preserve, Serializable]
+    public class PredictionResource {
+
+        /// <summary>
+        /// Resource identifier.
+        /// </summary>
+        public string id;
+
+        /// <summary>
+        /// Resource URL.
+        /// </summary>
+        public string url;
     }
 }

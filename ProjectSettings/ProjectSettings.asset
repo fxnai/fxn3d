@@ -816,7 +816,7 @@ PlayerSettings:
   webGLShowDiagnostics: 0
   webGLDataCaching: 1
   webGLDebugSymbols: 0
-  webGLEmscriptenArgs: ' --bind '
+  webGLEmscriptenArgs: ' --bind  -sALLOW_TABLE_GROWTH=1 '
   webGLModulesDirectory: 
   webGLTemplate: APPLICATION:Default
   webGLAnalyzeBuildSize: 0

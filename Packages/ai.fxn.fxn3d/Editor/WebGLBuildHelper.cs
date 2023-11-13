@@ -14,6 +14,7 @@ namespace Function.Editor {
         public int callbackOrder => 0;
         private readonly string[] EM_ARGS = new [] {
             @"--bind",
+            @"-sALLOW_TABLE_GROWTH=1",
         };
 
         void IPreprocessBuildWithReport.OnPreprocessBuild (BuildReport report) {
