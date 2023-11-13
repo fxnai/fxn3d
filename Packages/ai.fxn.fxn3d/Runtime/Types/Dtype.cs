@@ -137,6 +137,7 @@ namespace Function.Types {
             Dtype.Uint16        => typeof(ushort),
             Dtype.Uint32        => typeof(uint),
             Dtype.Uint64        => typeof(ulong),
+            Dtype.Bool          => typeof(bool),
             Dtype.String        => typeof(string),
             Dtype.List          => typeof(IList),
             Dtype.Dict          => typeof(IDictionary),
@@ -159,6 +160,7 @@ namespace Function.Types {
             var t when t == typeof(ushort)  => Dtype.Uint16,
             var t when t == typeof(uint)    => Dtype.Uint32,
             var t when t == typeof(ulong)   => Dtype.Uint64,
+            var t when t ==  typeof(bool)   => Dtype.Bool,
             _                               => Dtype.Null,
         };
     }

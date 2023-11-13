@@ -29,9 +29,7 @@ namespace Function.Services {
         /// List the current user's environment variables.
         /// </summary>
         /// <param name="organization">Organization username.</param>
-        public async Task<EnvironmentVariable[]?> List (
-            string? organization = null
-        ) {
+        public async Task<EnvironmentVariable[]?> List (string? organization = null) {
             var user = await client.Query<UserWithEnvironmentVariables?>(
                 @$"query ($input: UserInput) {{
                     user (input: $input) {{

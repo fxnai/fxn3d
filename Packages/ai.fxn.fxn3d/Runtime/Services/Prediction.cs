@@ -19,6 +19,8 @@ namespace Function.Services {
     using API;
     using Internal;
     using Types;
+    using Dtype = Types.Dtype;
+    using ValueFlags = Internal.Function.ValueFlags;
 
     /// <summary>
     /// Make predictions.
@@ -30,14 +32,18 @@ namespace Function.Services {
         /// Create a prediction.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
-        /// <param name="inputs">Input values. Only applies to `CLOUD` predictions.</param>
-        /// <param name="rawOutputs">Skip parsing output values into plain values.</param>
-        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size. Only applies to `CLOUD` predictions.</param>
+        /// <param name="inputs">Input values. This only applies to `CLOUD` predictions.</param>
+        /// <param name="rawOutputs">Skip parsing output values into plain values. This only applies to `CLOUD` predictions.</param>
+        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size. This only applies to `CLOUD` predictions.</param>
+        /// <param name="acceleration">Prediction acceleration. This only applies to `EDGE` predictions.</param>
+        /// <param name="device">Prediction device. Do not set this unless you know what you are doing. This only applies to `EDGE` predictions.</param>
         public async Task<Prediction> Create (
             string tag,
             Dictionary<string, object>? inputs = null,
             bool rawOutputs = false,
-            int? dataUrlLimit = null
+            int? dataUrlLimit = null,
+            Acceleration acceleration = default,
+            IntPtr device = default
         ) {
             // Check cache
             if (cache.TryGetValue(tag, out var p))
@@ -67,7 +73,7 @@ namespace Function.Services {
                 }
             );
             // Parse
-            var predictor = prediction.type == PredictorType.Edge ? await Load(prediction) : IntPtr.Zero;
+            var predictor = prediction.type == PredictorType.Edge ? await Load(prediction, acceleration, device) : IntPtr.Zero;
             var edgePrediction = predictor != IntPtr.Zero && inputs != null ? Predict(tag, predictor, inputs) : null;
             prediction.results = edgePrediction?.results ?? await ParseResults(prediction.results, rawOutputs);
             prediction.latency = edgePrediction?.latency ?? prediction.latency;
@@ -205,6 +211,7 @@ namespace Function.Services {
         #region --Operations--
         private readonly IFunctionClient client;
         private readonly StorageService storage;
+        private readonly ResourceService resources;
         private readonly Dictionary<string, IntPtr> cache;
         public const string Fields = @"
         id
@@ -227,14 +234,37 @@ namespace Function.Services {
         logs
         ";
 
-        internal PredictionService (IFunctionClient client, StorageService storage) {
+        internal PredictionService (
+            IFunctionClient client,
+            StorageService storage,
+            ResourceService resources
+        ) {
             this.client = client;
             this.storage = storage;
+            this.resources = resources;
             this.cache = new Dictionary<string, IntPtr>();
         }
 
-        private async Task<IntPtr> Load (Prediction prediction) { // INCOMPLETE
-            return default;
+        private async Task<IntPtr> Load (
+            Prediction prediction,
+            Acceleration acceleration,
+            IntPtr device
+        ) {
+            // Create configuration
+            Function.CreateConfiguration(out var configuration).CheckStatus();
+            configuration.SetConfigurationToken(prediction.configuration).CheckStatus();
+            configuration.SetConfigurationAcceleration(acceleration).CheckStatus();
+            configuration.SetConfigurationDevice(device).CheckStatus();
+            await Task.WhenAll(prediction.resources.Select(async resource => {
+                var path = await resources.Retrieve(resource);
+                lock (prediction)
+                    configuration.SetConfigurationResource(resource.id, path).CheckStatus();
+            }));
+            // Create predictor
+            Function.CreatePredictor(prediction.tag, configuration, out var predictor).CheckStatus();
+            configuration.ReleaseConfiguration().CheckStatus();
+            // Return
+            return predictor;
         }
 
         private Prediction Predict ( // INCOMPLETE // Latency, error, logs
@@ -283,11 +313,81 @@ namespace Function.Services {
             return results;
         }
 
-        private static IntPtr ToValue (object value) { // INCOMPLETE
-            return default;
+        private static unsafe IntPtr ToValue (object value) {
+            IntPtr result = default;
+            switch (value) {
+                case float x:       return ToValue(&x);
+                case double x:      return ToValue(&x);
+                case sbyte x:       return ToValue(&x);
+                case short x:       return ToValue(&x);   
+                case int x:         return ToValue(&x);
+                case long x:        return ToValue(&x);
+                case byte x:        return ToValue(&x);
+                case ushort x:      return ToValue(&x);
+                case uint x:        return ToValue(&x);
+                case ulong x:       return ToValue(&x);
+                case bool x:        return ToValue(&x);
+                case float[] x:     return ToValue(x);
+                case double[] x:    return ToValue(x);
+                case sbyte[] x:     return ToValue(x);
+                case short[] x:     return ToValue(x);   
+                case int[] x:       return ToValue(x);
+                case long[] x:      return ToValue(x);
+                case byte[] x:      return ToValue(x);
+                case ushort[] x:    return ToValue(x);
+                case uint[] x:      return ToValue(x);
+                case ulong[] x:     return ToValue(x);
+                case bool[] x:      return ToValue(x);
+                case string x:
+                    Function.CreateStringValue(x, out var str).CheckStatus();
+                    return str;
+                case IList x:
+                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var list).CheckStatus();
+                    return list;
+                case IDictionary x:
+                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var dict).CheckStatus();
+                    return dict;
+                case Stream stream:
+                    var data = StorageService.ReadStream(stream);
+                    Function.CreateBinaryValue(data, data.Length, ValueFlags.CopyData, out var binary).CheckStatus();
+                    return binary;
+                case null:
+                    Function.CreateNullValue(out var nullptr).CheckStatus();
+                    return nullptr;
+                default: throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}");
+            }
+        }
+
+        private static unsafe IntPtr ToValue<T> (T* data, int[] shape = null) where T : unmanaged {
+            Function.CreateArrayValue(
+                data,
+                shape,
+                shape?.Length ?? 0,
+                typeof(T).ToDtype(),
+                ValueFlags.CopyData,
+                out var result
+            ).CheckStatus();
+            return result;
+        }
+
+        private static unsafe IntPtr ToValue<T> (T[] array) where T : unmanaged {
+            fixed (T* data = array)
+                return ToValue(data, new [] { array.Length });
         }
 
         private static object ToObject (IntPtr value) { // INCOMPLETE
+            // Null
+            value.GetValueType(out var dtype).CheckStatus();
+            if (dtype == Dtype.Null)
+                return null;
+            // ...
+
+            value.GetValueData(out var data).CheckStatus();
+            value.GetValueDimensions(out var dims).CheckStatus();
+            var shape = new int[dims];
+            value.GetValueShape(shape, dims).CheckStatus();
+            
+
             return default;
         }
 

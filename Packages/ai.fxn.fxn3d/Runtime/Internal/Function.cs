@@ -104,7 +104,7 @@ namespace Function.Internal {
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateBinary")]
         public static extern Status CreateBinaryValue (
-            void* buffer,
+            [In] byte[] buffer,
             long bufferLen,
             ValueFlags flags,
             out IntPtr value
@@ -161,6 +161,12 @@ namespace Function.Internal {
         public static extern Status SetConfigurationToken (
             this IntPtr configuration,
             [MarshalAs(UnmanagedType.LPStr)] string token
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetResource")]
+        public static extern Status SetConfigurationResource (
+            this IntPtr configuration,
+            [MarshalAs(UnmanagedType.LPStr)] string id,
+            [MarshalAs(UnmanagedType.LPStr)] string path
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetAcceleration")]
         public static extern Status SetConfigurationAcceleration (
