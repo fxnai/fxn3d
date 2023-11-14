@@ -8,7 +8,7 @@ Logs/
 ProjectSettings/Function.asset
 
 # IDE
-#.vscode/
+.vscode/
 .gradle/
 .vs/
 

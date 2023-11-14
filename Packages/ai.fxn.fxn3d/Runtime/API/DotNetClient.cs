@@ -16,6 +16,7 @@ namespace Function.API {
     using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Graph;
+    using Types;
 
     /// <summary>
     /// Function API client for .NET.
@@ -81,7 +82,7 @@ namespace Function.API {
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
             // Create client
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("fxn-client", Id);
+            client.DefaultRequestHeaders.Add(@"fxn-client", Id);
             client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
             // Request
             using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
@@ -109,17 +110,14 @@ namespace Function.API {
         /// Download a file.
         /// </summary>
         /// <param name="url">Data URL.</param>
-        public async Task<MemoryStream> Download (string url) {
+        public async Task<Stream> Download (string url) {
             // Create client
             using var client = new HttpClient();
             var ua = new ProductInfoHeaderValue("FunctionDotNet", "1.0");
             client.DefaultRequestHeaders.UserAgent.Add(ua);
             // Download
-            using var dataStream = await client.GetStreamAsync(url);
-            using var memoryStream = new MemoryStream();
-            await dataStream.CopyToAsync(memoryStream);
-            // Return
-            return memoryStream;
+            var stream = await client.GetStreamAsync(url);
+            return stream;
         }
 
         /// <summary>
@@ -134,6 +132,26 @@ namespace Function.API {
             content.Headers.ContentType = new MediaTypeHeaderValue(mime ?? @"application/octet-stream");
             using var response = await client.PutAsync(url, content);
             response.EnsureSuccessStatusCode();
+        }
+
+        /// <summary>
+        /// Retrieve a predictor resource.
+        /// </summary>
+        /// <param name="resource">Prediction resource.</param>
+        /// <returns>Resource path.</returns>
+        public async Task<string> Retrieve (PredictionResource resource) {
+            // Check cache
+            var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var path = Path.Combine(homeDir, ".fxn", resource.id);
+            if (File.Exists(path))
+                return path;
+            // Download
+            using var dataStream = await Download(resource.url);
+            using var fileStream = File.Create(path);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            await dataStream.CopyToAsync(fileStream);
+            // Return
+            return path;
         }
         #endregion
 

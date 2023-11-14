@@ -12,11 +12,13 @@ namespace Function.API {
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
+    using UnityEngine;
     using UnityEngine.Networking;
     using Newtonsoft.Json;
     using Graph;
     using Internal;
     using Services;
+    using Types;
 
     /// <summary>
     /// Function API client for Unity Engine.
@@ -117,7 +119,7 @@ namespace Function.API {
         /// Download a file.
         /// </summary>
         /// <param name="url">URL</param>
-        public async Task<MemoryStream> Download (string url) {
+        public async Task<Stream> Download (string url) {
             using var request = UnityWebRequest.Get(url);
             request.SendWebRequest();
             while (!request.isDone)
@@ -138,7 +140,7 @@ namespace Function.API {
         public async Task Upload (Stream stream, string url, string? mime = null) {
             // Create client
             using var client = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT) {
-                uploadHandler = new UploadHandlerRaw(StorageService.ReadStream(stream)),
+                uploadHandler = new UploadHandlerRaw(stream.ToArray()),
                 downloadHandler = new DownloadHandlerBuffer(),
                 disposeDownloadHandlerOnDispose = true,
                 disposeUploadHandlerOnDispose = true,
@@ -152,12 +154,44 @@ namespace Function.API {
             if (client.error != null)
                 throw new InvalidOperationException(@"Failed to upload stream with error: {error}");
         }
+
+        /// <summary>
+        /// Retrieve a predictor resource.
+        /// </summary>
+        /// <param name="resource">Prediction resource.</param>
+        /// <returns>Resource path.</returns>
+        public Task<string> Retrieve (PredictionResource resource) => Application.platform == RuntimePlatform.WebGLPlayer ?
+            RetrieveFS(resource) :
+            RetrieveWebGL(resource);
         #endregion
 
 
         #region --Operations--
         private readonly string url;
         private readonly string? accessKey;
+
+        private async Task<string> RetrieveFS (PredictionResource resource) {
+            // Check cache
+            var homeDir = Application.persistentDataPath;
+            var path = Path.Combine(homeDir, "fxn", resource.id);
+            if (File.Exists(path))
+                return path;
+            // Download
+            using var dataStream = await Download(resource.url);
+            using var fileStream = File.Create(path);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            await dataStream.CopyToAsync(fileStream);
+            // Return
+            return path;
+        }
+
+        private async Task<string> RetrieveWebGL (PredictionResource resource) { // INCOMPLETE
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            return default;
+            #else
+            return default;
+            #endif
+        }
         #endregion
     }
 }

@@ -42,7 +42,7 @@ namespace Function.Types {
         /// <summary>
         /// Prediction results.
         /// </summary>
-        public object[]? results;
+        public object?[]? results;
 
         /// <summary>
         /// Prediction latency in milliseconds.

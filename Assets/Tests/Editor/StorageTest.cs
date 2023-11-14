@@ -38,14 +38,13 @@ namespace Function.Tests {
             Assert.That(url, Does.StartWith("data:"));
             // Read file data
             stream.Seek(0, SeekOrigin.Begin);
-            var fileData = StorageService.ReadStream(stream);
             // Check
             var dataIdx = url.LastIndexOf(",") + 1;
             var b64Data = url.Substring(dataIdx);
             var urlData = Convert.FromBase64String(b64Data);
             unsafe {
-                fixed (byte* fbuf = fileData, urlbuf = urlData)
-                    Assert.That(UnsafeUtility.MemCmp(fbuf, urlbuf, fileData.Length), Is.Zero);
+                fixed (byte* fbuf = Internal.FunctionUtils.ToArray(stream), urlbuf = urlData)
+                    Assert.That(UnsafeUtility.MemCmp(fbuf, urlbuf, stream.Length), Is.Zero);
             }
         }
 
@@ -64,13 +63,12 @@ namespace Function.Tests {
             Assert.That(url, Does.StartWith("data:"));
             // Read file data
             stream.Seek(0, SeekOrigin.Begin);
-            var fileData = StorageService.ReadStream(stream);
             // Download
             var urlStream = await fxn.Storage.Download(url);
             var urlData = urlStream.ToArray();
             unsafe {
-                fixed (byte* fbuf = fileData, urlbuf = urlData)
-                    Assert.That(UnsafeUtility.MemCmp(fbuf, urlbuf, fileData.Length), Is.Zero);
+                fixed (byte* fbuf = Internal.FunctionUtils.ToArray(stream), urlbuf = urlData)
+                    Assert.That(UnsafeUtility.MemCmp(fbuf, urlbuf, stream.Length), Is.Zero);
             }
         }
 
@@ -78,14 +76,13 @@ namespace Function.Tests {
         public async Task DownloadFromWebURL () {
             // Read file data
             using var fileStream = new FileStream("Assets/Media/cat.jpg", FileMode.Open);
-            var fileData = StorageService.ReadStream(fileStream);
             // Download
             var url = @"https://cdn.natml.ai/media/3e9e6c7a2fa114156c8b5f/cat.jpg";
             using var urlStream = await fxn.Storage.Download(url);
             var urlData = urlStream.ToArray();
             unsafe {
-                fixed (byte* fbuf = fileData, urlbuf = urlData)
-                    Assert.That(UnsafeUtility.MemCmp(fbuf, urlbuf, fileData.Length), Is.Zero);
+                fixed (byte* fbuf = Internal.FunctionUtils.ToArray(fileStream), urlbuf = urlData)
+                    Assert.That(UnsafeUtility.MemCmp(fbuf, urlbuf, fileStream.Length), Is.Zero);
             }
         }
     }

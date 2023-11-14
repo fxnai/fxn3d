@@ -12,6 +12,7 @@ namespace Function.Services {
     using System.Threading.Tasks;
     using Newtonsoft.Json;
     using API;
+    using Internal;
     using Types;
 
     /// <summary>
@@ -33,7 +34,11 @@ namespace Function.Services {
                 return new MemoryStream(data, 0, data.Length, false, false);
             }
             // Remote URL
-            return await client.Download(url);
+            var dataStream = await client.Download(url);
+            var memoryStream = new MemoryStream();
+            await dataStream.CopyToAsync(memoryStream);
+            // Return
+            return memoryStream;
         }
 
         /// <summary>
@@ -54,7 +59,7 @@ namespace Function.Services {
             mime ??= @"application/octet-stream";
             // Data URL
             if (stream.Length < dataUrlLimit) {
-                var data = Convert.ToBase64String(ReadStream(stream));
+                var data = Convert.ToBase64String(stream.ToArray());
                 var result = $"data:{mime};base64,{data}";
                 return result;
             }
@@ -95,15 +100,6 @@ namespace Function.Services {
         private readonly IFunctionClient client;
 
         internal StorageService (IFunctionClient client) => this.client = client;
-
-        internal static byte[] ReadStream (Stream stream) {
-            if (stream is MemoryStream memoryStream)
-                return memoryStream.ToArray();
-            using (var dstStream = new MemoryStream()) {
-                stream.CopyTo(dstStream);
-                return dstStream.ToArray();
-            }
-        }
         #endregion
 
 

@@ -211,7 +211,6 @@ namespace Function.Services {
         #region --Operations--
         private readonly IFunctionClient client;
         private readonly StorageService storage;
-        private readonly ResourceService resources;
         private readonly Dictionary<string, IntPtr> cache;
         public const string Fields = @"
         id
@@ -234,14 +233,9 @@ namespace Function.Services {
         logs
         ";
 
-        internal PredictionService (
-            IFunctionClient client,
-            StorageService storage,
-            ResourceService resources
-        ) {
+        internal PredictionService (IFunctionClient client, StorageService storage) {
             this.client = client;
             this.storage = storage;
-            this.resources = resources;
             this.cache = new Dictionary<string, IntPtr>();
         }
 
@@ -256,7 +250,7 @@ namespace Function.Services {
             configuration.SetConfigurationAcceleration(acceleration).CheckStatus();
             configuration.SetConfigurationDevice(device).CheckStatus();
             await Task.WhenAll(prediction.resources.Select(async resource => {
-                var path = await resources.Retrieve(resource);
+                var path = await client.Retrieve(resource);
                 lock (prediction)
                     configuration.SetConfigurationResource(resource.id, path).CheckStatus();
             }));
@@ -280,7 +274,7 @@ namespace Function.Services {
             predictor.Predict(inputMap, out var outputMap).CheckStatus();
             // Marshal outputs
             outputMap.GetValueMapSize(out var count).CheckStatus();
-            var results = new List<object>();
+            var results = new List<object?>();
             var name = new StringBuilder(1024);
             for (var idx = 0; idx < count; ++idx) {
                 name.Clear();
@@ -303,18 +297,20 @@ namespace Function.Services {
             return prediction;
         }
 
-        private async Task<object[]> ParseResults (object[] values, bool raw) {
+        private async Task<object?[]?> ParseResults (object[]? values, bool raw) {
+            // Check
             if (values == null)
                 return null;
+            // Convert
             var results = await Task.WhenAll(values.Select(async r => {
                 var value = (r as JObject).ToObject<Value>();
                 return raw ? value : await ToObject(value);
             }));
+            // Return
             return results;
         }
 
-        private static unsafe IntPtr ToValue (object value) {
-            IntPtr result = default;
+        private static unsafe IntPtr ToValue (object? value) {
             switch (value) {
                 case float x:       return ToValue(&x);
                 case double x:      return ToValue(&x);
@@ -348,8 +344,7 @@ namespace Function.Services {
                     Function.CreateListValue(JsonConvert.SerializeObject(x), out var dict).CheckStatus();
                     return dict;
                 case Stream stream:
-                    var data = StorageService.ReadStream(stream);
-                    Function.CreateBinaryValue(data, data.Length, ValueFlags.CopyData, out var binary).CheckStatus();
+                    Function.CreateBinaryValue(stream.ToArray(), stream.Length, ValueFlags.CopyData, out var binary).CheckStatus();
                     return binary;
                 case null:
                     Function.CreateNullValue(out var nullptr).CheckStatus();
@@ -375,7 +370,7 @@ namespace Function.Services {
                 return ToValue(data, new [] { array.Length });
         }
 
-        private static object ToObject (IntPtr value) { // INCOMPLETE
+        private static object? ToObject (IntPtr value) { // INCOMPLETE
             // Null
             value.GetValueType(out var dtype).CheckStatus();
             if (dtype == Dtype.Null)

@@ -12,6 +12,7 @@ namespace Function.API {
     using System.IO;
     using System.Threading.Tasks;
     using Graph;
+    using Types;
 
     /// <summary>
     /// Function API client.
@@ -46,7 +47,7 @@ namespace Function.API {
         /// Download a file.
         /// </summary>
         /// <param name="url">URL</param>
-        Task<MemoryStream> Download (string url);
+        Task<Stream> Download (string url);
 
         /// <summary>
         /// Upload a data stream.
@@ -55,5 +56,12 @@ namespace Function.API {
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
         Task Upload (Stream stream, string url, string? mime = null);
+
+        /// <summary>
+        /// Retrieve a predictor resource.
+        /// </summary>
+        /// <param name="resource">Prediction resource.</param>
+        /// <returns>Resource path.</returns>
+        Task<string> Retrieve (PredictionResource resource);
     }
 }
