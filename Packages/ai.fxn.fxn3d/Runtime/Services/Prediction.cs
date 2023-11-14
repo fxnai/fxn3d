@@ -239,18 +239,14 @@ namespace Function.Services {
             this.cache = new Dictionary<string, IntPtr>();
         }
 
-        private async Task<IntPtr> Load (
-            Prediction prediction,
-            Acceleration acceleration,
-            IntPtr device
-        ) {
+        private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
             // Create configuration
             Function.CreateConfiguration(out var configuration).CheckStatus();
             configuration.SetConfigurationToken(prediction.configuration).CheckStatus();
             configuration.SetConfigurationAcceleration(acceleration).CheckStatus();
             configuration.SetConfigurationDevice(device).CheckStatus();
             await Task.WhenAll(prediction.resources.Select(async resource => {
-                var path = await client.Retrieve(resource);
+                var path = await Retrieve(resource);
                 lock (prediction)
                     configuration.SetConfigurationResource(resource.id, path).CheckStatus();
             }));
@@ -259,6 +255,20 @@ namespace Function.Services {
             configuration.ReleaseConfiguration().CheckStatus();
             // Return
             return predictor;
+        }
+
+        private async Task<string> Retrieve (PredictionResource resource) {
+            // Check cache
+            var path = Path.Combine(client.CachePath, resource.id); // INCOMPLETE // Different predictors and their tags
+            if (File.Exists(path))
+                return path;
+            // Download
+            using var dataStream = await client.Download(resource.url);
+            using var fileStream = File.Create(path);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            await dataStream.CopyToAsync(fileStream);
+            // Return
+            return path;
         }
 
         private Prediction Predict ( // INCOMPLETE // Latency, error, logs

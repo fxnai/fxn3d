@@ -30,15 +30,25 @@ namespace Function.API {
         public string? Id { get; private set; }
 
         /// <summary>
+        /// Cache path.
+        /// </summary>
+        public string CachePath { get; private set; }
+
+        /// <summary>
         /// Create the .NET Function API client.
         /// </summary>
         /// <param name="url">Function API URL.</param>
         /// <param name="accessKey">Function access key.</param>
-        /// <param name="id"></param>
-        public DotNetClient (string url, string? accessKey, string? id = null) {
+        /// <param name="id">Client identifier.</param>
+        /// <param name="cachePath">Prediction resource cache path.</param>
+        public DotNetClient (string url, string? accessKey, string? id = null, string? cachePath = null) {
             this.url = url;
             this.accessKey = accessKey;
             this.Id = id;
+            this.CachePath = cachePath ?? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".fxn"
+            );
         }
 
         /// <summary>
@@ -132,26 +142,6 @@ namespace Function.API {
             content.Headers.ContentType = new MediaTypeHeaderValue(mime ?? @"application/octet-stream");
             using var response = await client.PutAsync(url, content);
             response.EnsureSuccessStatusCode();
-        }
-
-        /// <summary>
-        /// Retrieve a predictor resource.
-        /// </summary>
-        /// <param name="resource">Prediction resource.</param>
-        /// <returns>Resource path.</returns>
-        public async Task<string> Retrieve (PredictionResource resource) {
-            // Check cache
-            var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var path = Path.Combine(homeDir, ".fxn", resource.id);
-            if (File.Exists(path))
-                return path;
-            // Download
-            using var dataStream = await Download(resource.url);
-            using var fileStream = File.Create(path);
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            await dataStream.CopyToAsync(fileStream);
-            // Return
-            return path;
         }
         #endregion
 

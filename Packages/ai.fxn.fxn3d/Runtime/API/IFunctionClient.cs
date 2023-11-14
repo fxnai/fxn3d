@@ -25,6 +25,11 @@ namespace Function.API {
         public string? Id { get; }
 
         /// <summary>
+        /// Cache path.
+        /// </summary>
+        public string CachePath { get; }
+
+        /// <summary>
         /// Query the Function graph API.
         /// </summary>
         /// <typeparam name="T">Deserialized response type.</typeparam>
@@ -56,12 +61,5 @@ namespace Function.API {
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
         Task Upload (Stream stream, string url, string? mime = null);
-
-        /// <summary>
-        /// Retrieve a predictor resource.
-        /// </summary>
-        /// <param name="resource">Prediction resource.</param>
-        /// <returns>Resource path.</returns>
-        Task<string> Retrieve (PredictionResource resource);
     }
 }

@@ -33,6 +33,11 @@ namespace Function.API {
         public string? Id { get; private set; }
 
         /// <summary>
+        /// Cache path.
+        /// </summary>
+        public string CachePath { get; private set; }
+
+        /// <summary>
         /// Create the Unity Function API client.
         /// </summary>
         /// <param name="url">Function API URL.</param>
@@ -41,6 +46,7 @@ namespace Function.API {
             this.url = url;
             this.accessKey = accessKey;
             this.Id = id;
+            this.CachePath = Path.Combine(Application.persistentDataPath, "fxn");
         }
 
         /// <summary>
@@ -154,44 +160,12 @@ namespace Function.API {
             if (client.error != null)
                 throw new InvalidOperationException(@"Failed to upload stream with error: {error}");
         }
-
-        /// <summary>
-        /// Retrieve a predictor resource.
-        /// </summary>
-        /// <param name="resource">Prediction resource.</param>
-        /// <returns>Resource path.</returns>
-        public Task<string> Retrieve (PredictionResource resource) => Application.platform == RuntimePlatform.WebGLPlayer ?
-            RetrieveFS(resource) :
-            RetrieveWebGL(resource);
         #endregion
 
 
         #region --Operations--
         private readonly string url;
         private readonly string? accessKey;
-
-        private async Task<string> RetrieveFS (PredictionResource resource) {
-            // Check cache
-            var homeDir = Application.persistentDataPath;
-            var path = Path.Combine(homeDir, "fxn", resource.id);
-            if (File.Exists(path))
-                return path;
-            // Download
-            using var dataStream = await Download(resource.url);
-            using var fileStream = File.Create(path);
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            await dataStream.CopyToAsync(fileStream);
-            // Return
-            return path;
-        }
-
-        private async Task<string> RetrieveWebGL (PredictionResource resource) { // INCOMPLETE
-            #if UNITY_WEBGL && !UNITY_EDITOR
-            return default;
-            #else
-            return default;
-            #endif
-        }
         #endregion
     }
 }
