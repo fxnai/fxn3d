@@ -30,7 +30,12 @@ namespace Function.API {
         /// <summary>
         /// Client identifier.
         /// </summary>
-        public string? Id { get; private set; }
+        public string? ClientId { get; private set; }
+
+        /// <summary>
+        /// Device identifier.
+        /// </summary>
+        public string? DeviceId { get; private set; }
 
         /// <summary>
         /// Cache path.
@@ -42,10 +47,13 @@ namespace Function.API {
         /// </summary>
         /// <param name="url">Function API URL.</param>
         /// <param name="accessKey">Function access key.</param>
-        public UnityClient (string url, string? accessKey, string? id = null) {
+        /// <param name="clientId">Client identifier.</param>
+        /// <param name="deviceId">Device model identifier.</param>
+        public UnityClient (string url, string? accessKey, string? clientId = null, string? deviceId = null) {
             this.url = url;
             this.accessKey = accessKey;
-            this.Id = id;
+            this.ClientId = clientId;
+            this.DeviceId = deviceId;
             this.CachePath = Path.Combine(Application.persistentDataPath, "fxn");
         }
 
@@ -68,7 +76,7 @@ namespace Function.API {
                 disposeUploadHandlerOnDispose = true,
             };
             client.SetRequestHeader(@"Content-Type",  @"application/json");
-            client.SetRequestHeader(@"fxn-client", Id);
+            client.SetRequestHeader(@"fxn-client", ClientId);
             if (!string.IsNullOrEmpty(accessKey))
                 client.SetRequestHeader("Authorization", $"Bearer {accessKey}");
             // Request
@@ -105,7 +113,7 @@ namespace Function.API {
                 disposeUploadHandlerOnDispose = true,
             };
             client.SetRequestHeader(@"Content-Type",  @"application/json");
-            client.SetRequestHeader(@"fxn-client", Id);
+            client.SetRequestHeader(@"fxn-client", ClientId);
             if (!string.IsNullOrEmpty(accessKey))
                 client.SetRequestHeader(@"Authorization",  $"Bearer {accessKey}");
             // Request

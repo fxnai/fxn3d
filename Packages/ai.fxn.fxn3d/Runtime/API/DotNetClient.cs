@@ -27,7 +27,12 @@ namespace Function.API {
         /// <summary>
         /// Client identifier.
         /// </summary>
-        public string? Id { get; private set; }
+        public string? ClientId { get; private set; }
+        
+        /// <summary>
+        /// Device model identifier.
+        /// </summary>
+        public string? DeviceId { get; private set; }
 
         /// <summary>
         /// Cache path.
@@ -39,12 +44,20 @@ namespace Function.API {
         /// </summary>
         /// <param name="url">Function API URL.</param>
         /// <param name="accessKey">Function access key.</param>
-        /// <param name="id">Client identifier.</param>
+        /// <param name="clientId">Client identifier.</param>
+        /// <param name="deviceId">Device model identifier.</param>
         /// <param name="cachePath">Prediction resource cache path.</param>
-        public DotNetClient (string url, string? accessKey, string? id = null, string? cachePath = null) {
+        public DotNetClient (
+            string url,
+            string? accessKey,
+            string? clientId = null,
+            string? deviceId = null,
+            string? cachePath = null
+        ) {
             this.url = url;
             this.accessKey = accessKey;
-            this.Id = id;
+            this.ClientId = clientId;
+            this.DeviceId = deviceId;
             this.CachePath = cachePath ?? Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 ".fxn"
@@ -64,7 +77,7 @@ namespace Function.API {
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
             // Create client
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("fxn-client", Id);
+            client.DefaultRequestHeaders.Add("fxn-client", ClientId);
             client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
             // Request
             using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
@@ -92,7 +105,7 @@ namespace Function.API {
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
             // Create client
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add(@"fxn-client", Id);
+            client.DefaultRequestHeaders.Add(@"fxn-client", ClientId);
             client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
             // Request
             using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");

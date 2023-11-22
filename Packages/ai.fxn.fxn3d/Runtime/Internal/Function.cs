@@ -201,6 +201,13 @@ namespace Function.Internal {
         #endregion
 
 
+        #region --FXNVersion--
+        [DllImport(Assembly, EntryPoint = @"FXNGetVersion")]
+        [return: MarshalAs(UnmanagedType.LPStr)]
+        public static extern string GetVersion ();
+        #endregion
+
+
         #region --Utility--
         public static void CheckStatus (this Status status) {
             switch (status) {

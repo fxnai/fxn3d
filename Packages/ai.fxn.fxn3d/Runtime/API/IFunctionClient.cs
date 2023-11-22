@@ -22,7 +22,12 @@ namespace Function.API {
         /// <summary>
         /// Client identifier.
         /// </summary>
-        public string? Id { get; }
+        public string? ClientId { get; }
+
+        /// <summary>
+        /// Device model identifier.
+        /// </summary>
+        public string? DeviceId { get; }
 
         /// <summary>
         /// Cache path.

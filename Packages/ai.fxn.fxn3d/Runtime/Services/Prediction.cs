@@ -66,9 +66,11 @@ namespace Function.Services {
                 new () {
                     ["input"] = new CreatePredictionInput {
                         tag = tag,
-                        client = client.Id,
+                        client = client.ClientId,
                         inputs = values,
                         dataUrlLimit = dataUrlLimit,
+                        configuration = ConfigurationId,
+                        device = client.DeviceId,
                     }
                 }
             );
@@ -239,13 +241,23 @@ namespace Function.Services {
             this.cache = new Dictionary<string, IntPtr>();
         }
 
+        private string ConfigurationId {
+            get {
+                var sb = new StringBuilder(2048);
+                Function.GetConfigurationUniqueID(sb, sb.Capacity);
+                return sb.ToString();
+            }
+        }
+
         private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
             // Create configuration
             Function.CreateConfiguration(out var configuration).CheckStatus();
             configuration.SetConfigurationToken(prediction.configuration).CheckStatus();
             configuration.SetConfigurationAcceleration(acceleration).CheckStatus();
-            configuration.SetConfigurationDevice(device).CheckStatus();
+            configuration.SetConfigurationDevice(device).CheckStatus();            
             await Task.WhenAll(prediction.resources.Select(async resource => {
+                if (resource.id == @"fxn")
+                    return;
                 var path = await Retrieve(resource);
                 lock (prediction)
                     configuration.SetConfigurationResource(resource.id, path).CheckStatus();
@@ -259,14 +271,17 @@ namespace Function.Services {
 
         private async Task<string> Retrieve (PredictionResource resource) {
             // Check cache
+            Directory.CreateDirectory(client.CachePath);
             var path = Path.Combine(client.CachePath, resource.id); // INCOMPLETE // Different predictors and their tags
             if (File.Exists(path))
                 return path;
             // Download
             using var dataStream = await client.Download(resource.url);
             using var fileStream = File.Create(path);
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            await dataStream.CopyToAsync(fileStream);
+            if (client.ClientId == @"browser")
+                dataStream.CopyTo(fileStream); // Workaround for lack of pthreads on browser
+            else
+                await dataStream.CopyToAsync(fileStream);
             // Return
             return path;
         }
@@ -385,12 +400,12 @@ namespace Function.Services {
             value.GetValueType(out var dtype).CheckStatus();
             if (dtype == Dtype.Null)
                 return null;
-            // ...
-
+            // Get data and shape
             value.GetValueData(out var data).CheckStatus();
             value.GetValueDimensions(out var dims).CheckStatus();
             var shape = new int[dims];
             value.GetValueShape(shape, dims).CheckStatus();
+            // Deserialize
             
 
             return default;
@@ -429,6 +444,8 @@ namespace Function.Services {
             public string client;
             public ValueInput[]? inputs;
             public int? dataUrlLimit;
+            public string? configuration;
+            public string? device;
         }
 
         private sealed class ValueInput : Value {

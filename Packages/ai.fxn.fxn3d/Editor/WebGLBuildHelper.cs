@@ -13,7 +13,7 @@ namespace Function.Editor {
 
         public int callbackOrder => 0;
         private readonly string[] EM_ARGS = new [] {
-            @"--bind",
+            @"-lembind",
             @"-sALLOW_TABLE_GROWTH=1",
         };
 

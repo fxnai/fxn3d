@@ -30,10 +30,11 @@ namespace Function {
         /// <returns>Function client.</returns>
         public static Function Create (string? accessKey = null, string? url = null) {
             var key = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance?.accessKey;
-            var graph = url ?? Function.URL;
+            var apiUrl = url ?? Function.URL;
+            var deviceId = SystemInfo.deviceModel;
             var client = Application.platform == RuntimePlatform.WebGLPlayer ?
-                (IFunctionClient)new UnityClient(graph, key, ClientId) :
-                new DotNetClient(graph, key, ClientId);
+                (IFunctionClient)new UnityClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId) :
+                new DotNetClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId);
             var fxn = new Function(client);
             return fxn;
         }
