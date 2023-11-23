@@ -12,6 +12,8 @@ namespace Function.Services {
     using System.Collections.Generic;
     using System.Linq;
     using System.IO;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
@@ -71,6 +73,7 @@ namespace Function.Services {
                         dataUrlLimit = dataUrlLimit,
                         configuration = ConfigurationId,
                         device = client.DeviceId,
+                        clientVersion = Function.GetVersion(),
                     }
                 }
             );
@@ -141,18 +144,18 @@ namespace Function.Services {
             var stream = await storage.Download(value.data);
             // Switch
             switch (value.type) {
+                case Dtype.Float32: return ToObject<float>(stream, value.shape);
+                case Dtype.Float64: return ToObject<double>(stream, value.shape);
+                case Dtype.Int8:    return ToObject<sbyte>(stream, value.shape);
+                case Dtype.Int16:   return ToObject<short>(stream, value.shape);
+                case Dtype.Int32:   return ToObject<int>(stream, value.shape);
+                case Dtype.Int64:   return ToObject<long>(stream, value.shape);
+                case Dtype.Uint8:   return ToObject<byte>(stream, value.shape);
+                case Dtype.Uint16:  return ToObject<ushort>(stream, value.shape);
+                case Dtype.Uint32:  return ToObject<uint>(stream, value.shape);
+                case Dtype.Uint64:  return ToObject<ulong>(stream, value.shape);
+                case Dtype.Bool:    return ToObject<bool>(stream, value.shape);
                 case Dtype.String:  return new StreamReader(stream).ReadToEnd();
-                case Dtype.Float32: return value.shape.Length > 0 ? ToArray<float>(stream) : ToScalar<float>(stream);
-                case Dtype.Float64: return value.shape.Length > 0 ? ToArray<double>(stream) : ToScalar<double>(stream);
-                case Dtype.Int8:    return value.shape.Length > 0 ? ToArray<sbyte>(stream) : ToScalar<sbyte>(stream);
-                case Dtype.Int16:   return value.shape.Length > 0 ? ToArray<short>(stream) : ToScalar<short>(stream);
-                case Dtype.Int32:   return value.shape.Length > 0 ? ToArray<int>(stream) : ToScalar<int>(stream);
-                case Dtype.Int64:   return value.shape.Length > 0 ? ToArray<long>(stream) : ToScalar<long>(stream);
-                case Dtype.Uint8:   return value.shape.Length > 0 ? ToArray<byte>(stream) : ToScalar<byte>(stream);
-                case Dtype.Uint16:  return value.shape.Length > 0 ? ToArray<ushort>(stream) : ToScalar<ushort>(stream);
-                case Dtype.Uint32:  return value.shape.Length > 0 ? ToArray<uint>(stream) : ToScalar<uint>(stream);
-                case Dtype.Uint64:  return value.shape.Length > 0 ? ToArray<ulong>(stream) : ToScalar<ulong>(stream);
-                case Dtype.Bool:    return value.shape.Length > 0 ? ToArray<bool>(stream) : ToScalar<bool>(stream);
                 case Dtype.Binary:  return stream;
                 case Dtype.List:    return JsonConvert.DeserializeObject<List<object>>(new StreamReader(stream).ReadToEnd());
                 case Dtype.Dict:    return JsonConvert.DeserializeObject<Dictionary<string, object>>(new StreamReader(stream).ReadToEnd());
@@ -165,47 +168,55 @@ namespace Function.Services {
         /// </summary>
         /// <param name="value">Input object.</param>
         /// <param name="name">Value name.</param>
-        /// <param name="type">Value type. This only applies to `Stream` input values.</param>
-        /// <param name="shape">Value shape for tensor values.</param>
+        /// <param name="type">Value type. This only applies to `Stream` input objects.</param>
         /// <param name="minUploadSize">Values larger than this size in bytes will be uploaded.</param>
         /// <returns>Function value.</returns>
         public async Task<Value> ToValue (
             object value,
             string name,
             Dtype? type = null,
-            int[]? shape = null,
             int minUploadSize = 4096,
             string? key = null
         ) => value switch {
-            Value       x => x,
-            string      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
-            float       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new int[0] },
-            double      x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new int[0] },
-            sbyte       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new int[0] },
-            short       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new int[0] },
-            int         x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new int[0] },
-            long        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new int[0] },
-            byte        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new int[0] },
-            ushort      x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new int[0] },
-            uint        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new int[0] },
-            ulong       x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new int[0] },
-            bool        x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new int[0] },
-            float[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = shape ?? new int[] { x.Length } },
-            double[]    x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = shape ?? new int[] { x.Length } },
-            sbyte[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = shape ?? new int[] { x.Length } },
-            short[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = shape ?? new int[] { x.Length } },
-            int[]       x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = shape ?? new int[] { x.Length } },
-            long[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = shape ?? new int[] { x.Length } },
-            byte[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = shape ?? new int[] { x.Length } },
-            ushort[]    x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = shape ?? new int[] { x.Length } },
-            uint[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = shape ?? new int[] { x.Length } },
-            ulong[]     x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = shape ?? new int[] { x.Length } },
-            bool[]      x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = shape ?? new int[] { x.Length } },
-            Stream      x => new Value { data = await storage.Upload(name, x, UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
-            IList       x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
-            IDictionary x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
-            null          => new Value { type = Dtype.Null },
-            _             => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}"),
+            Value           x => x,
+            float           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new int[0] },
+            double          x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new int[0] },
+            sbyte           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new int[0] },
+            short           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new int[0] },
+            int             x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new int[0] },
+            long            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new int[0] },
+            byte            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new int[0] },
+            ushort          x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new int[0] },
+            uint            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new int[0] },
+            ulong           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new int[0] },
+            bool            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new int[0] },
+            float[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new [] { x.Length } },
+            double[]        x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new [] { x.Length } },
+            sbyte[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new [] { x.Length } },
+            short[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new [] { x.Length } },
+            int[]           x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new [] { x.Length } },
+            long[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new [] { x.Length } },
+            byte[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new [] { x.Length } },
+            ushort[]        x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new [] { x.Length } },
+            uint[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new [] { x.Length } },
+            ulong[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new [] { x.Length } },
+            bool[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new [] { x.Length } },
+            Tensor<float>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = x.shape },
+            Tensor<double>  x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = x.shape },
+            Tensor<sbyte>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = x.shape },
+            Tensor<short>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = x.shape },
+            Tensor<int>     x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = x.shape },
+            Tensor<long>    x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = x.shape },
+            Tensor<byte>    x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = x.shape },
+            Tensor<ushort>  x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = x.shape },
+            Tensor<uint>    x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = x.shape },
+            Tensor<ulong>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = x.shape },
+            string          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
+            Stream          x => new Value { data = await storage.Upload(name, x, UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
+            IList           x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
+            IDictionary     x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
+            null              => new Value { type = Dtype.Null },
+            _                 => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}"),
         };
         #endregion
 
@@ -265,6 +276,8 @@ namespace Function.Services {
             // Create predictor
             Function.CreatePredictor(prediction.tag, configuration, out var predictor).CheckStatus();
             configuration.ReleaseConfiguration().CheckStatus();
+            // Cache
+            cache.Add(prediction.tag, predictor);
             // Return
             return predictor;
         }
@@ -334,31 +347,47 @@ namespace Function.Services {
             // Return
             return results;
         }
+        #endregion
+
+
+        #region --Utilities--
 
         private static unsafe IntPtr ToValue (object? value) {
             switch (value) {
-                case float x:       return ToValue(&x);
-                case double x:      return ToValue(&x);
-                case sbyte x:       return ToValue(&x);
-                case short x:       return ToValue(&x);   
-                case int x:         return ToValue(&x);
-                case long x:        return ToValue(&x);
-                case byte x:        return ToValue(&x);
-                case ushort x:      return ToValue(&x);
-                case uint x:        return ToValue(&x);
-                case ulong x:       return ToValue(&x);
-                case bool x:        return ToValue(&x);
-                case float[] x:     return ToValue(x);
-                case double[] x:    return ToValue(x);
-                case sbyte[] x:     return ToValue(x);
-                case short[] x:     return ToValue(x);   
-                case int[] x:       return ToValue(x);
-                case long[] x:      return ToValue(x);
-                case byte[] x:      return ToValue(x);
-                case ushort[] x:    return ToValue(x);
-                case uint[] x:      return ToValue(x);
-                case ulong[] x:     return ToValue(x);
-                case bool[] x:      return ToValue(x);
+                case IntPtr x:          return x;
+                case float x:           return ToValue(&x);
+                case double x:          return ToValue(&x);
+                case sbyte x:           return ToValue(&x);
+                case short x:           return ToValue(&x);   
+                case int x:             return ToValue(&x);
+                case long x:            return ToValue(&x);
+                case byte x:            return ToValue(&x);
+                case ushort x:          return ToValue(&x);
+                case uint x:            return ToValue(&x);
+                case ulong x:           return ToValue(&x);
+                case bool x:            return ToValue(&x);
+                case float[] x:         return ToValue(x);
+                case double[] x:        return ToValue(x);
+                case sbyte[] x:         return ToValue(x);
+                case short[] x:         return ToValue(x);   
+                case int[] x:           return ToValue(x);
+                case long[] x:          return ToValue(x);
+                case byte[] x:          return ToValue(x);
+                case ushort[] x:        return ToValue(x);
+                case uint[] x:          return ToValue(x);
+                case ulong[] x:         return ToValue(x);
+                case bool[] x:          return ToValue(x);
+                case Tensor<float> x:   return ToValue(x.data, x.shape);
+                case Tensor<double> x:  return ToValue(x.data, x.shape);
+                case Tensor<sbyte> x:   return ToValue(x.data, x.shape);
+                case Tensor<short> x:   return ToValue(x.data, x.shape);
+                case Tensor<int> x:     return ToValue(x.data, x.shape);
+                case Tensor<long> x:    return ToValue(x.data, x.shape);
+                case Tensor<byte> x:    return ToValue(x.data, x.shape);
+                case Tensor<ushort> x:  return ToValue(x.data, x.shape);
+                case Tensor<uint> x:    return ToValue(x.data, x.shape);
+                case Tensor<ulong> x:   return ToValue(x.data, x.shape);
+                case Tensor<bool> x:    return ToValue(x.data, x.shape);
                 case string x:
                     Function.CreateStringValue(x, out var str).CheckStatus();
                     return str;
@@ -378,6 +407,38 @@ namespace Function.Services {
             }
         }
 
+        private static unsafe object? ToObject (IntPtr value) {
+            // Null
+            value.GetValueType(out var dtype).CheckStatus();
+            if (dtype == Dtype.Null)
+                return null;
+            // Get data and shape
+            value.GetValueData(out var data).CheckStatus();
+            value.GetValueDimensions(out var dims).CheckStatus();
+            var shape = new int[dims];
+            value.GetValueShape(shape, dims).CheckStatus();
+            // Deserialize
+            switch (dtype) {
+                case Dtype.Float32: return ToObject<float>(data, shape);
+                case Dtype.Float64: return ToObject<double>(data, shape);
+                case Dtype.Int8:    return ToObject<sbyte>(data, shape);
+                case Dtype.Int16:   return ToObject<short>(data, shape);
+                case Dtype.Int32:   return ToObject<int>(data, shape);
+                case Dtype.Int64:   return ToObject<long>(data, shape);
+                case Dtype.Uint8:   return ToObject<byte>(data, shape);
+                case Dtype.Uint16:  return ToObject<ushort>(data, shape);
+                case Dtype.Uint32:  return ToObject<uint>(data, shape);
+                case Dtype.Uint64:  return ToObject<ulong>(data, shape);
+                case Dtype.Bool:    return ToObject<bool>(data, shape);
+                case Dtype.String:  return Marshal.PtrToStringUTF8(data);
+                case Dtype.Binary:  return new MemoryStream(ToArray<byte>(data, shape));
+                case Dtype.List:    return JsonConvert.DeserializeObject<object[]>(Marshal.PtrToStringUTF8(data));
+                case Dtype.Dict:    return JsonConvert.DeserializeObject<Dictionary<string, object>>(Marshal.PtrToStringUTF8(data));
+                default:            throw new InvalidOperationException($"Cannot convert Function value to object because value type is unsupported: {dtype}");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe IntPtr ToValue<T> (T* data, int[] shape = null) where T : unmanaged {
             Function.CreateArrayValue(
                 data,
@@ -390,32 +451,33 @@ namespace Function.Services {
             return result;
         }
 
-        private static unsafe IntPtr ToValue<T> (T[] array) where T : unmanaged {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe IntPtr ToValue<T> (T[] array, int[] shape = null) where T : unmanaged {
             fixed (T* data = array)
-                return ToValue(data, new [] { array.Length });
+                return ToValue(data, shape ?? new [] { array.Length });
         }
 
-        private static object? ToObject (IntPtr value) { // INCOMPLETE
-            // Null
-            value.GetValueType(out var dtype).CheckStatus();
-            if (dtype == Dtype.Null)
-                return null;
-            // Get data and shape
-            value.GetValueData(out var data).CheckStatus();
-            value.GetValueDimensions(out var dims).CheckStatus();
-            var shape = new int[dims];
-            value.GetValueShape(shape, dims).CheckStatus();
-            // Deserialize
-            
-
-            return default;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static object ToObject<T> (MemoryStream stream, int[] shape) where T : unmanaged {
+            var data = ToArray<T>(stream);
+            return shape.Length <= 1 ? shape.Length < 1 ? data[0] : data : new Tensor<T>(data, shape);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe object ToObject<T> (IntPtr data, int[] shape) where T : unmanaged {
+            if (shape.Length == 0)
+                return *(T*)data;
+            var array = ToArray<T>(data, shape);
+            return shape.Length > 1 ? new Tensor<T>(array, shape) : array;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Stream ToStream (string data) {
             var buffer = Encoding.UTF8.GetBytes(data);
             return new MemoryStream(buffer);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe Stream ToStream<T> (T[] data) where T : unmanaged {
             if (data is byte[] raw)
                 return new MemoryStream(raw);
@@ -426,6 +488,7 @@ namespace Function.Services {
             return new MemoryStream(array);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe T[] ToArray<T> (MemoryStream stream) where T : unmanaged {
             var rawData = stream.ToArray();
             var data = new T[rawData.Length / sizeof(T)];
@@ -433,7 +496,14 @@ namespace Function.Services {
             return data;
         }
 
-        private static T ToScalar<T> (MemoryStream stream) where T : unmanaged => ToArray<T>(stream)[0];
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe T[] ToArray<T> (IntPtr data, int[] shape) where T : unmanaged {
+            var count = shape.Aggregate(1, (a, b) => a * b);
+            var result = new T[count];
+            fixed (void* dst = result)
+                Buffer.MemoryCopy((void*)data, dst, count * sizeof(T), count * sizeof(T));
+            return result;
+        }
         #endregion
 
 
@@ -446,6 +516,7 @@ namespace Function.Services {
             public int? dataUrlLimit;
             public string? configuration;
             public string? device;
+            public string? clientVersion;
         }
 
         private sealed class ValueInput : Value {
