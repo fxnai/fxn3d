@@ -154,7 +154,6 @@ namespace Function.Internal {
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationCreate")]
         public static extern Status CreateConfiguration (out IntPtr configuration);
-
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationRelease")]
         public static extern Status ReleaseConfiguration (this IntPtr configuration);
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetToken")]
@@ -181,6 +180,29 @@ namespace Function.Internal {
         #endregion
 
 
+        #region --FXNProfile--
+        [DllImport(Assembly, EntryPoint = @"FXNProfileRelease")]
+        public static extern Status ReleaseProfile (this IntPtr profile);
+        [DllImport(Assembly, EntryPoint = @"FXNProfileGetLatency")]
+        public static extern Status GetProfileLatency (
+            this IntPtr profile,
+            out double latency
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNProfileGetError")]
+        public static extern Status GetProfileError (
+            this IntPtr profile,
+            [MarshalAs(UnmanagedType.LPStr)] StringBuilder error,
+            out int size
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNProfileGetLogs")]
+        public static extern Status GetProfileLogs (
+            this IntPtr profile,
+            [MarshalAs(UnmanagedType.LPStr)] StringBuilder logs,
+            out int size
+        );
+        #endregion
+
+
         #region --FXNPredictor--
         [DllImport(Assembly, EntryPoint = @"FXNPredictorCreate")]
         public static extern Status CreatePredictor (
@@ -196,6 +218,7 @@ namespace Function.Internal {
         public static extern Status Predict (
             this IntPtr predictor,
             IntPtr inputs,
+            out IntPtr profile,
             out IntPtr outputs
         );
         #endregion

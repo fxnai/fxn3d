@@ -309,7 +309,7 @@ namespace Function.Services {
             foreach (var pair in inputs)
                 inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).CheckStatus();
             // Predict
-            predictor.Predict(inputMap, out var outputMap).CheckStatus();
+            predictor.Predict(inputMap, out var profile, out var outputMap).CheckStatus();
             // Marshal outputs
             outputMap.GetValueMapSize(out var count).CheckStatus();
             var results = new List<object?>();
