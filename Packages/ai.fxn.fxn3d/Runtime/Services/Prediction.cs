@@ -73,7 +73,7 @@ namespace Function.Services {
                         dataUrlLimit = dataUrlLimit,
                         configuration = ConfigurationId,
                         device = client.DeviceId,
-                        clientVersion = Function.GetVersion(),
+                        clientVersion = Marshal.PtrToStringUTF8(Function.GetVersion()),
                     }
                 }
             );
