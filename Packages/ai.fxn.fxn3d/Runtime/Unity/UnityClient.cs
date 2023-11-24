@@ -49,12 +49,19 @@ namespace Function.API {
         /// <param name="accessKey">Function access key.</param>
         /// <param name="clientId">Client identifier.</param>
         /// <param name="deviceId">Device model identifier.</param>
-        public UnityClient (string url, string? accessKey, string? clientId = null, string? deviceId = null) {
+        /// <param name="cachePath">Prediction resource cache path.</param>
+        public UnityClient (
+            string url,
+            string? accessKey,
+            string? clientId = null,
+            string? deviceId = null,
+            string? cachePath = null
+        ) {
             this.url = url;
             this.accessKey = accessKey;
             this.ClientId = clientId;
             this.DeviceId = deviceId;
-            this.CachePath = Path.Combine(Application.persistentDataPath, "fxn");
+            this.CachePath = cachePath ?? Path.Combine(Application.persistentDataPath, "fxn");
         }
 
         /// <summary>

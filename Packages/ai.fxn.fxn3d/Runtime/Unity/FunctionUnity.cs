@@ -32,9 +32,10 @@ namespace Function {
             var key = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance?.accessKey;
             var apiUrl = url ?? Function.URL;
             var deviceId = SystemInfo.deviceModel;
+            var cachePath = Path.Combine(Application.persistentDataPath, "fxn");
             var client = Application.platform == RuntimePlatform.WebGLPlayer ?
-                (IFunctionClient)new UnityClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId) :
-                new DotNetClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId);
+                (IFunctionClient)new UnityClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId, cachePath: cachePath) :
+                new DotNetClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId, cachePath: cachePath);
             var fxn = new Function(client);
             return fxn;
         }

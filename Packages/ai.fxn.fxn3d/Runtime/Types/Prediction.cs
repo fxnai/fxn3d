@@ -61,14 +61,8 @@ namespace Function.Types {
         public string? logs;
 
         /// <summary>
-        /// Predictor implementation.
-        /// This is only populated for `EDGE` predictions.
-        /// </summary>
-        public string? implementation;
-
-        /// <summary>
         /// Predictor resources.
-        // This is only populated for `EDGE` predictions.
+        /// This is only populated for `EDGE` predictions.
         /// </summary>
         public PredictionResource[]? resources;
 

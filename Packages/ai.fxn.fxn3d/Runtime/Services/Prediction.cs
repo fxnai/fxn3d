@@ -265,9 +265,9 @@ namespace Function.Services {
             Function.CreateConfiguration(out var configuration).CheckStatus();
             configuration.SetConfigurationToken(prediction.configuration).CheckStatus();
             configuration.SetConfigurationAcceleration(acceleration).CheckStatus();
-            configuration.SetConfigurationDevice(device).CheckStatus();            
+            configuration.SetConfigurationDevice(device).CheckStatus();
             await Task.WhenAll(prediction.resources.Select(async resource => {
-                if (resource.id == @"fxn")
+                if (resource.id.StartsWith(@"fxn"))
                     return;
                 var path = await Retrieve(resource);
                 lock (prediction)
@@ -285,7 +285,8 @@ namespace Function.Services {
         private async Task<string> Retrieve (PredictionResource resource) {
             // Check cache
             Directory.CreateDirectory(client.CachePath);
-            var path = Path.Combine(client.CachePath, resource.id); // INCOMPLETE // Different predictors and their tags
+            var fileName = resource.id.Replace(":", "-");
+            var path = Path.Combine(client.CachePath, fileName); // INCOMPLETE // Different predictors and their tags
             if (File.Exists(path))
                 return path;
             // Download
