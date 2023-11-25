@@ -66,7 +66,7 @@ namespace Function.Services {
 
         #region --Types--
 
-        internal sealed class UserInput {
+        public sealed class UserInput {
             public string username;
         }
         #endregion

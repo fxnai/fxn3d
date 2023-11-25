@@ -107,13 +107,13 @@ namespace Function.Services {
 
         #region --Types--
 
-        private sealed class CreateEnvironmentVariableInput {
+        public sealed class CreateEnvironmentVariableInput {
             public string name;
             public string value;
             public string? organization;
         }
 
-        private sealed class DeleteEnvironmentVariableInput {
+        public sealed class DeleteEnvironmentVariableInput {
             public string name;
             public string? organization;
         }

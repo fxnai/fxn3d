@@ -179,42 +179,42 @@ namespace Function.Services {
             string? key = null
         ) => value switch {
             Value           x => x,
-            float           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new int[0] },
-            double          x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new int[0] },
-            sbyte           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new int[0] },
-            short           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new int[0] },
-            int             x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new int[0] },
-            long            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new int[0] },
-            byte            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new int[0] },
-            ushort          x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new int[0] },
-            uint            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new int[0] },
-            ulong           x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new int[0] },
-            bool            x => new Value { data = await storage.Upload(name, ToStream(new [] { x }), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new int[0] },
-            float[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new [] { x.Length } },
-            double[]        x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new [] { x.Length } },
-            sbyte[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new [] { x.Length } },
-            short[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new [] { x.Length } },
-            int[]           x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new [] { x.Length } },
-            long[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new [] { x.Length } },
-            byte[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new [] { x.Length } },
-            ushort[]        x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new [] { x.Length } },
-            uint[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new [] { x.Length } },
-            ulong[]         x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new [] { x.Length } },
-            bool[]          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new [] { x.Length } },
-            Tensor<float>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = x.shape },
-            Tensor<double>  x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = x.shape },
-            Tensor<sbyte>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = x.shape },
-            Tensor<short>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = x.shape },
-            Tensor<int>     x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = x.shape },
-            Tensor<long>    x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = x.shape },
-            Tensor<byte>    x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = x.shape },
-            Tensor<ushort>  x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = x.shape },
-            Tensor<uint>    x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = x.shape },
-            Tensor<ulong>   x => new Value { data = await storage.Upload(name, ToStream(x.data), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = x.shape },
-            string          x => new Value { data = await storage.Upload(name, ToStream(x), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
+            float           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new int[0] },
+            double          x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new int[0] },
+            sbyte           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new int[0] },
+            short           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new int[0] },
+            int             x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new int[0] },
+            long            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new int[0] },
+            byte            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new int[0] },
+            ushort          x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new int[0] },
+            uint            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new int[0] },
+            ulong           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new int[0] },
+            bool            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new int[0] },
+            float[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new [] { x.Length } },
+            double[]        x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new [] { x.Length } },
+            sbyte[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new [] { x.Length } },
+            short[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new [] { x.Length } },
+            int[]           x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new [] { x.Length } },
+            long[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new [] { x.Length } },
+            byte[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new [] { x.Length } },
+            ushort[]        x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new [] { x.Length } },
+            uint[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new [] { x.Length } },
+            ulong[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new [] { x.Length } },
+            bool[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new [] { x.Length } },
+            Tensor<float>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = x.shape },
+            Tensor<double>  x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = x.shape },
+            Tensor<sbyte>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = x.shape },
+            Tensor<short>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = x.shape },
+            Tensor<int>     x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = x.shape },
+            Tensor<long>    x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = x.shape },
+            Tensor<byte>    x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = x.shape },
+            Tensor<ushort>  x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = x.shape },
+            Tensor<uint>    x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = x.shape },
+            Tensor<ulong>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = x.shape },
+            string          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
             Stream          x => new Value { data = await storage.Upload(name, x, UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
-            IList           x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
-            IDictionary     x => new Value { data = await storage.Upload(name, ToStream(JsonConvert.SerializeObject(x)), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
+            IList           x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
+            IDictionary     x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
             null              => new Value { type = Dtype.Null },
             _                 => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}"),
         };
@@ -230,7 +230,6 @@ namespace Function.Services {
         tag
         type
         created
-        implementation
         configuration
         resources {
             id
@@ -252,14 +251,6 @@ namespace Function.Services {
             this.cache = new Dictionary<string, IntPtr>();
         }
 
-        private string ConfigurationId {
-            get {
-                var sb = new StringBuilder(2048);
-                Function.GetConfigurationUniqueID(sb, sb.Capacity);
-                return sb.ToString();
-            }
-        }
-
         private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
             // Create configuration
             Function.CreateConfiguration(out var configuration).CheckStatus();
@@ -267,7 +258,7 @@ namespace Function.Services {
             configuration.SetConfigurationAcceleration(acceleration).CheckStatus();
             configuration.SetConfigurationDevice(device).CheckStatus();
             await Task.WhenAll(prediction.resources.Select(async resource => {
-                if (resource.id.StartsWith(@"fxn"))
+                if (resource.id.StartsWith(@"pdre-fxn"))
                     return;
                 var path = await Retrieve(resource);
                 lock (prediction)
@@ -285,8 +276,7 @@ namespace Function.Services {
         private async Task<string> Retrieve (PredictionResource resource) {
             // Check cache
             Directory.CreateDirectory(client.CachePath);
-            var fileName = resource.id.Replace(":", "-");
-            var path = Path.Combine(client.CachePath, fileName); // INCOMPLETE // Different predictors and their tags
+            var path = Path.Combine(client.CachePath, resource.id);
             if (File.Exists(path))
                 return path;
             // Download
@@ -352,6 +342,14 @@ namespace Function.Services {
 
 
         #region --Utilities--
+
+        private static string ConfigurationId {
+            get {
+                var sb = new StringBuilder(2048);
+                Function.GetConfigurationUniqueID(sb, sb.Capacity).CheckStatus();
+                return sb.ToString();
+            }
+        }
 
         private static unsafe IntPtr ToValue (object? value) {
             switch (value) {
@@ -460,7 +458,7 @@ namespace Function.Services {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static object ToObject<T> (MemoryStream stream, int[] shape) where T : unmanaged {
-            var data = ToArray<T>(stream);
+            var data = stream.ToArray<T>();
             return shape.Length <= 1 ? shape.Length < 1 ? data[0] : data : new Tensor<T>(data, shape);
         }
 
@@ -470,31 +468,6 @@ namespace Function.Services {
                 return *(T*)data;
             var array = ToArray<T>(data, shape);
             return shape.Length > 1 ? new Tensor<T>(array, shape) : array;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Stream ToStream (string data) {
-            var buffer = Encoding.UTF8.GetBytes(data);
-            return new MemoryStream(buffer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe Stream ToStream<T> (T[] data) where T : unmanaged {
-            if (data is byte[] raw)
-                return new MemoryStream(raw);
-            var size = data.Length * sizeof(T);
-            var array = new byte[size];
-            fixed (void* src = data, dst = array)
-                Buffer.MemoryCopy(src, dst, size, size);
-            return new MemoryStream(array);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe T[] ToArray<T> (MemoryStream stream) where T : unmanaged {
-            var rawData = stream.ToArray();
-            var data = new T[rawData.Length / sizeof(T)];
-            Buffer.BlockCopy(rawData, 0, data, 0, rawData.Length);
-            return data;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -510,7 +483,7 @@ namespace Function.Services {
 
         #region --Types--
 
-        private sealed class CreatePredictionInput {
+        public sealed class CreatePredictionInput {
             public string tag;
             public string client;
             public ValueInput[]? inputs;
@@ -520,7 +493,7 @@ namespace Function.Services {
             public string? clientVersion;
         }
 
-        private sealed class ValueInput : Value {
+        public sealed class ValueInput : Value {
             public string name;
         }
         #endregion

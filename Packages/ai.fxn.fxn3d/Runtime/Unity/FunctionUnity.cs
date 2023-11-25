@@ -33,9 +33,7 @@ namespace Function {
             var apiUrl = url ?? Function.URL;
             var deviceId = SystemInfo.deviceModel;
             var cachePath = Path.Combine(Application.persistentDataPath, "fxn");
-            var client = Application.platform == RuntimePlatform.WebGLPlayer ?
-                (IFunctionClient)new UnityClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId, cachePath: cachePath) :
-                new DotNetClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId, cachePath: cachePath);
+            var client = new UnityClient(apiUrl, accessKey: key, clientId: ClientId, deviceId: deviceId, cachePath: cachePath);
             var fxn = new Function(client);
             return fxn;
         }

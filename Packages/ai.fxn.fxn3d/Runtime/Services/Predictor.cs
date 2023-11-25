@@ -219,23 +219,23 @@ namespace Function.Services {
 
         #region --Types--
 
-        private sealed class PredictorInput {
+        public sealed class PredictorInput {
             public string tag;
         }
 
-        private sealed class PredictorsInput {
+        public sealed class PredictorsInput {
             public string? query;
             public int? offset;
             public int? count;
         }
 
-        private sealed class UserPredictorsInput {
+        public sealed class UserPredictorsInput {
             public PredictorStatus? status;
             public int? offset;
             public int? count;
         }
 
-        private sealed class CreatePredictorInput {
+        public sealed class CreatePredictorInput {
             public string tag;
             public string notebook;
             public PredictorType? type;
@@ -248,15 +248,15 @@ namespace Function.Services {
             public bool? overwrite;
         }
 
-        private sealed class DeletePredictorInput {
+        public sealed class DeletePredictorInput {
             public string tag;
         }
 
-        private sealed class ArchivePredictorInput {
+        public sealed class ArchivePredictorInput {
             public string tag;
         }
 
-        private sealed class EnvironmentVariableInput {
+        public sealed class EnvironmentVariableInput {
             public string name;
             public string value;
         }

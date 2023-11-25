@@ -105,7 +105,7 @@ namespace Function.Services {
 
         #region --Types--
 
-        private sealed class CreateUploadUrlInput {
+        public sealed class CreateUploadUrlInput {
             public string name;
             public UploadType type;
             public string? key;
