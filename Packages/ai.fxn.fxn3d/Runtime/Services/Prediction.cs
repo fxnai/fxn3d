@@ -22,6 +22,7 @@ namespace Function.Services {
     using Internal;
     using Types;
     using Dtype = Types.Dtype;
+    using Status = Internal.Function.Status;
     using ValueFlags = Internal.Function.ValueFlags;
 
     /// <summary>
@@ -290,40 +291,58 @@ namespace Function.Services {
             return path;
         }
 
-        private Prediction Predict ( // INCOMPLETE // Latency, error, logs
-            string tag,
-            IntPtr predictor,
-            Dictionary<string, object> inputs
-        ) {
-            // Marshal inouts
-            Function.CreateValueMap(out var inputMap).CheckStatus();
-            foreach (var pair in inputs)
-                inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).CheckStatus();
-            // Predict
-            predictor.Predict(inputMap, out var profile, out var outputMap).CheckStatus();
-            // Marshal outputs
-            outputMap.GetValueMapSize(out var count).CheckStatus();
-            var results = new List<object?>();
-            var name = new StringBuilder(1024);
-            for (var idx = 0; idx < count; ++idx) {
-                name.Clear();
-                outputMap.GetValueMapKey(idx, name, name.Capacity).CheckStatus();
-                outputMap.GetValueMapValue(name.ToString(), out var value).CheckStatus();
-                results.Add(ToObject(value));
+        private Prediction Predict (string tag, IntPtr predictor, Dictionary<string, object> inputs) {
+            IntPtr inputMap = default, outputMap = default, profile = default;
+            try {
+                // Marshal inputs
+                Function.CreateValueMap(out inputMap).CheckStatus();
+                foreach (var pair in inputs)
+                    inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).CheckStatus();
+                // Predict
+                predictor.Predict(inputMap, out profile, out outputMap).CheckStatus();
+                // Marshal outputs
+                outputMap.GetValueMapSize(out var count).CheckStatus();
+                var results = new List<object?>();
+                var name = new StringBuilder(2048);
+                for (var idx = 0; idx < count; ++idx) {
+                    name.Clear();
+                    outputMap.GetValueMapKey(idx, name, name.Capacity).CheckStatus();
+                    outputMap.GetValueMapValue(name.ToString(), out var value).CheckStatus();
+                    results.Add(ToObject(value));
+                }
+                // Marshal profile
+                var id = new StringBuilder(2048);
+                StringBuilder error = null, logs = null;
+                profile.GetProfileID(id, id.Capacity); // nothrow
+                profile.GetProfileLatency(out var latency);
+                var errorLength = 0;
+                if (profile.GetProfileError(null, ref errorLength) == Status.Ok) {
+                    error = new StringBuilder(errorLength);
+                    profile.GetProfileError(error, ref errorLength);
+                }
+                var logsLength = 0;
+                if (profile.GetProfileLogs(null, ref logsLength) == Status.Ok) {
+                    logs = new StringBuilder(logsLength);
+                    profile.GetProfileLogs(logs, ref logsLength);
+                }
+                // Create prediction
+                var prediction = new Prediction {
+                    id = id.ToString(),
+                    tag = tag,
+                    type = PredictorType.Edge,
+                    created = DateTime.UtcNow,
+                    results = results.ToArray(),
+                    latency = latency, 
+                    error = error?.ToString(),
+                    logs = logs?.ToString(),
+                };
+                // Return
+                return prediction;
+            } finally {
+                inputMap.ReleaseValueMap().CheckStatus();
+                outputMap.ReleaseValueMap().CheckStatus();
+                profile.ReleaseProfile().CheckStatus();
             }
-            // Create prediction
-            var prediction = new Prediction {
-                id = Guid.NewGuid().ToString("N"),
-                tag = tag,
-                type = PredictorType.Edge,
-                created = DateTime.Now,
-                results = results.ToArray(),
-                latency = 0, 
-                error = null,
-                logs = null,
-            };
-            // Return
-            return prediction;
         }
 
         private async Task<object?[]?> ParseResults (object[]? values, bool raw) {

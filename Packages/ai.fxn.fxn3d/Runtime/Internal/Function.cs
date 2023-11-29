@@ -183,6 +183,12 @@ namespace Function.Internal {
         #region --FXNProfile--
         [DllImport(Assembly, EntryPoint = @"FXNProfileRelease")]
         public static extern Status ReleaseProfile (this IntPtr profile);
+        [DllImport(Assembly, EntryPoint = @"FXNProfileGetID")]
+        public static extern Status GetProfileID (
+            this IntPtr profile,
+            [MarshalAs(UnmanagedType.LPStr)] StringBuilder id,
+            int size
+        );
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetLatency")]
         public static extern Status GetProfileLatency (
             this IntPtr profile,
@@ -192,13 +198,13 @@ namespace Function.Internal {
         public static extern Status GetProfileError (
             this IntPtr profile,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder error,
-            out int size
+            ref int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetLogs")]
         public static extern Status GetProfileLogs (
             this IntPtr profile,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder logs,
-            out int size
+            ref int size
         );
         #endregion
 

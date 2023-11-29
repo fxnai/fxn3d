@@ -47,7 +47,7 @@ namespace Function.Types {
         /// <summary>
         /// Prediction latency in milliseconds.
         /// </summary>
-        public float? latency;
+        public double? latency;
 
         /// <summary>
         /// Prediction error.
