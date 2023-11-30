@@ -311,20 +311,14 @@ namespace Function.Services {
                     results.Add(ToObject(value));
                 }
                 // Marshal profile
-                var id = new StringBuilder(2048);
-                StringBuilder error = null, logs = null;
-                profile.GetProfileID(id, id.Capacity); // nothrow
                 profile.GetProfileLatency(out var latency);
-                var errorLength = 0;
-                if (profile.GetProfileError(null, ref errorLength) == Status.Ok) {
-                    error = new StringBuilder(errorLength);
-                    profile.GetProfileError(error, ref errorLength);
-                }
-                var logsLength = 0;
-                if (profile.GetProfileLogs(null, ref logsLength) == Status.Ok) {
-                    logs = new StringBuilder(logsLength);
-                    profile.GetProfileLogs(logs, ref logsLength);
-                }
+                profile.GetProfileLogLength(out var logsLength);
+                var idBuffer = new StringBuilder(2048);
+                var errorBuffer = new StringBuilder(2048);
+                var logBuffer = new StringBuilder(logsLength + 1);
+                var id = profile.GetProfileID(idBuffer, idBuffer.Capacity) == Status.Ok ? idBuffer.ToString() : null;
+                var error = profile.GetProfileError(errorBuffer, errorBuffer.Length) == Status.Ok ? errorBuffer.ToString() : null;
+                var logs = profile.GetProfileLogs(logBuffer, logBuffer.Capacity) == Status.Ok ? logBuffer.ToString() : null;                
                 // Create prediction
                 var prediction = new Prediction {
                     id = id.ToString(),
@@ -333,8 +327,8 @@ namespace Function.Services {
                     created = DateTime.UtcNow,
                     results = results.ToArray(),
                     latency = latency, 
-                    error = error?.ToString(),
-                    logs = logs?.ToString(),
+                    error = error,
+                    logs = logs,
                 };
                 // Return
                 return prediction;

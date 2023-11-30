@@ -198,13 +198,18 @@ namespace Function.Internal {
         public static extern Status GetProfileError (
             this IntPtr profile,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder error,
-            ref int size
+            int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetLogs")]
         public static extern Status GetProfileLogs (
             this IntPtr profile,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder logs,
-            ref int size
+            int size
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNProfileGetLogLength")]
+        public static extern Status GetProfileLogLength (
+            this IntPtr profile,
+            out int size
         );
         #endregion
 
