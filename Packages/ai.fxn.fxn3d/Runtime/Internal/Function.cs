@@ -128,7 +128,7 @@ namespace Function.Internal {
         public static extern Status GetValueMapKey (
             this IntPtr map,
             int index,
-            [MarshalAs(UnmanagedType.LPStr)] StringBuilder key,
+            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder key,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueMapGetValue")]
@@ -149,7 +149,7 @@ namespace Function.Internal {
         #region --FXNConfiguration--
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetUniqueID")]
         public static extern Status GetConfigurationUniqueID (
-            [MarshalAs(UnmanagedType.LPStr)] StringBuilder identifier,
+            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder identifier,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationCreate")]
@@ -186,7 +186,7 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetID")]
         public static extern Status GetProfileID (
             this IntPtr profile,
-            [MarshalAs(UnmanagedType.LPStr)] StringBuilder id,
+            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder id,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetLatency")]
@@ -197,13 +197,13 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetError")]
         public static extern Status GetProfileError (
             this IntPtr profile,
-            [MarshalAs(UnmanagedType.LPStr)] StringBuilder error,
+            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder error,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetLogs")]
         public static extern Status GetProfileLogs (
             this IntPtr profile,
-            [MarshalAs(UnmanagedType.LPStr)] StringBuilder logs,
+            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder logs,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNProfileGetLogLength")]
