@@ -99,6 +99,7 @@ namespace Function.Internal {
             byte* pixelBuffer,
             int width,
             int height,
+            int channels,
             ValueFlags flags,
             out IntPtr value
         );
@@ -242,7 +243,8 @@ namespace Function.Internal {
 
 
         #region --Utility--
-        public static void CheckStatus (this Status status) {
+
+        public static void Throw (this Status status) {
             switch (status) {
                 case Status.Ok:                 break;
                 case Status.InvalidArgument:    throw new ArgumentException();

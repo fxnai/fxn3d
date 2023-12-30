@@ -127,7 +127,7 @@ namespace Function.Services {
             if (!cache.TryGetValue(tag, out var predictor))
                 return false;
             // Release
-            predictor.ReleasePredictor().CheckStatus();
+            predictor.ReleasePredictor().Throw();
             // Return
             return true;
         }
@@ -254,20 +254,20 @@ namespace Function.Services {
 
         private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
             // Create configuration
-            Function.CreateConfiguration(out var configuration).CheckStatus();
-            configuration.SetConfigurationToken(prediction.configuration).CheckStatus();
-            configuration.SetConfigurationAcceleration(acceleration).CheckStatus();
-            configuration.SetConfigurationDevice(device).CheckStatus();
+            Function.CreateConfiguration(out var configuration).Throw();
+            configuration.SetConfigurationToken(prediction.configuration).Throw();
+            configuration.SetConfigurationAcceleration(acceleration).Throw();
+            configuration.SetConfigurationDevice(device).Throw();
             await Task.WhenAll(prediction.resources.Select(async resource => {
                 if (resource.id.StartsWith(@"pdre-fxn"))
                     return;
                 var path = await Retrieve(resource);
                 lock (prediction)
-                    configuration.SetConfigurationResource(resource.id, path).CheckStatus();
+                    configuration.SetConfigurationResource(resource.id, path).Throw();
             }));
             // Create predictor
-            Function.CreatePredictor(prediction.tag, configuration, out var predictor).CheckStatus();
-            configuration.ReleaseConfiguration().CheckStatus();
+            Function.CreatePredictor(prediction.tag, configuration, out var predictor).Throw();
+            configuration.ReleaseConfiguration().Throw();
             // Cache
             cache.Add(prediction.tag, predictor);
             // Return
@@ -295,19 +295,19 @@ namespace Function.Services {
             IntPtr inputMap = default, outputMap = default, profile = default;
             try {
                 // Marshal inputs
-                Function.CreateValueMap(out inputMap).CheckStatus();
+                Function.CreateValueMap(out inputMap).Throw();
                 foreach (var pair in inputs)
-                    inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).CheckStatus();
+                    inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).Throw();
                 // Predict
-                predictor.Predict(inputMap, out profile, out outputMap).CheckStatus();
+                predictor.Predict(inputMap, out profile, out outputMap).Throw();
                 // Marshal outputs
-                outputMap.GetValueMapSize(out var count).CheckStatus();
+                outputMap.GetValueMapSize(out var count).Throw();
                 var results = new List<object?>();
                 var name = new StringBuilder(2048);
                 for (var idx = 0; idx < count; ++idx) {
                     name.Clear();
-                    outputMap.GetValueMapKey(idx, name, name.Capacity).CheckStatus();
-                    outputMap.GetValueMapValue(name.ToString(), out var value).CheckStatus();
+                    outputMap.GetValueMapKey(idx, name, name.Capacity).Throw();
+                    outputMap.GetValueMapValue(name.ToString(), out var value).Throw();
                     results.Add(ToObject(value));
                 }
                 // Marshal profile
@@ -333,9 +333,9 @@ namespace Function.Services {
                 // Return
                 return prediction;
             } finally {
-                inputMap.ReleaseValueMap().CheckStatus();
-                outputMap.ReleaseValueMap().CheckStatus();
-                profile.ReleaseProfile().CheckStatus();
+                inputMap.ReleaseValueMap().Throw();
+                outputMap.ReleaseValueMap().Throw();
+                profile.ReleaseProfile().Throw();
             }
         }
 
@@ -359,7 +359,7 @@ namespace Function.Services {
         private static string ConfigurationId {
             get {
                 var sb = new StringBuilder(2048);
-                Function.GetConfigurationUniqueID(sb, sb.Capacity).CheckStatus();
+                Function.GetConfigurationUniqueID(sb, sb.Capacity).Throw();
                 return sb.ToString();
             }
         }
@@ -401,19 +401,19 @@ namespace Function.Services {
                 case Tensor<ulong> x:   return ToValue(x.data, x.shape);
                 case Tensor<bool> x:    return ToValue(x.data, x.shape);
                 case string x:
-                    Function.CreateStringValue(x, out var str).CheckStatus();
+                    Function.CreateStringValue(x, out var str).Throw();
                     return str;
                 case IList x:
-                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var list).CheckStatus();
+                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var list).Throw();
                     return list;
                 case IDictionary x:
-                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var dict).CheckStatus();
+                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var dict).Throw();
                     return dict;
                 case Stream stream:
-                    Function.CreateBinaryValue(stream.ToArray(), stream.Length, ValueFlags.CopyData, out var binary).CheckStatus();
+                    Function.CreateBinaryValue(stream.ToArray(), stream.Length, ValueFlags.CopyData, out var binary).Throw();
                     return binary;
                 case null:
-                    Function.CreateNullValue(out var nullptr).CheckStatus();
+                    Function.CreateNullValue(out var nullptr).Throw();
                     return nullptr;
                 default: throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}");
             }
@@ -421,14 +421,14 @@ namespace Function.Services {
 
         private static unsafe object? ToObject (IntPtr value) {
             // Null
-            value.GetValueType(out var dtype).CheckStatus();
+            value.GetValueType(out var dtype).Throw();
             if (dtype == Dtype.Null)
                 return null;
             // Get data and shape
-            value.GetValueData(out var data).CheckStatus();
-            value.GetValueDimensions(out var dims).CheckStatus();
+            value.GetValueData(out var data).Throw();
+            value.GetValueDimensions(out var dims).Throw();
             var shape = new int[dims];
-            value.GetValueShape(shape, dims).CheckStatus();
+            value.GetValueShape(shape, dims).Throw();
             // Deserialize
             switch (dtype) {
                 case Dtype.Float32: return ToObject<float>(data, shape);
@@ -459,7 +459,7 @@ namespace Function.Services {
                 typeof(T).ToDtype(),
                 ValueFlags.CopyData,
                 out var result
-            ).CheckStatus();
+            ).Throw();
             return result;
         }
 
