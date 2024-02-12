@@ -47,7 +47,7 @@ var prediction = await fxn.Predictions.Create(
     inputs: new () {
         ["name"] = "Rhea"
     }
-) as CloudPrediction;
+);
 // Log the result
 Debug.Log(prediction.results[0]);
 ```
