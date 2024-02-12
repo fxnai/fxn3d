@@ -16,6 +16,7 @@ namespace Function.API {
     using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Graph;
+    using Internal;
     using Types;
 
     /// <summary>
@@ -136,7 +137,7 @@ namespace Function.API {
         public async Task<Stream> Download (string url) {
             // Create client
             using var client = new HttpClient();
-            var ua = new ProductInfoHeaderValue(@"FunctionDotNet", Function.Internal.Function.Version);
+            var ua = new ProductInfoHeaderValue(@"FunctionDotNet", Function.Version);
             client.DefaultRequestHeaders.UserAgent.Add(ua);
             // Download
             var stream = await client.GetStreamAsync(url);

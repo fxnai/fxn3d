@@ -1,5 +1,5 @@
 ## 0.0.7
-*INCOMPLETE*
++ Fixed compiler error on some platforms related to Function version.
 
 ## 0.0.6
 + Fixed `NullReferenceException` when calling `Tag.TryParse` with `null` input string.
