@@ -1,3 +1,6 @@
+## 0.0.7
+*INCOMPLETE*
+
 ## 0.0.6
 + Fixed `NullReferenceException` when calling `Tag.TryParse` with `null` input string.
 + Removed `CloudPrediction` class. Use `Prediction` class instead.

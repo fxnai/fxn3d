@@ -16,7 +16,7 @@ namespace Function.Internal {
     /// </summary>
     public static unsafe class Function {
 
-        public const string Version = @"0.0.6";
+        public const string Version = @"0.0.7";
         public const string Assembly =
         #if (UNITY_IOS || UNITY_WEBGL) && !UNITY_EDITOR
         @"__Internal";
