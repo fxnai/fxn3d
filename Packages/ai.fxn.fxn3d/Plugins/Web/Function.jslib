@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2023 NatML Inc, The Emscripten Authors. All Rights Reserved.
+*   Copyright © 2024 NatML Inc, The Emscripten Authors. All Rights Reserved.
 */
 
 mergeInto(LibraryManager.library, {
