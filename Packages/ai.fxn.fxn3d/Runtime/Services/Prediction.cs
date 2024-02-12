@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2023 NatML Inc. All rights reserved.
+*   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
 #nullable enable
@@ -234,6 +234,7 @@ namespace Function.Services {
         configuration
         resources {
             id
+            type
             url
         }
         results {
@@ -259,7 +260,7 @@ namespace Function.Services {
             configuration.SetConfigurationAcceleration(acceleration).Throw();
             configuration.SetConfigurationDevice(device).Throw();
             await Task.WhenAll(prediction.resources.Select(async resource => {
-                if (resource.id.StartsWith(@"pdre-fxn"))
+                if (resource.type == @"fxn")
                     return;
                 var path = await Retrieve(resource);
                 lock (prediction)

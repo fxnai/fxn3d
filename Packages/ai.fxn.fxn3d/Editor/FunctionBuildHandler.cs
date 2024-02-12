@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2023 NatML Inc. All rights reserved.
+*   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
 using FunctionClient = Function.Function;
@@ -93,7 +93,7 @@ namespace Function.Editor {
                 var client = new DotNetClient(url, accessKey, clientId);
                 var prediction = CreatePrediction(embed, client).Result;
                 foreach (var resource in prediction.resources) {
-                    if (!resource.id.StartsWith(@"pdre-so"))
+                    if (!resource.type.StartsWith(@"dso"))
                         continue;
                     var resourceData = Task.Run(async () => (await client.Download(resource.url)).ToArray()).Result;
                     var resourcePath = Path.Combine(CachePath, $"{resource.id}.so");
@@ -130,6 +130,7 @@ namespace Function.Editor {
                         created
                         resources {{
                             id
+                            type
                             url
                         }}
                     }}

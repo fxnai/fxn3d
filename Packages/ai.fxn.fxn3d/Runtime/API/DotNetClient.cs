@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2023 NatML Inc. All rights reserved.
+*   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
 #nullable enable
@@ -77,7 +77,7 @@ namespace Function.API {
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
             // Create client
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("fxn-client", ClientId);
+            client.DefaultRequestHeaders.Add(@"fxn-client", ClientId);
             client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
             // Request
             using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
@@ -136,7 +136,7 @@ namespace Function.API {
         public async Task<Stream> Download (string url) {
             // Create client
             using var client = new HttpClient();
-            var ua = new ProductInfoHeaderValue("FunctionDotNet", "1.0");
+            var ua = new ProductInfoHeaderValue(@"FunctionDotNet", Function.Internal.Function.Version);
             client.DefaultRequestHeaders.UserAgent.Add(ua);
             // Download
             var stream = await client.GetStreamAsync(url);

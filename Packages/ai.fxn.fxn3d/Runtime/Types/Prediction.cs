@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2023 NatML Inc. All rights reserved.
+*   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
 #nullable enable
@@ -83,6 +83,11 @@ namespace Function.Types {
         /// Resource identifier.
         /// </summary>
         public string id;
+
+        /// <summary>
+        /// Resource type.
+        /// </summary>
+        public string type;
 
         /// <summary>
         /// Resource URL.

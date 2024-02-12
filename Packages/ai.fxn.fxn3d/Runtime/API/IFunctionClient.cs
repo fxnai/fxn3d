@@ -1,6 +1,6 @@
 /*
 *   Function
-*   Copyright © 2023 NatML Inc. All rights reserved.
+*   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
 #nullable enable
