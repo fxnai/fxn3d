@@ -80,11 +80,6 @@ namespace Function.Types {
     public class PredictionResource {
 
         /// <summary>
-        /// Resource identifier.
-        /// </summary>
-        public string id;
-
-        /// <summary>
         /// Resource type.
         /// </summary>
         public string type;

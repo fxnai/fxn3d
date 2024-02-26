@@ -53,38 +53,27 @@ namespace Function.Services {
                 return Predict(tag, p, inputs);
             // Collect inputs
             var key = Guid.NewGuid().ToString();
-            var values = inputs != null ? await Task.WhenAll(inputs.Select(async pair => {
-                var name = pair.Key;
-                var value = await ToValue(pair.Value, name, key: key);
-                return new ValueInput { name = name, data = value.data, type = value.type, shape = value.shape };
-            })) : null;
+            var values = inputs != null ?
+                (await Task.WhenAll(inputs.Select(async pair => (name: pair.Key, value: await ToValue(pair.Value, pair.Key, key: key))))).ToDictionary(pair => pair.name, pair => pair.value as object) :
+                null;
             // Query
-            var prediction = await client.Query<Prediction?>(
-                @$"mutation ($input: CreatePredictionInput!) {{
-                    createPrediction (input: $input) {{
-                        {Fields}
-                    }}
-                }}",
-                @"createPrediction",
+            var prediction = await client.Request<Prediction>(
+                @"POST",
+                $"/predict/{tag}?dataUrlLimit={dataUrlLimit}",
+                values,
                 new () {
-                    ["input"] = new CreatePredictionInput {
-                        tag = tag,
-                        client = client.ClientId,
-                        inputs = values,
-                        dataUrlLimit = dataUrlLimit,
-                        configuration = ConfigurationId,
-                        device = client.DeviceId,
-                        clientVersion = Marshal.PtrToStringUTF8(Function.GetVersion()),
-                    }
+                    [@"fxn-client"] = clientId,
+                    [@"fxn-configuration-token"] = ConfigurationId
                 }
             );
-            // Parse
-            var predictor = prediction.type == PredictorType.Edge ? await Load(prediction, acceleration, device) : IntPtr.Zero;
-            var edgePrediction = predictor != IntPtr.Zero && inputs != null ? Predict(tag, predictor, inputs) : null;
-            prediction.results = edgePrediction?.results ?? await ParseResults(prediction.results, rawOutputs);
-            prediction.latency = edgePrediction?.latency ?? prediction.latency;
-            prediction.error = edgePrediction?.error ?? prediction.error;
-            prediction.logs = edgePrediction?.error ?? prediction.logs;
+            // Parse results
+            prediction.results = await ParseResults(prediction.results, rawOutputs);
+            // Create edge prediction
+            if (prediction.type == PredictorType.Edge) {
+                var predictor = await Load(prediction, acceleration, device);
+                cache.Add(prediction.tag, predictor);
+                prediction = Predict(tag, predictor, inputs);
+            }
             // Return
             return prediction;
         }
@@ -225,37 +214,31 @@ namespace Function.Services {
         #region --Operations--
         private readonly IFunctionClient client;
         private readonly StorageService storage;
+        private readonly string clientId;
+        private readonly string cachePath;
         private readonly Dictionary<string, IntPtr> cache;
-        public const string Fields = @"
-        id
-        tag
-        type
-        created
-        configuration
-        resources {
-            id
-            type
-            url
-        }
-        results {
-            data
-            type
-            shape
-        }
-        latency
-        error
-        logs
-        ";
 
-        internal PredictionService (IFunctionClient client, StorageService storage) {
+        internal PredictionService (
+            IFunctionClient client,
+            StorageService storage,
+            string? clientId,
+            string? cachePath
+        ) {
             this.client = client;
             this.storage = storage;
+            this.clientId = clientId;        
+            this.cachePath = cachePath ?? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".fxn",
+                "cache"
+            );
             this.cache = new Dictionary<string, IntPtr>();
         }
 
         private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
             // Create configuration
             Function.CreateConfiguration(out var configuration).Throw();
+            configuration.SetConfigurationTag(prediction.tag).Throw();
             configuration.SetConfigurationToken(prediction.configuration).Throw();
             configuration.SetConfigurationAcceleration(acceleration).Throw();
             configuration.SetConfigurationDevice(device).Throw();
@@ -264,27 +247,25 @@ namespace Function.Services {
                     return;
                 var path = await Retrieve(resource);
                 lock (prediction)
-                    configuration.SetConfigurationResource(resource.id, path).Throw();
+                    configuration.AddConfigurationResource(resource.type, path).Throw();
             }));
             // Create predictor
-            Function.CreatePredictor(prediction.tag, configuration, out var predictor).Throw();
-            configuration.ReleaseConfiguration().Throw();
-            // Cache
-            cache.Add(prediction.tag, predictor);
+            Function.CreatePredictor(configuration, out var predictor).Throw();
+            configuration.ReleaseConfiguration().Throw();            
             // Return
             return predictor;
         }
 
         private async Task<string> Retrieve (PredictionResource resource) {
             // Check cache
-            Directory.CreateDirectory(client.CachePath);
-            var path = Path.Combine(client.CachePath, resource.id);
+            Directory.CreateDirectory(cachePath);
+            var path = Path.Combine(cachePath, GetResourceName(resource.url));
             if (File.Exists(path))
                 return path;
             // Download
             using var dataStream = await client.Download(resource.url);
             using var fileStream = File.Create(path);
-            if (client.ClientId == @"browser")
+            if (clientId == @"browser")
                 dataStream.CopyTo(fileStream); // Workaround for lack of pthreads on browser
             else
                 await dataStream.CopyToAsync(fileStream);
@@ -293,15 +274,26 @@ namespace Function.Services {
         }
 
         private Prediction Predict (string tag, IntPtr predictor, Dictionary<string, object> inputs) {
-            IntPtr inputMap = default, outputMap = default, profile = default;
+            IntPtr inputMap = default;
+            IntPtr prediction = default;
             try {
                 // Marshal inputs
                 Function.CreateValueMap(out inputMap).Throw();
                 foreach (var pair in inputs)
                     inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).Throw();
                 // Predict
-                predictor.Predict(inputMap, out profile, out outputMap).Throw();
+                predictor.Predict(inputMap, out prediction).Throw();
+                // Get prediction data
+                var idBuffer = new StringBuilder(2048);
+                var errorBuffer = new StringBuilder(2048);
+                var id = prediction.GetPredictionID(idBuffer, idBuffer.Capacity) == Status.Ok ? idBuffer.ToString() : null;
+                var error = prediction.GetPredictionError(errorBuffer, errorBuffer.Length) == Status.Ok ? errorBuffer.ToString() : null;
+                prediction.GetPredictionLatency(out var latency);
+                prediction.GetPredictionLogLength(out var logsLength);
+                var logBuffer = new StringBuilder(logsLength + 1);
+                var logs = prediction.GetPredictionLogs(logBuffer, logBuffer.Capacity) == Status.Ok ? logBuffer.ToString() : null;  
                 // Marshal outputs
+                prediction.GetPredictionResults(out var outputMap).Throw();
                 outputMap.GetValueMapSize(out var count).Throw();
                 var results = new List<object?>();
                 var name = new StringBuilder(2048);
@@ -310,18 +302,9 @@ namespace Function.Services {
                     outputMap.GetValueMapKey(idx, name, name.Capacity).Throw();
                     outputMap.GetValueMapValue(name.ToString(), out var value).Throw();
                     results.Add(ToObject(value));
-                }
-                // Marshal profile
-                profile.GetProfileLatency(out var latency);
-                profile.GetProfileLogLength(out var logsLength);
-                var idBuffer = new StringBuilder(2048);
-                var errorBuffer = new StringBuilder(2048);
-                var logBuffer = new StringBuilder(logsLength + 1);
-                var id = profile.GetProfileID(idBuffer, idBuffer.Capacity) == Status.Ok ? idBuffer.ToString() : null;
-                var error = profile.GetProfileError(errorBuffer, errorBuffer.Length) == Status.Ok ? errorBuffer.ToString() : null;
-                var logs = profile.GetProfileLogs(logBuffer, logBuffer.Capacity) == Status.Ok ? logBuffer.ToString() : null;                
+                }                              
                 // Create prediction
-                var prediction = new Prediction {
+                return new Prediction {
                     id = id.ToString(),
                     tag = tag,
                     type = PredictorType.Edge,
@@ -331,12 +314,9 @@ namespace Function.Services {
                     error = error,
                     logs = logs,
                 };
-                // Return
-                return prediction;
             } finally {
                 inputMap.ReleaseValueMap().Throw();
-                outputMap.ReleaseValueMap().Throw();
-                profile.ReleaseProfile().Throw();
+                prediction.ReleasePrediction().Throw();
             }
         }
 
@@ -491,6 +471,13 @@ namespace Function.Services {
             fixed (void* dst = result)
                 Buffer.MemoryCopy((void*)data, dst, count * sizeof(T), count * sizeof(T));
             return result;
+        }
+
+        internal static string GetResourceName (string url) {
+            var uri = new Uri(url);
+            var path = uri.AbsolutePath.TrimEnd('/');            
+            var name = path.Substring(path.LastIndexOf('/') + 1);
+            return name;
         }
         #endregion
 

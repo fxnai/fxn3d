@@ -8,7 +8,6 @@ namespace Function.Editor {
     using System.IO;
     using UnityEditor;
     using UnityEngine;
-    using Internal;
 
     internal static class FunctionMenu {
 

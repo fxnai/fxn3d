@@ -49,18 +49,20 @@ namespace Function.Services {
 
         internal UserService (IFunctionClient client) => this.client = client;
         
-        private Task<T?> Retrieve<T> (string? username = null) => client.Query<T?>(
-            @$"query ($input: UserInput) {{
-                user (input: $input) {{
-                    {ProfileFields}
-                    {(string.IsNullOrEmpty(username) ? UserFields : string.Empty)}
-                }}
-            }}",
-            @"user",
-            new () {
-                ["input"] = !string.IsNullOrEmpty(username) ? new UserInput { username = username } : null
-            }
-        );
+        private async Task<T?> Retrieve<T> (string? username = null) where T : Profile {
+            var response = await client.Query<UserResponse<T>>(
+                @$"query ($input: UserInput) {{
+                    user (input: $input) {{
+                        {ProfileFields}
+                        {(string.IsNullOrEmpty(username) ? UserFields : string.Empty)}
+                    }}
+                }}",
+                new () {
+                    ["input"] = !string.IsNullOrEmpty(username) ? new UserInput { username = username } : null
+                }
+            );
+            return response.user;
+        }
         #endregion
 
 
@@ -68,6 +70,10 @@ namespace Function.Services {
 
         public sealed class UserInput {
             public string username;
+        }
+
+        private sealed class UserResponse<T> where T : Profile {
+            public T? user;
         }
         #endregion
     }

@@ -8,17 +8,18 @@ namespace Function.Tests {
     using UnityEngine;
     using Newtonsoft.Json;
 
-    [Function.Embed("@yusuf-delete/math", apiUrl: @"https://api.fxn.dev")]
+    [Function.Embed(EdgeFunctionTest.Tag, apiUrl: @"https://api.fxn.dev")]
     internal sealed class EdgeFunctionTest : MonoBehaviour {
 
         private Function fxn;
+        private const string Tag = "@fxn/math";
 
         private void Awake () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
 
         private async void Start () {
             // Create edge prediction
             var prediction = await fxn.Predictions.Create(
-                tag: "@yusuf-delete/math",
+                tag: Tag,
                 inputs: new () { ["radius"] = 4 }
             );
             // Log
@@ -31,7 +32,7 @@ namespace Function.Tests {
                 return;
             // Predict
             var prediction = await fxn.Predictions.Create(
-                tag: "@yusuf-delete/math",
+                tag: Tag,
                 inputs: new () { ["radius"] = 4 }
             );
             // Log
@@ -39,7 +40,7 @@ namespace Function.Tests {
         }
 
         private async void OnDestroy () {
-            var deleted = await fxn.Predictions.Delete("@yusuf-delete/math");
+            var deleted = await fxn.Predictions.Delete(Tag);
             Debug.Log($"Deleted predictor: {deleted}");
         }
     }

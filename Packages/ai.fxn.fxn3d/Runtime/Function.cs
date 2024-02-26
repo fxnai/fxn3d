@@ -78,31 +78,40 @@ namespace Function {
         /// Create a Function client.
         /// </summary>
         /// <param name="accessKey">Function access key.</param>
-        /// <param name="clientId">Client identifier.</param>
         /// <param name="url">Function API URL.</param>
+        /// <param name="clientId">Client identifier.</param>
+        /// <param name="cachePath">Predictor cache path.</param>
         public Function (
             string? accessKey = null,
+            string? url = null,
             string? clientId = null,
-            string? url = null
-        ) : this(new DotNetClient(url ?? URL, accessKey: accessKey, clientId: clientId)) { }
+            string? cachePath = null
+        ) : this(new DotNetClient(url ?? URL, accessKey: accessKey), clientId, cachePath) { }
 
         /// <summary>
         /// Create a Function client.
         /// </summary>
         /// <param name="client">Function API client.</param>
-        public Function (IFunctionClient client) {
+        /// <param name="clientId">Client identifier.</param>
+        /// <param name="cachePath">Predictor cache path.</param>
+        public Function (
+            IFunctionClient client,
+            string? clientId = null,
+            string? cachePath = null
+        ) {
             this.client = client;
             this.Storage = new StorageService(client);
             this.Users = new UserService(client);
             this.Predictors = new PredictorService(client);
             this.EnvironmentVariables = new EnvironmentVariableService(client);
-            this.Predictions = new PredictionService(client, Storage);
+            this.Predictions = new PredictionService(client, Storage, clientId, cachePath);
         }
         #endregion
 
 
         #region --Operations--
         public readonly IFunctionClient client;
+        public const string Version = @"0.0.8";
         internal const string URL = @"https://api.fxn.ai";
         #endregion
     }

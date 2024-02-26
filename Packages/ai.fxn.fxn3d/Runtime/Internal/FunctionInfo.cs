@@ -5,7 +5,7 @@
 
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static Function.Internal.Function;
+using static Function.Function;
 
 // Metadata
 [assembly: AssemblyCompany(@"NatML Inc")]

@@ -76,23 +76,25 @@ namespace Function.Services {
         /// <param name="name">File name.</param>
         /// <param name="type">Upload type.</param>
         /// <param name="key">File key. This is useful for grouping related files.</param>
-        public Task<string> CreateUploadUrl (
+        public async Task<string> CreateUploadUrl (
             string name,
             UploadType type,
             string? key = null
-        ) => client.Query<string>(
-            @$"mutation ($input: CreateUploadUrlInput!) {{
-                createUploadUrl (input: $input)
-            }}",
-            @"createUploadUrl",
-            new () {
-                ["input"] = new CreateUploadUrlInput {
-                    name = name,
-                    type = type,
-                    key = key
+        ) {
+            var response = await client.Query<CreateUploadUrlResponse>(
+                @$"mutation ($input: CreateUploadUrlInput!) {{
+                    createUploadUrl (input: $input)
+                }}",
+                new () {
+                    ["input"] = new CreateUploadUrlInput {
+                        name = name,
+                        type = type,
+                        key = key
+                    }
                 }
-            }
-        );
+            );
+            return response.createUploadUrl;
+        }
         #endregion
 
 
@@ -109,6 +111,10 @@ namespace Function.Services {
             public string name;
             public UploadType type;
             public string? key;
+        }
+
+        private sealed class CreateUploadUrlResponse {
+            public string createUploadUrl;
         }
         #endregion
     }

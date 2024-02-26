@@ -15,8 +15,6 @@ namespace Function.API {
     using System.Text;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
-    using Graph;
-    using Internal;
     using Types;
 
     /// <summary>
@@ -26,21 +24,6 @@ namespace Function.API {
 
         #region --Client API--
         /// <summary>
-        /// Client identifier.
-        /// </summary>
-        public string? ClientId { get; private set; }
-        
-        /// <summary>
-        /// Device model identifier.
-        /// </summary>
-        public string? DeviceId { get; private set; }
-
-        /// <summary>
-        /// Cache path.
-        /// </summary>
-        public string CachePath { get; private set; }
-
-        /// <summary>
         /// Create the .NET Function API client.
         /// </summary>
         /// <param name="url">Function API URL.</param>
@@ -48,21 +31,51 @@ namespace Function.API {
         /// <param name="clientId">Client identifier.</param>
         /// <param name="deviceId">Device model identifier.</param>
         /// <param name="cachePath">Prediction resource cache path.</param>
-        public DotNetClient (
-            string url,
-            string? accessKey,
-            string? clientId = null,
-            string? deviceId = null,
-            string? cachePath = null
-        ) {
+        public DotNetClient (string url, string? accessKey) {
             this.url = url;
             this.accessKey = accessKey;
-            this.ClientId = clientId;
-            this.DeviceId = deviceId;
-            this.CachePath = cachePath ?? Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                ".fxn"
-            );
+        }
+
+        /// <summary>
+        /// Perform a request to a Function REST endpoint.
+        /// </summary>
+        /// <typeparam name="T">Deserialized response type.</typeparam>
+        /// <param name="method">HTTP request method.</param>
+        /// <param name="path">Endpoint path.</param>
+        /// <param name="payload">Request body.</param>
+        /// <param name="headers">Request body.</param>
+        /// <returns>Deserialized response.</returns>
+        public async Task<T> Request<T> ( // DEPLOY
+            string method,
+            string path,
+            object? payload = default,
+            Dictionary<string, string>? headers = default
+        ) {
+            // Create client and message
+            using var client = new HttpClient();
+            using var message = new HttpRequestMessage(new HttpMethod(method), $"{this.url}{path}");
+            // Add headers
+            if (!string.IsNullOrEmpty(accessKey))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
+            if (headers != null)
+                foreach (var header in headers)
+                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+            // Add payload
+            if (payload != null) {
+                var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+                var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
+                message.Content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
+            }
+            // Request
+            using var response = await client.SendAsync(message);
+            var responseStr = await response.Content.ReadAsStringAsync();
+            // Check error
+            if ((int)response.StatusCode >= 400) {
+                var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
+                throw new InvalidOperationException(errorPayload.errors[0].message);
+            }
+            // Return
+            return JsonConvert.DeserializeObject<T>(responseStr);
         }
 
         /// <summary>
@@ -71,26 +84,16 @@ namespace Function.API {
         /// <param name="query">Graph query.</param>
         /// <param name="key">Query result key.</param>
         /// <param name="input">Query inputs.</param>
-        public async Task<T?> Query<T> (string query, string key, Dictionary<string, object?>? variables = default) {
-            // Serialize payload
-            var payload = new GraphRequest { query = query, variables = variables };
-            var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
-            var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
-            // Create client
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add(@"fxn-client", ClientId);
-            client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
-            // Request
-            using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
-            using var response = await client.PostAsync($"{this.url}/graph", content);
-            // Parse
-            var responseStr = await response.Content.ReadAsStringAsync();
-            var responsePayload = JsonConvert.DeserializeObject<GraphResponse<T>>(responseStr);
-            // Check error
-            if (responsePayload.errors != null)
-                throw new InvalidOperationException(responsePayload.errors[0].message);
-            // Return
-            return responsePayload.data.TryGetValue(key, out var value) ? value : default;                
+        public async Task<T> Query<T> ( // DEPLOY
+            string query,
+            Dictionary<string, object?>? variables = default
+        ) {
+            var response = await Request<GraphResponse<T>>(
+                @"POST",
+                @"graph",
+                new GraphRequest { query = query, variables = variables }
+            );
+            return response.data;       
         }
 
         /// <summary>
@@ -100,13 +103,12 @@ namespace Function.API {
         /// <param name="path">Endpoint path.</param>
         /// <param name="payload">POST request body.</param>
         /// <returns>Stream of deserialized responses.</returns>
-        public async IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload) {
+        public async IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload) { // INCOMPLETE // ClientId
             // Serialize payload
             var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
             // Create client
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add(@"fxn-client", ClientId);
             client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
             // Request
             using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
@@ -115,7 +117,7 @@ namespace Function.API {
             using var response = await client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
             // Consume stream
             using var stream = await response.Content.ReadAsStreamAsync();
-            var buffer = new byte[65536]; // CHECK // Could be problemati with `dataUrlLimit`
+            var buffer = new byte[65536]; // CHECK // Could be problematic with `dataUrlLimit`
             while (true) {
                 var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
                 if (bytesRead == 0)

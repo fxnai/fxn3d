@@ -11,7 +11,7 @@ namespace Function.API {
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using Graph;
+    using Internal;
     using Types;
 
     /// <summary>
@@ -20,32 +20,35 @@ namespace Function.API {
     public interface IFunctionClient {
 
         /// <summary>
-        /// Client identifier.
+        /// Perform a request to a Function REST endpoint.
         /// </summary>
-        public string? ClientId { get; }
-
-        /// <summary>
-        /// Device model identifier.
-        /// </summary>
-        public string? DeviceId { get; }
-
-        /// <summary>
-        /// Cache path.
-        /// </summary>
-        public string CachePath { get; }
+        /// <typeparam name="T">Deserialized response type.</typeparam>
+        /// <param name="method">HTTP request method.</param>
+        /// <param name="path">Endpoint path.</param>
+        /// <param name="payload">Request body.</param>
+        /// <param name="headers">Request body.</param>
+        /// <returns>Deserialized response.</returns>
+        Task<T> Request<T> (
+            string method,
+            string path,
+            object? payload = default,
+            Dictionary<string, string>? headers = default
+        );
 
         /// <summary>
         /// Query the Function graph API.
         /// </summary>
         /// <typeparam name="T">Deserialized response type.</typeparam>
         /// <param name="query">Graph query.</param>
-        /// <param name="key">Query result key.</param>
         /// <param name="input">Query inputs.</param>
         /// <returns>Deserialized query result.</returns>
-        Task<T?> Query<T> (string query, string key, Dictionary<string, object?>? variables = default);
+        Task<T> Query<T> (
+            string query,
+            Dictionary<string, object?>? variables = default
+        );
 
         /// <summary>
-        /// Perform a streaming request to a Function REST endpoint.
+        /// Perform a streaming POST request to a Function REST endpoint.
         /// </summary>
         /// <typeparam name="T">Deserialized response type.</typeparam>
         /// <param name="path">Endpoint path.</param>
@@ -66,5 +69,33 @@ namespace Function.API {
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
         Task Upload (Stream stream, string url, string? mime = null);
+    }
+
+    /// <summary>
+    /// Function graph API request.
+    /// </summary>
+    [Preserve]
+    public sealed class GraphRequest {
+        public string query = string.Empty;
+        public Dictionary<string, object?>? variables;
+    }
+
+    /// <summary>
+    /// Function graph API response.
+    /// </summary>
+    [Preserve]
+    public sealed class GraphResponse<T> {
+        public T data;
+    }
+
+    /// <summary>
+    /// Function API error response.
+    /// </summary>
+    [Preserve]
+    public sealed class ErrorResponse {
+        public Error[] errors;
+        public sealed class Error {
+            public string message;
+        }
     }
 }

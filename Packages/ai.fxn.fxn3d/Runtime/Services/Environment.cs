@@ -30,7 +30,7 @@ namespace Function.Services {
         /// </summary>
         /// <param name="organization">Organization username.</param>
         public async Task<EnvironmentVariable[]?> List (string? organization = null) {
-            var user = await client.Query<UserWithEnvironmentVariables?>(
+            var response = await client.Query<UserWithEnvironmentVariablesResponse>(
                 @$"query ($input: UserInput) {{
                     user (input: $input) {{
                         ... on User {{
@@ -45,12 +45,11 @@ namespace Function.Services {
                         }}
                     }}
                 }}",
-                @"user",
                 new () {
                     ["input"] = !string.IsNullOrEmpty(organization) ? new UserService.UserInput { username = organization } : null,
                 }
             );
-            return user?.environmentVariables;
+            return response.user?.environmentVariables;
         }
 
         /// <summary>
@@ -59,39 +58,43 @@ namespace Function.Services {
         /// <param name="name">Environment variable name.</param>
         /// <param name="value">Environment variable value.</param>
         /// <param name="organization">Organization username.</param>
-        public Task<EnvironmentVariable> Create (
+        public async Task<EnvironmentVariable> Create (
             string name,
             string value,
             string? organization = null
-        ) => client.Query<EnvironmentVariable>(
-            @$"mutation ($input: CreateEnvironmentVariableInput!) {{
-                createEnvironmentVariable (input: $input) {{
-                    {Fields}
-                }}
-            }}",
-            @"createEnvironmentVariable",
-            new () {
-                ["input"] = new CreateEnvironmentVariableInput { name = name, value = value, organization = organization }
-            }
-        );
+        ) {
+            var response = await client.Query<CreateEnvironmentVariableResponse>(
+                @$"mutation ($input: CreateEnvironmentVariableInput!) {{
+                    createEnvironmentVariable (input: $input) {{
+                        {Fields}
+                    }}
+                }}",
+                new () {
+                    ["input"] = new CreateEnvironmentVariableInput { name = name, value = value, organization = organization }
+                }
+            );
+            return response.createEnvironmentVariable;
+        }
 
         /// <summary>
         /// Delete an environment variables.
         /// </summary>
         /// <param name="name">Environment variable name.</param>
         /// <param name="organization">Organization username.</param>
-        public Task<bool> Delete (
+        public async Task<bool> Delete (
             string name,
             string? organization = null
-        ) => client.Query<bool>(
-            @$"mutation ($input: DeleteEnvironmentVariableInput!) {{
-                deleteEnvironmentVariable (input: $input)
-            }}",
-            @"deleteEnvironmentVariable",
-            new () {
-                ["input"] = new DeleteEnvironmentVariableInput { name = name, organization = organization }
-            }
-        );
+        ) {
+            var response = await client.Query<DeleteEnvironmentVariableResponse>(
+                @$"mutation ($input: DeleteEnvironmentVariableInput!) {{
+                    deleteEnvironmentVariable (input: $input)
+                }}",
+                new () {
+                    ["input"] = new DeleteEnvironmentVariableInput { name = name, organization = organization }
+                }
+            );
+            return response.deleteEnvironmentVariable;
+        }
         #endregion
 
 
@@ -118,8 +121,20 @@ namespace Function.Services {
             public string? organization;
         }
 
-        private sealed class UserWithEnvironmentVariables {
-            public EnvironmentVariable[] environmentVariables;
+        private sealed class UserWithEnvironmentVariablesResponse {
+            public UserWithEnvironmentVariables? user;
+
+            public sealed class UserWithEnvironmentVariables {
+                public EnvironmentVariable[] environmentVariables;
+            }
+        }
+
+        private sealed class CreateEnvironmentVariableResponse {
+            public EnvironmentVariable createEnvironmentVariable;
+        }
+
+        private sealed class DeleteEnvironmentVariableResponse {
+            public bool deleteEnvironmentVariable;
         }
         #endregion
     }

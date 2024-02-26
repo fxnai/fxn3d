@@ -75,7 +75,7 @@ namespace Function.Editor {
             PlayerSettings.SetPreloadedAssets(assets.ToArray());
         }
 
-        private static async void EmbedPredictors (BuildReport report) {
+        private static void EmbedPredictors (BuildReport report) { // INCOMPLETE
             // Get embeds
             var embeds = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly
@@ -86,27 +86,47 @@ namespace Function.Editor {
                 .ToArray();
             var defaultAccessKey = FunctionProjectSettings.instance.AccessKey;
             // Embed
-            var clientId = ToClientId(report.summary.platform);
+            var platforms = GetPlatforms(report.summary.platform);
             foreach (var embed in embeds) {
+                // Create client
                 var url = embed.apiUrl ?? FunctionClient.URL;
                 var accessKey = embed.accessKey ?? defaultAccessKey;
-                var client = new DotNetClient(url, accessKey, clientId);
-                var prediction = CreatePrediction(embed, client).Result;
-                foreach (var resource in prediction.resources) {
-                    if (!resource.type.StartsWith(@"dso"))
+                var client = new DotNetClient(url, accessKey);
+                // Embed
+                foreach (var platform in platforms) {
+                    // Create prediction
+                    var prediction = Task.Run(() => client.Request<Prediction>(
+                        @"POST",
+                        $"/predict/{embed.tag}",
+                        headers: new () {
+                            [@"fxn-client"] = platform,
+                        }
+                    )).Result;
+                    // Check type
+                    if (prediction.type != PredictorType.Edge)
                         continue;
-                    var resourceData = Task.Run(async () => (await client.Download(resource.url)).ToArray()).Result;
-                    var resourcePath = Path.Combine(CachePath, $"{resource.id}.so");
-                    File.WriteAllBytes(resourcePath, resourceData);
-                    AssetDatabase.Refresh();
-                    PluginImporter importer = PluginImporter.GetAtPath(resourcePath) as PluginImporter;
-                    if (importer == null)
-                        throw new InvalidOperationException($"Function failed to embed {embed.tag} resource {resource.id} because PluginImporter could not be retrieved");
-                    importer.SetCompatibleWithAnyPlatform(false);
-                    importer.SetCompatibleWithPlatform(report.summary.platform, true);
-                    importer.SetPlatformData(report.summary.platform, @"CPU", ToAndroidArch(resource.id));
-                    importer.SetPlatformData(report.summary.platform, @"AndroidSharedLibraryType", @"Executable");
-                    importer.SaveAndReimport();
+                    // Embed resources
+                    foreach (var resource in prediction.resources) {
+                        if (!resource.type.StartsWith(@"dso"))
+                            continue;
+                        // Write resource
+                        var resourceData = Task.Run(async () => (await client.Download(resource.url)).ToArray()).Result;
+                        var resourceName = PredictionService.GetResourceName(resource.url);
+                        var resourcePath = Path.Combine(CachePath, $"{resourceName}.so");
+                        File.WriteAllBytes(resourcePath, resourceData);
+                        // Import
+                        AssetDatabase.Refresh();
+                        // Get plugin importer
+                        PluginImporter importer = PluginImporter.GetAtPath(resourcePath) as PluginImporter;
+                        if (importer == null)
+                            throw new InvalidOperationException($"Function failed to embed {embed.tag} resource {resourceName} because PluginImporter could not be retrieved");
+                        //  Configure importer
+                        importer.SetCompatibleWithAnyPlatform(false);
+                        importer.SetCompatibleWithPlatform(report.summary.platform, true);
+                        importer.SetPlatformData(report.summary.platform, @"CPU", ToAndroidArch(platform));
+                        importer.SetPlatformData(report.summary.platform, @"AndroidSharedLibraryType", @"Executable");
+                        importer.SaveAndReimport();
+                    }
                 }
             }
         }
@@ -120,48 +140,21 @@ namespace Function.Editor {
             AssetDatabase.DeleteAsset(CachePath);
         }
 
-        private static Task<Prediction> CreatePrediction (EmbedAttribute embed, DotNetClient client) => Task.Run(async () => {
-            var prediction = await client.Query<Prediction?>(
-                @$"mutation ($input: CreatePredictionInput!) {{
-                    createPrediction (input: $input) {{
-                        id
-                        tag
-                        type
-                        created
-                        resources {{
-                            id
-                            type
-                            url
-                        }}
-                    }}
-                }}",
-                @"createPrediction",
-                new () {
-                    ["input"] = new PredictionService.CreatePredictionInput {
-                        tag = embed.tag,
-                        client = client.ClientId,
-                        clientVersion = Marshal.PtrToStringUTF8(Function.GetVersion()),
-                    }
-                }
-            );
-            return prediction;
-        });
-
-        private static string ToClientId (BuildTarget target) => target switch {
-            BuildTarget.Android             => @"android",
-            BuildTarget.iOS                 => @"ios",
-            BuildTarget.StandaloneLinux64   => @"linux",
-            BuildTarget.StandaloneOSX       => @"macos",
-            BuildTarget.StandaloneWindows64 => @"windows",
-            BuildTarget.WebGL               => @"browser",
-            _                               => null,
+        private static string[] GetPlatforms (BuildTarget target) => target switch {
+            BuildTarget.Android             => new [] { @"android:armeabi-v7a", @"android:arm64-v8a", @"android:x86", @"android:x86_64" }, 
+            BuildTarget.iOS                 => new [] { @"ios:arm64" },
+            BuildTarget.StandaloneLinux64   => new [] { @"linux:x86_64" },
+            BuildTarget.StandaloneOSX       => new [] { @"macos:arm64", @"macos:x86_64" },
+            BuildTarget.StandaloneWindows64 => new [] { @"windows:x86_64" },
+            BuildTarget.WebGL               => new [] { @"browser" },
+            _                               => new string[0],
         };
 
         private static string ToAndroidArch (string resourceId) => resourceId switch {
             var x when x.Contains(@"armeabi-v7a")   => @"ARMV7",
             var x when x.Contains(@"arm64-v8a")     => @"ARM64",
-            var x when x.Contains(@"x86")           => "X86",
-            var x when x.Contains(@"x86_64")        => "X86_64",
+            var x when x.Contains(@"x86")           => @"X86",
+            var x when x.Contains(@"x86_64")        => @"X86_64",
             _                                       => null,
         };
     }

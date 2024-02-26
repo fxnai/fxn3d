@@ -23,17 +23,19 @@ namespace Function.Services {
         /// Retrieve a predictor.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
-        public Task<Predictor?> Retrieve (string tag) => client.Query<Predictor?>(
-            @$"query ($input: PredictorInput!) {{
-                predictor (input: $input) {{
-                    {Fields}
-                }}
-            }}",
-            @"predictor",
-            new () {
-                ["input"] = new PredictorInput { tag = tag }
-            }
-        );
+        public async Task<Predictor?> Retrieve (string tag) {
+            var response = await client.Query<PredictorResponse>(
+                @$"query ($input: PredictorInput!) {{
+                    predictor (input: $input) {{
+                        {Fields}
+                    }}
+                }}",
+                new () {
+                    ["input"] = new PredictorInput { tag = tag }
+                }
+            );
+            return response.predictor;
+        }
 
         /// <summary>
         /// List the current user's predictors.
@@ -48,7 +50,7 @@ namespace Function.Services {
             int? offset = null,
             int? count = null
         ) {
-            var user = await client.Query<UserWithPredictors?>(
+            var response = await client.Query<UserWithPredictorsResponse>(
                 @$"query ($user: UserInput, $predictors: UserPredictorsInput) {{
                     user (input: $user) {{
                         predictors (input: $predictors) {{
@@ -56,13 +58,12 @@ namespace Function.Services {
                         }}
                     }}
                 }}",
-                @"user",
                 new () {
                     ["user"] = !string.IsNullOrEmpty(owner) ? new UserService.UserInput { username = owner } : null,
                     ["predictors"] = new UserPredictorsInput { status = status, offset = offset, count = count }
                 }
             );
-            return user?.predictors;
+            return response.user?.predictors;
         }
 
         /// <summary>
@@ -71,21 +72,23 @@ namespace Function.Services {
         /// <param name="query">Search query.</param>
         /// <param name="offset">Pagination offset.</param>
         /// <param name="count">Pagination count.</param>
-        public Task<Predictor[]> Search (
+        public async Task<Predictor[]> Search (
             string? query = null,
             int? offset = null,
             int? count = null
-        ) => client.Query<Predictor[]>(
-            @$"query ($input: PredictorsInput) {{
-                predictors (input: $input) {{
-                    {Fields}
-                }}
-            }}",
-            @"predictors",
-            new () {
-                ["input"] = new PredictorsInput { query = query, offset = offset, count = count }
-            }
-        );
+        ) {
+            var response = await client.Query<PredictorListResponse>(
+                @$"query ($input: PredictorsInput) {{
+                    predictors (input: $input) {{
+                        {Fields}
+                    }}
+                }}",
+                new () {
+                    ["input"] = new PredictorsInput { query = query, offset = offset, count = count }
+                }
+            );
+            return response.predictors;
+        }
 
         /// <summary>
         /// Create a predictor.
@@ -101,7 +104,7 @@ namespace Function.Services {
         /// <param name="license">Predictor license URL.</param>
         /// <param name="overwrite">Overwrite any existing predictor with the same tag. Existing predictor will be deleted.</param>
         /// <returns>Created predictor.</returns>
-        public Task<Predictor> Create (
+        public async Task<Predictor> Create (
             string tag,
             string notebook,
             PredictorType? type = null,
@@ -112,60 +115,66 @@ namespace Function.Services {
             Dictionary<string, string>? environment = null,
             string? license = null,
             bool? overwrite = null
-        ) => client.Query<Predictor>(
-            @$"mutation ($input: CreatePredictorInput!) {{
-                createPredictor (input: $input) {{
-                    {Fields}
-                }}
-            }}",
-            @"createPredictor",
-            new () {
-                ["input"] = new CreatePredictorInput {
-                    tag = tag,
-                    notebook = notebook,
-                    type = type,
-                    access = access,
-                    description = description,
-                    media = media,
-                    acceleration = acceleration,
-                    environment = environment?.Select(pair => new EnvironmentVariableInput { name = pair.Key, value = pair.Value }).ToArray(),
-                    license = license,
-                    overwrite = overwrite
+        ) {
+            var response = await client.Query<CreatePredictorResponse>(
+                @$"mutation ($input: CreatePredictorInput!) {{
+                    createPredictor (input: $input) {{
+                        {Fields}
+                    }}
+                }}",
+                new () {
+                    ["input"] = new CreatePredictorInput {
+                        tag = tag,
+                        notebook = notebook,
+                        type = type,
+                        access = access,
+                        description = description,
+                        media = media,
+                        acceleration = acceleration,
+                        environment = environment?.Select(pair => new EnvironmentVariableInput { name = pair.Key, value = pair.Value }).ToArray(),
+                        license = license,
+                        overwrite = overwrite
+                    }
                 }
-            }
-        );
+            );
+            return response.createPredictor;
+        }
 
         /// <summary>
         /// Delete a predictor.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
         /// <returns>Whether the predictor was successfully deleted.</returns>
-        public Task<bool> Delete (string tag) => client.Query<bool>(
-            @$"mutation ($input: DeletePredictorInput!) {{
-                deletePredictor (input: $input)
-            }}",
-            @"deletePredictor",
-            new () {
-                ["input"] = new DeletePredictorInput { tag = tag }
-            }
-        );
+        public async Task<bool> Delete (string tag) {
+            var response = await client.Query<DeletePredictorResponse>(
+                @$"mutation ($input: DeletePredictorInput!) {{
+                    deletePredictor (input: $input)
+                }}",
+                new () {
+                    ["input"] = new DeletePredictorInput { tag = tag }
+                }
+            );
+            return response.deletePredictor;
+        }
 
         /// <summary>
         /// Archive a predictor.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
         /// <returns>Archived predictor.</returns>
-        public Task<Predictor> Archive (string tag) => client.Query<Predictor>(
-            @$"mutation ($input: ArchivePredictorInput!) {{
-                archivePredictor (input: $input) {{
-                    {Fields}
-                }}
-            }}",
-            @"archivePredictor",
-            new () {
-                ["input"] = new ArchivePredictorInput { tag = tag }
-            }
-        );
+        public async Task<Predictor> Archive (string tag) {
+            var response = await client.Query<ArchivePredictorResponse>(
+                @$"mutation ($input: ArchivePredictorInput!) {{
+                    archivePredictor (input: $input) {{
+                        {Fields}
+                    }}
+                }}",
+                new () {
+                    ["input"] = new ArchivePredictorInput { tag = tag }
+                }
+            );
+            return response.archivePredictor;
+        }
         #endregion
 
 
@@ -261,8 +270,33 @@ namespace Function.Services {
             public string value;
         }
 
-        private sealed class UserWithPredictors {
+        private sealed class PredictorResponse {
+            public Predictor? predictor;
+        }
+
+        private sealed class PredictorListResponse {
             public Predictor[] predictors;
+        }
+
+        private sealed class UserWithPredictorsResponse {
+
+            public UserWithPredictors? user;
+
+            public sealed class UserWithPredictors {
+                public Predictor[] predictors;
+            }
+        }
+
+        private sealed class CreatePredictorResponse {
+            public Predictor createPredictor;
+        }
+
+        private sealed class DeletePredictorResponse {
+            public bool deletePredictor;
+        }
+
+        private sealed class ArchivePredictorResponse {
+            public Predictor archivePredictor;
         }
         #endregion
     }
