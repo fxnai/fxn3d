@@ -34,7 +34,7 @@ namespace Function.Types {
         public PredictorType type;
 
         /// <summary>
-        /// Date created
+        /// Date created.
         /// </summary>
         [JsonConverter(typeof(IsoDateTimeConverter))]
         public DateTime created;

@@ -10,12 +10,12 @@ namespace Function.API {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using UnityEngine;
     using UnityEngine.Networking;
     using Newtonsoft.Json;
-    using Graph;
     using Internal;
     using Services;
     using Types;
@@ -24,44 +24,67 @@ namespace Function.API {
     /// Function API client for Unity Engine.
     /// This uses Unity APIs for performing web requests.
     /// </summary>
-    public sealed class UnityClient : IFunctionClient {
+    internal class UnityClient : IFunctionClient {
 
         #region --Client API--
         /// <summary>
-        /// Client identifier.
-        /// </summary>
-        public string? ClientId { get; private set; }
-
-        /// <summary>
-        /// Device identifier.
-        /// </summary>
-        public string? DeviceId { get; private set; }
-
-        /// <summary>
-        /// Cache path.
-        /// </summary>
-        public string CachePath { get; private set; }
-
-        /// <summary>
-        /// Create the Unity Function API client.
+        /// Create the client.
         /// </summary>
         /// <param name="url">Function API URL.</param>
         /// <param name="accessKey">Function access key.</param>
-        /// <param name="clientId">Client identifier.</param>
-        /// <param name="deviceId">Device model identifier.</param>
-        /// <param name="cachePath">Prediction resource cache path.</param>
-        public UnityClient (
-            string url,
-            string? accessKey,
-            string? clientId = null,
-            string? deviceId = null,
-            string? cachePath = null
+        /// <param name="cache">Prediction cache.</param>
+        public UnityClient (string url, string? accessKey) {
+            this.url = url.TrimEnd('/');
+            this.accessKey = accessKey;    
+        }
+
+        /// <summary>
+        /// Perform a request to a Function REST endpoint.
+        /// </summary>
+        /// <typeparam name="T">Deserialized response type.</typeparam>
+        /// <param name="method">HTTP request method.</param>
+        /// <param name="path">Endpoint path.</param>
+        /// <param name="payload">Request body.</param>
+        /// <param name="headers">Request headers.</param>
+        /// <returns>Deserialized response.</returns>
+        public virtual async Task<T> Request<T> (
+            string method,
+            string path,
+            object? payload = default,
+            Dictionary<string, string>? headers = default
         ) {
-            this.url = url;
-            this.accessKey = accessKey;
-            this.ClientId = clientId;
-            this.DeviceId = deviceId;
-            this.CachePath = cachePath ?? Path.Combine(Application.persistentDataPath, "fxn");
+            path = path.TrimStart('/');
+            // Create client
+            using var client = new UnityWebRequest($"{this.url}/{path}", method) {
+                downloadHandler = new DownloadHandlerBuffer(),
+                disposeDownloadHandlerOnDispose = true,
+                disposeUploadHandlerOnDispose = true,
+            };
+            // Add headers
+            if (!string.IsNullOrEmpty(accessKey))
+                client.SetRequestHeader(@"Authorization", $"Bearer {accessKey}");
+            if (headers != null)
+                foreach (var header in headers)
+                    client.SetRequestHeader(header.Key, header.Value);
+            // Add payload
+            if (payload != null) {
+                var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+                var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
+                client.SetRequestHeader(@"Content-Type",  @"application/json");
+                client.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payloadStr));
+            }
+            // Request
+            client.SendWebRequest();
+            while (!client.isDone)
+                await Task.Yield();
+            // Check error
+            var responseStr = client.downloadHandler.text;
+            if (client.responseCode >= 400) {
+                var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
+                throw new InvalidOperationException(errorPayload.errors[0].message);
+            }
+            // Return
+            return JsonConvert.DeserializeObject<T>(responseStr);
         }
 
         /// <summary>
@@ -70,34 +93,16 @@ namespace Function.API {
         /// <param name="query">Graph query.</param>
         /// <param name="key">Query result key.</param>
         /// <param name="input">Query inputs.</param>
-        public async Task<T?> Query<T> (string query, string key, Dictionary<string, object?>? variables = default) {
-            // Serialize payload
-            var payload = new GraphRequest { query = query, variables = variables };
-            var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
-            var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
-            // Create client
-            using var client = new UnityWebRequest($"{this.url}/graph", UnityWebRequest.kHttpVerbPOST) {
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payloadStr)),
-                downloadHandler = new DownloadHandlerBuffer(),
-                disposeDownloadHandlerOnDispose = true,
-                disposeUploadHandlerOnDispose = true,
-            };
-            client.SetRequestHeader(@"Content-Type",  @"application/json");
-            client.SetRequestHeader(@"fxn-client", ClientId);
-            if (!string.IsNullOrEmpty(accessKey))
-                client.SetRequestHeader("Authorization", $"Bearer {accessKey}");
-            // Request
-            client.SendWebRequest();
-            while (!client.isDone)
-                await Task.Yield();
-            // Parse
-            var responseStr = client.downloadHandler.text;
-            var response = JsonConvert.DeserializeObject<GraphResponse<T>>(responseStr);
-            // Check error
-            if (response.errors != null)
-                throw new InvalidOperationException(response.errors[0].message);
-            // Return
-            return response.data.TryGetValue(key, out var value) ? value : default;                
+        public virtual async Task<T> Query<T> (
+            string query,
+            Dictionary<string, object?>? variables = default
+        ) {
+            var response = await Request<GraphResponse<T>>(
+                @"POST",
+                @"/graph",
+                new GraphRequest { query = query, variables = variables }
+            );
+            return response.data;      
         }
 
         /// <summary>
@@ -107,20 +112,20 @@ namespace Function.API {
         /// <param name="path">Endpoint path.</param>
         /// <param name="payload">POST request body.</param>
         /// <returns>Stream of deserialized responses.</returns>
-        public async IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload) {
+        public virtual async IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload) {
+            path = path.TrimStart('/');
             // Serialize payload
             var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
             // Create client
             var downloadHandler = new DownloadHandlerAsyncIterable();
-            using var client = new UnityWebRequest($"{this.url}{path}", UnityWebRequest.kHttpVerbPOST) {
+            using var client = new UnityWebRequest($"{this.url}/{path}", UnityWebRequest.kHttpVerbPOST) {
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payloadStr)),
                 downloadHandler = downloadHandler,
                 disposeDownloadHandlerOnDispose = true,
                 disposeUploadHandlerOnDispose = true,
             };
             client.SetRequestHeader(@"Content-Type",  @"application/json");
-            client.SetRequestHeader(@"fxn-client", ClientId);
             if (!string.IsNullOrEmpty(accessKey))
                 client.SetRequestHeader(@"Authorization",  $"Bearer {accessKey}");
             // Request
@@ -140,7 +145,7 @@ namespace Function.API {
         /// Download a file.
         /// </summary>
         /// <param name="url">URL</param>
-        public async Task<Stream> Download (string url) {
+        public virtual async Task<Stream> Download (string url) {
             using var request = UnityWebRequest.Get(url);
             request.SendWebRequest();
             while (!request.isDone)
@@ -158,7 +163,7 @@ namespace Function.API {
         /// <param name="stream">Data stream.</param>
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
-        public async Task Upload (Stream stream, string url, string? mime = null) {
+        public virtual async Task Upload (Stream stream, string url, string? mime = null) {
             // Create client
             using var client = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT) {
                 uploadHandler = new UploadHandlerRaw(stream.ToArray()),
@@ -179,8 +184,8 @@ namespace Function.API {
 
 
         #region --Operations--
-        private readonly string url;
-        private readonly string? accessKey;
+        protected readonly string url;
+        protected readonly string? accessKey;
         #endregion
     }
 }

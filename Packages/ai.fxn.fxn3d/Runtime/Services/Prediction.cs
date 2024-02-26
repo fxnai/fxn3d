@@ -59,7 +59,7 @@ namespace Function.Services {
             // Query
             var prediction = await client.Request<Prediction>(
                 @"POST",
-                $"/predict/{tag}?dataUrlLimit={dataUrlLimit}",
+                $"/predict/{tag}?dataUrlLimit={dataUrlLimit}&rawOutputs=true",
                 values,
                 new () {
                     [@"fxn-client"] = clientId,
@@ -432,7 +432,7 @@ namespace Function.Services {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue<T> (T* data, int[] shape = null) where T : unmanaged {
+        private static unsafe IntPtr ToValue<T> (T* data, int[]? shape = null) where T : unmanaged {
             Function.CreateArrayValue(
                 data,
                 shape,
@@ -445,7 +445,7 @@ namespace Function.Services {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue<T> (T[] array, int[] shape = null) where T : unmanaged {
+        private static unsafe IntPtr ToValue<T> (T[] array, int[]? shape = null) where T : unmanaged {
             fixed (T* data = array)
                 return ToValue(data, shape ?? new [] { array.Length });
         }

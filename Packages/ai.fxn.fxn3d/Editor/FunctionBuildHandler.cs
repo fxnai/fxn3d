@@ -22,8 +22,9 @@ namespace Function.Editor {
     using Internal;
     using Services;
     using Types;
+    using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
-    internal sealed class FunctionBuildHandler : IPreprocessBuildWithReport, IPostprocessBuildWithReport {
+    internal sealed class FunctionBuildHandler : IPreprocessBuildWithReport {
 
         private const string CachePath = @"Assets/__FXN_DELETE_THIS__";
         private static readonly string[] EM_ARGS = new [] {
@@ -39,19 +40,24 @@ namespace Function.Editor {
             // WebGL
             if (report.summary.platform == BuildTarget.WebGL)
                 SetWebGLArgs();
-            // Embed settings
-            EmbedSettings();
+            // Clear
+            ClearSettings();
+            Directory.CreateDirectory(CachePath);
+            // Create settings
+            var settings = FunctionProjectSettings.CreateSettings();
             // Embed predictors
-            EmbedPredictors(report);
+            EmbedPredictors(report, settings);
+            // Embed settings
+            EmbedSettings(settings);
         }
 
-        void IPostprocessBuildWithReport.OnPostprocessBuild (BuildReport report) => ClearSettings();
-
         private void FailureListener () {
+            // Check that we're done building
             if (BuildPipeline.isBuildingPlayer)
                 return;
+            // Clear
             EditorApplication.update -= FailureListener;
-            (this as IPostprocessBuildWithReport).OnPostprocessBuild(null);
+            ClearSettings();
         }
 
         private static void SetWebGLArgs () {
@@ -62,11 +68,8 @@ namespace Function.Editor {
             }
         }
 
-        private static void EmbedSettings () {
-            // Clear
-            ClearSettings();
+        private static void EmbedSettings (FunctionSettings settings) {
             // Create asset
-            var settings = FunctionProjectSettings.CreateSettings();
             Directory.CreateDirectory(CachePath);
             AssetDatabase.CreateAsset(settings, $"{CachePath}/Function.asset");
             // Add to build
@@ -75,7 +78,7 @@ namespace Function.Editor {
             PlayerSettings.SetPreloadedAssets(assets.ToArray());
         }
 
-        private static void EmbedPredictors (BuildReport report) { // INCOMPLETE
+        private static void EmbedPredictors (BuildReport report, FunctionSettings settings) { // INCOMPLETE
             // Get embeds
             var embeds = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly
@@ -84,23 +87,22 @@ namespace Function.Editor {
                 )
                 .Cast<EmbedAttribute>()
                 .ToArray();
-            var defaultAccessKey = FunctionProjectSettings.instance.AccessKey;
             // Embed
             var platforms = GetPlatforms(report.summary.platform);
+            var cache = new List<CachedPrediction>();
             foreach (var embed in embeds) {
                 // Create client
                 var url = embed.apiUrl ?? FunctionClient.URL;
-                var accessKey = embed.accessKey ?? defaultAccessKey;
+                var accessKey = embed.accessKey ?? settings.accessKey;
                 var client = new DotNetClient(url, accessKey);
                 // Embed
+                var predictions = new Dictionary<string, Prediction>();
                 foreach (var platform in platforms) {
                     // Create prediction
                     var prediction = Task.Run(() => client.Request<Prediction>(
                         @"POST",
                         $"/predict/{embed.tag}",
-                        headers: new () {
-                            [@"fxn-client"] = platform,
-                        }
+                        headers: new () { [@"fxn-client"] = platform }
                     )).Result;
                     // Check type
                     if (prediction.type != PredictorType.Edge)
@@ -127,8 +129,12 @@ namespace Function.Editor {
                         importer.SetPlatformData(report.summary.platform, @"AndroidSharedLibraryType", @"Executable");
                         importer.SaveAndReimport();
                     }
+                    // Embed prediction
+                    cache.Add(new CachedPrediction { platform = platform, prediction = prediction });
                 }
             }
+            // Add to settings
+            settings.cache = cache;
         }
 
         private static void ClearSettings () {

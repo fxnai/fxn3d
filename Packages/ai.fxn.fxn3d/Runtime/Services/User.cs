@@ -20,13 +20,13 @@ namespace Function.Services {
         /// <summary>
         /// Retrieve the current user.
         /// </summary>
-        public Task<User?> Retrieve () => Retrieve<User?>();
+        public Task<User?> Retrieve () => Retrieve<User>();
 
         /// <summary>
         /// Retrieve a user.
         /// </summary>
         /// <param name="username">Username.</param>
-        public Task<Profile?> Retrieve (string username) => Retrieve<Profile?>(username);
+        public Task<Profile?> Retrieve (string username) => Retrieve<Profile>(username);
         #endregion
 
 

@@ -30,10 +30,11 @@ namespace Function {
         /// <param name="accessKey">Function access key. This defaults to your access key in Project Settings.</param>
         /// <returns>Function client.</returns>
         public static Function Create (string? accessKey = null, string? url = null) {
-            var key = !string.IsNullOrEmpty(accessKey) ? accessKey : FunctionSettings.Instance?.accessKey;
+            var settings = FunctionSettings.Instance;
+            var key = !string.IsNullOrEmpty(accessKey) ? accessKey : settings?.accessKey;
             var apiUrl = url ?? Function.URL;
             var cachePath = Path.Combine(Application.persistentDataPath, "fxn", "cache");
-            var client = new UnityClient(apiUrl, accessKey: key);
+            var client = new PredictionCacheClient(apiUrl, accessKey: key, cache: settings?.cache);
             var fxn = new Function(client, clientId: ClientId, cachePath: cachePath);
             return fxn;
         }
@@ -182,7 +183,7 @@ namespace Function {
         internal static string ClientId {
             get {
                 if (Application.platform == RuntimePlatform.Android)
-                    switch (RuntimeInformation.OSArchitecture) {
+                    switch (RuntimeInformation.ProcessArchitecture) {
                         case Architecture.Arm:          return "android:armeabi-v7a";
                         case Architecture.Arm64:        return "android:arm64-v8a";
                         case Architecture.X86:          return "android:x86";
@@ -192,7 +193,7 @@ namespace Function {
                 if (Application.platform == RuntimePlatform.IPhonePlayer)
                     return @"ios";
                 if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
-                    switch (RuntimeInformation.OSArchitecture) {
+                    switch (RuntimeInformation.ProcessArchitecture) {
                         case Architecture.Arm64:    return "macos:arm64";
                         case Architecture.X64:      return "macos:x86_64";
                         default:                    return null;

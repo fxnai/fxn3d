@@ -32,7 +32,7 @@ namespace Function.API {
         /// <param name="deviceId">Device model identifier.</param>
         /// <param name="cachePath">Prediction resource cache path.</param>
         public DotNetClient (string url, string? accessKey) {
-            this.url = url;
+            this.url = url.TrimEnd('/');
             this.accessKey = accessKey;
         }
 
@@ -45,15 +45,16 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request body.</param>
         /// <returns>Deserialized response.</returns>
-        public async Task<T> Request<T> ( // DEPLOY
+        public async Task<T> Request<T> (
             string method,
             string path,
             object? payload = default,
             Dictionary<string, string>? headers = default
         ) {
+            path = path.TrimStart('/');
             // Create client and message
             using var client = new HttpClient();
-            using var message = new HttpRequestMessage(new HttpMethod(method), $"{this.url}{path}");
+            using var message = new HttpRequestMessage(new HttpMethod(method), $"{this.url}/{path}");
             // Add headers
             if (!string.IsNullOrEmpty(accessKey))
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
@@ -90,10 +91,10 @@ namespace Function.API {
         ) {
             var response = await Request<GraphResponse<T>>(
                 @"POST",
-                @"graph",
+                @"/graph",
                 new GraphRequest { query = query, variables = variables }
             );
-            return response.data;       
+            return response.data;
         }
 
         /// <summary>
@@ -104,6 +105,7 @@ namespace Function.API {
         /// <param name="payload">POST request body.</param>
         /// <returns>Stream of deserialized responses.</returns>
         public async IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload) { // INCOMPLETE // ClientId
+            path = path.TrimStart('/');
             // Serialize payload
             var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
             var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
@@ -112,7 +114,7 @@ namespace Function.API {
             client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
             // Request
             using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
-            using var message = new HttpRequestMessage(HttpMethod.Post, $"{this.url}{path}");
+            using var message = new HttpRequestMessage(HttpMethod.Post, $"{this.url}/{path}");
             message.Content = content;
             using var response = await client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
             // Consume stream
