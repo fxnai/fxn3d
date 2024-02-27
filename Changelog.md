@@ -1,5 +1,5 @@
 ## 0.0.8
-*INCOMPLETE*
++ Fixed linker errors when compiling iOS projects in Xcode.
 
 ## 0.0.7
 + Fixed compiler error on some platforms related to Function version.
