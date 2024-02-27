@@ -42,7 +42,7 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request body.</param>
         /// <returns>Deserialized response.</returns>
-        public override async Task<T> Request<T> ( // INCOMPLETE // Move predictor caching logic into separate class.
+        public override async Task<T> Request<T> (
             string method,
             string path,
             object? payload = default,

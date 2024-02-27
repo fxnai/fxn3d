@@ -104,7 +104,10 @@ namespace Function.API {
         /// <param name="path">Endpoint path.</param>
         /// <param name="payload">POST request body.</param>
         /// <returns>Stream of deserialized responses.</returns>
-        public async IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload) { // INCOMPLETE // ClientId
+        public async IAsyncEnumerable<T> Stream<T> ( // INCOMPLETE // ClientId
+            string path,
+            Dictionary<string, object> payload
+        ) {
             path = path.TrimStart('/');
             // Serialize payload
             var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };

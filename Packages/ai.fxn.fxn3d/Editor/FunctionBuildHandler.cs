@@ -146,13 +146,13 @@ namespace Function.Editor {
             AssetDatabase.DeleteAsset(CachePath);
         }
 
-        private static string[] GetPlatforms (BuildTarget target) => target switch {
+        private static string[] GetPlatforms (BuildTarget target) => target switch { // INCOMPLETE
             BuildTarget.Android             => new [] { @"android:armeabi-v7a", @"android:arm64-v8a", @"android:x86", @"android:x86_64" }, 
-            BuildTarget.iOS                 => new [] { @"ios:arm64" },
-            BuildTarget.StandaloneLinux64   => new [] { @"linux:x86_64" },
-            BuildTarget.StandaloneOSX       => new [] { @"macos:arm64", @"macos:x86_64" },
-            BuildTarget.StandaloneWindows64 => new [] { @"windows:x86_64" },
-            BuildTarget.WebGL               => new [] { @"browser" },
+            //BuildTarget.iOS                 => new [] { @"ios:arm64" },
+            //BuildTarget.StandaloneLinux64   => new [] { @"linux:x86_64" },
+            //BuildTarget.StandaloneOSX       => new [] { @"macos:arm64", @"macos:x86_64" },
+            //BuildTarget.StandaloneWindows64 => new [] { @"windows:x86_64" },
+            //BuildTarget.WebGL               => new [] { @"browser" },
             _                               => new string[0],
         };
 
