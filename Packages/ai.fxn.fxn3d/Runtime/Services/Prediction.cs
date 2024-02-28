@@ -111,14 +111,14 @@ namespace Function.Services {
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
         /// <returns>Whether the edge predictor was successfully deleted from memory.</returns>
-        public async Task<bool> Delete (string tag) {
+        public Task<bool> Delete (string tag) {
             // Check
             if (!cache.TryGetValue(tag, out var predictor))
-                return false;
+                return Task.FromResult(false);
             // Release
             predictor.ReleasePredictor().Throw();
             // Return
-            return true;
+            return Task.FromResult(true);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Function.Services {
         /// </summary>
         /// <param name="value">Function value.</param>
         /// <returns>Plain object or `Value` if the value cannot be converted to a plain object.</returns>
-        public async Task<object> ToObject (Value value) {
+        public async Task<object?> ToObject (Value value) {
             // Null
             if (value.type == Dtype.Null)
                 return null;
@@ -214,9 +214,10 @@ namespace Function.Services {
         #region --Operations--
         private readonly IFunctionClient client;
         private readonly StorageService storage;
-        private readonly string clientId;
+        private readonly string? clientId;
         private readonly string cachePath;
         private readonly Dictionary<string, IntPtr> cache;
+        private static readonly string[] InvalidResources = new [] { @"fxn", @"dso", @"js" };
 
         internal PredictionService (
             IFunctionClient client,
@@ -243,7 +244,7 @@ namespace Function.Services {
             configuration.SetConfigurationAcceleration(acceleration).Throw();
             configuration.SetConfigurationDevice(device).Throw();
             await Task.WhenAll(prediction.resources.Select(async resource => {
-                if (resource.type == @"fxn")
+                if (InvalidResources.Contains(resource.type))
                     return;
                 var path = await Retrieve(resource);
                 lock (prediction)
@@ -283,11 +284,14 @@ namespace Function.Services {
                     inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).Throw();
                 // Predict
                 predictor.Predict(inputMap, out prediction).Throw();
-                // Get prediction data
+                // Get prediction id
                 var idBuffer = new StringBuilder(2048);
+                prediction.GetPredictionID(idBuffer, idBuffer.Capacity).Throw();
+                var id = idBuffer.ToString();
+                // Get prediction error
                 var errorBuffer = new StringBuilder(2048);
-                var id = prediction.GetPredictionID(idBuffer, idBuffer.Capacity) == Status.Ok ? idBuffer.ToString() : null;
                 var error = prediction.GetPredictionError(errorBuffer, errorBuffer.Length) == Status.Ok ? errorBuffer.ToString() : null;
+                // Get latency and logs
                 prediction.GetPredictionLatency(out var latency);
                 prediction.GetPredictionLogLength(out var logsLength);
                 var logBuffer = new StringBuilder(logsLength + 1);

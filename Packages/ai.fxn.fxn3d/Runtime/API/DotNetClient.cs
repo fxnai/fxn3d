@@ -31,7 +31,7 @@ namespace Function.API {
         /// <param name="clientId">Client identifier.</param>
         /// <param name="deviceId">Device model identifier.</param>
         /// <param name="cachePath">Prediction resource cache path.</param>
-        public DotNetClient (string url, string? accessKey) {
+        public DotNetClient (string url, string? accessKey = default) {
             this.url = url.TrimEnd('/');
             this.accessKey = accessKey;
         }

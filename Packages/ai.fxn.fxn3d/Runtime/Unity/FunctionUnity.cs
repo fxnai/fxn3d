@@ -180,7 +180,7 @@ namespace Function {
         /// <summary>
         /// Function client identifier.
         /// </summary>
-        internal static string ClientId {
+        internal static string? ClientId {
             get {
                 if (Application.platform == RuntimePlatform.Android)
                     switch (RuntimeInformation.ProcessArchitecture) {
@@ -191,7 +191,7 @@ namespace Function {
                         default:                        return null;
                     }
                 if (Application.platform == RuntimePlatform.IPhonePlayer)
-                    return @"ios";
+                    return "ios:arm64";
                 if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
                     switch (RuntimeInformation.ProcessArchitecture) {
                         case Architecture.Arm64:    return "macos:arm64";

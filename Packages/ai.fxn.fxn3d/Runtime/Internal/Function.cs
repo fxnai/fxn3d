@@ -251,9 +251,9 @@ namespace Function.Internal {
 
         #region --Utility--
 
-        public static void Throw (this Status status) {
+        public static Status Throw (this Status status) {
             switch (status) {
-                case Status.Ok:                 break;
+                case Status.Ok:                 return status;
                 case Status.InvalidArgument:    throw new ArgumentException();
                 case Status.InvalidOperation:   throw new InvalidOperationException();
                 case Status.NotImplemented:     throw new NotImplementedException();
