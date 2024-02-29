@@ -39,16 +39,17 @@ namespace Function.Editor.Build {
                 var accessKey = embed.accessKey ?? settings.accessKey;
                 var client = new DotNetClient(url, accessKey);
                 // Create prediction
-                var prediction = Task.Run(async () => await client.Request<Prediction>(
+                var prediction = Task.Run(() => client.Request<Prediction>(
                     @"POST",
                     $"/predict/{embed.tag}",
                     headers: new () { [@"fxn-client"] = Platform }
                 )).Result;
-                // Check type
-                if (prediction.type != PredictorType.Edge)
-                    continue;
                 // Add to settings
-                cache.Add(new CachedPrediction { platform = Platform, prediction = prediction });
+                if (prediction.type == PredictorType.Edge)
+                    cache.Add(new CachedPrediction {
+                        platform = Platform,
+                        prediction = prediction
+                    });
             }
             // Cache
             settings.cache = cache;
@@ -71,8 +72,7 @@ namespace Function.Editor.Build {
             var client = new DotNetClient(Function.URL);
             var frameworks = new List<string>();
             foreach (var cachedPrediction in cache) {
-                var prediction = cachedPrediction.prediction;
-                var dso = prediction.resources.First(res => res.type == @"dso");
+                var dso = cachedPrediction.prediction.resources.First(res => res.type == @"dso");
                 var dsoPath = Path.GetTempFileName();
                 {
                     using var dsoStream = Task.Run(async () => await client.Download(dso.url)).Result;

@@ -217,7 +217,6 @@ namespace Function.Services {
         private readonly string? clientId;
         private readonly string cachePath;
         private readonly Dictionary<string, IntPtr> cache;
-        private static readonly string[] InvalidResources = new [] { @"fxn", @"dso", @"js" };
 
         internal PredictionService (
             IFunctionClient client,
@@ -244,7 +243,7 @@ namespace Function.Services {
             configuration.SetConfigurationAcceleration(acceleration).Throw();
             configuration.SetConfigurationDevice(device).Throw();
             await Task.WhenAll(prediction.resources.Select(async resource => {
-                if (InvalidResources.Contains(resource.type))
+                if (resource.type == @"fxn")
                     return;
                 var path = await Retrieve(resource);
                 lock (prediction)
