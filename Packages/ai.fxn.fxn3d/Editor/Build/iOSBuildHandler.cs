@@ -90,7 +90,11 @@ namespace Function.Editor.Build {
             // Add frameworks
             var targetGuid = project.GetUnityMainTargetGuid();
             foreach (var framework in frameworks) {
-                var frameworkGuid = project.AddFile("Frameworks/Function/" + framework, "Frameworks/" + framework, PBXSourceTree.Source);
+                var frameworkGuid = project.AddFile(
+                    "Frameworks/Function/" + framework,
+                    "Frameworks/" + framework,
+                    PBXSourceTree.Source
+                );
                 project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
             }
             // Write

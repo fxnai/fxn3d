@@ -26,7 +26,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 100}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 0
-  controlID: 136
+  controlID: 1917
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -62,7 +62,7 @@ MonoBehaviour:
     m_SaveData: []
     m_OverlaysVisible: 1
   m_PosLeft: {x: 0, y: 0}
-  m_PosRight: {x: 0, y: 919.9994}
+  m_PosRight: {x: 0, y: 627.99805}
   m_Scope: 1
   m_SplitterFlex: 0.2
   m_SearchText: 
@@ -107,8 +107,8 @@ MonoBehaviour:
     y: 0
     width: 378
     height: 850
-  m_MinSize: {x: 201, y: 221}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 4}
   m_Panes:
   - {fileID: 4}
@@ -496,9 +496,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: -0.08717229, y: 0.89959055, z: -0.21045254, w: -0.3726226}
   m_Size:
-    m_Target: 11.535393
+    m_Target: 11.708754
     speed: 2
-    m_Value: 11.535393
+    m_Value: 11.708754
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -542,8 +542,8 @@ MonoBehaviour:
     y: 0
     width: 405.5
     height: 850
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 202, y: 221}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 6}
   m_Panes:
   - {fileID: 6}
@@ -671,7 +671,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 155
+  controlID: 1984
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -682,7 +682,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: SceneHierarchyWindow
+  m_Name: ConsoleWindow
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -691,14 +691,14 @@ MonoBehaviour:
     y: 0
     width: 323
     height: 373
-  m_MinSize: {x: 202, y: 221}
+  m_MinSize: {x: 102, y: 121}
   m_MaxSize: {x: 4002, y: 4021}
-  m_ActualView: {fileID: 9}
+  m_ActualView: {fileID: 10}
   m_Panes:
   - {fileID: 9}
   - {fileID: 10}
-  m_Selected: 0
-  m_LastSelected: 1
+  m_Selected: 1
+  m_LastSelected: 0
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -736,9 +736,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 1c5f0000
-      m_LastClickedID: 24348
-      m_ExpandedIDs: 32e6ffff82e6ffffbee7ffff12ebffff62ebffffc6ecffffb6f1ffff06f2ffff70f3ffff24fbffff
+      m_SelectedIDs: 
+      m_LastClickedID: 0
+      m_ExpandedIDs: fea1ffff52a2ffffc0a3ffff08a9ffff5ea9ffffc2aaffffd6b1ffff2cb2ffff90b3ffff42b9ffff98b9fffffcbaffff0cc0ffff62c0ffffc6c1ffff1ec8ffff74c8ffffd8c9ffff74cfffffcacfffff06d1fffffcd4ffff50d5ffff96d6ffffdcdbffff32dcffff9cddffff32e6ffff82e6ffffbee7ffff12ebffff62ebffffc6ecffffb6f1ffff06f2ffff70f3ffff24fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -867,7 +867,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Packages/ai.fxn.fxn3d/Plugins/iOS
+    - Packages/ai.fxn.fxn3d/Plugins/macOS
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -875,15 +875,15 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Packages/ai.fxn.fxn3d/Plugins/iOS
+  - Packages/ai.fxn.fxn3d/Plugins/macOS
   m_LastFoldersGridSize: -1
   m_LastProjectPath: /Users/yusuf/Documents/Projects/fxnai/fxn3d
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 48}
-    m_SelectedIDs: 7e5b0000
-    m_LastClickedID: 23422
+    m_SelectedIDs: 765b0000
+    m_LastClickedID: 23414
     m_ExpandedIDs: 00000000485b00005c5b0000785b000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -912,7 +912,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000485b0000
+    m_ExpandedIDs: 00000000485b000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -937,8 +937,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 1c5f0000
-    m_LastClickedInstanceID: 24348
+    m_SelectedInstanceIDs: 
+    m_LastClickedInstanceID: 0
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000
     m_RenameOverlay:
