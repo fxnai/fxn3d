@@ -69,6 +69,7 @@
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/AndroidBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/WindowsBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionSettingsProvider.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/LinuxBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionProjectSettings.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionMenu.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/iOSBuildHandler.cs" />

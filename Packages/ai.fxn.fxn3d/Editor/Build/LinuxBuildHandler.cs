@@ -8,9 +8,9 @@ namespace Function.Editor.Build {
     using UnityEditor;
     using UnityEditor.Build.Reporting;
 
-    internal sealed class WindowsBuildHandler : BuildHandler {
+    internal sealed class LinuxBuildHandler : BuildHandler {
 
-        protected override BuildTarget target => BuildTarget.StandaloneWindows64;
+        protected override BuildTarget target => BuildTarget.StandaloneLinux64;
 
         protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
             // Create settings

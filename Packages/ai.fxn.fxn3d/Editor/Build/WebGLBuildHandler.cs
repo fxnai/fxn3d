@@ -10,8 +10,6 @@ namespace Function.Editor.Build {
 
     internal sealed class WebGLBuildHandler : BuildHandler {
 
-        #region --Operations--
-
         private static readonly string[] EM_ARGS = new [] {
             @"-lembind",
             @"-sALLOW_TABLE_GROWTH=1",
@@ -31,6 +29,5 @@ namespace Function.Editor.Build {
             // Return
             return settings;
         }
-        #endregion
     }
 }
