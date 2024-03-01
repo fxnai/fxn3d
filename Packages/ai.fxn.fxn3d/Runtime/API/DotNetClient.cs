@@ -37,13 +37,13 @@ namespace Function.API {
         }
 
         /// <summary>
-        /// Perform a request to a Function REST endpoint.
+        /// Make a request to a REST endpoint.
         /// </summary>
         /// <typeparam name="T">Deserialized response type.</typeparam>
         /// <param name="method">HTTP request method.</param>
         /// <param name="path">Endpoint path.</param>
         /// <param name="payload">Request body.</param>
-        /// <param name="headers">Request body.</param>
+        /// <param name="headers">Request headers.</param>
         /// <returns>Deserialized response.</returns>
         public async Task<T> Request<T> (
             string method,
@@ -73,10 +73,59 @@ namespace Function.API {
             // Check error
             if ((int)response.StatusCode >= 400) {
                 var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
-                throw new InvalidOperationException(errorPayload.errors[0].message);
+                var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
+                throw new InvalidOperationException(error);
             }
             // Return
             return JsonConvert.DeserializeObject<T>(responseStr);
+        }
+
+        /// <summary>
+        /// Make a request to a REST endpoint and consume the response as a stream.
+        /// </summary>
+        /// <typeparam name="T">Deserialized response type.</typeparam>
+        /// <param name="path">Endpoint path.</param>
+        /// <param name="payload">Request body.</param>
+        /// <param name="headers">Request headers.</param>
+        /// <returns>Stream of deserialized responses.</returns>
+        public async IAsyncEnumerable<T> Stream<T> (
+            string method,
+            string path,
+            object? payload = default,
+            Dictionary<string, string>? headers = default
+        ) {
+            path = path.TrimStart('/');
+            // Create client and message
+            using var client = new HttpClient();
+            using var message = new HttpRequestMessage(new HttpMethod(method), $"{this.url}/{path}");
+            // Add headers
+            if (!string.IsNullOrEmpty(accessKey))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
+            if (headers != null)
+                foreach (var header in headers)
+                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+            // Add payload
+            if (payload != null) {
+                var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+                var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
+                message.Content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
+            }
+            // Stream
+            using var response = await client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
+            using var stream = await response.Content.ReadAsStreamAsync();
+            var buffer = new byte[65536]; // CHECK // Could be problematic with `dataUrlLimit`
+            while (true) {
+                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                if (bytesRead == 0)
+                    break;
+                var responseStr = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                if ((int)response.StatusCode >= 400) {
+                    var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
+                    var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
+                    throw new InvalidOperationException(error);
+                }
+                yield return JsonConvert.DeserializeObject<T>(responseStr);
+            }
         }
 
         /// <summary>
@@ -95,46 +144,6 @@ namespace Function.API {
                 new GraphRequest { query = query, variables = variables }
             );
             return response.data;
-        }
-
-        /// <summary>
-        /// Perform a streaming request to a Function REST endpoint.
-        /// </summary>
-        /// <typeparam name="T">Deserialized response type.</typeparam>
-        /// <param name="path">Endpoint path.</param>
-        /// <param name="payload">POST request body.</param>
-        /// <returns>Stream of deserialized responses.</returns>
-        public async IAsyncEnumerable<T> Stream<T> ( // INCOMPLETE // ClientId
-            string path,
-            Dictionary<string, object> payload
-        ) {
-            path = path.TrimStart('/');
-            // Serialize payload
-            var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
-            var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
-            // Create client
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = !string.IsNullOrEmpty(accessKey) ? new AuthenticationHeaderValue(@"Bearer", accessKey) : null;
-            // Request
-            using var content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
-            using var message = new HttpRequestMessage(HttpMethod.Post, $"{this.url}/{path}");
-            message.Content = content;
-            using var response = await client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
-            // Consume stream
-            using var stream = await response.Content.ReadAsStreamAsync();
-            var buffer = new byte[65536]; // CHECK // Could be problematic with `dataUrlLimit`
-            while (true) {
-                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                if (bytesRead == 0)
-                    break;
-                var responseStr = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                if ((int)response.StatusCode >= 400) {
-                    var errorPayload = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseStr);
-                    var error = errorPayload.TryGetValue(@"error", out var msg) ? msg : "An unknown error occurred";
-                    throw new InvalidOperationException(error);
-                }
-                yield return JsonConvert.DeserializeObject<T>(responseStr);
-            }
         }
 
         /// <summary>

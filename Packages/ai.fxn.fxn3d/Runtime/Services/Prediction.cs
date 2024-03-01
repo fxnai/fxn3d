@@ -97,8 +97,13 @@ namespace Function.Services {
                 (await Task.WhenAll(inputs.Select(async pair => (name: pair.Key, value: await ToValue(pair.Value, pair.Key, key: key))))).ToDictionary(pair => pair.name, pair => pair.value as object) :
                 null;
             // Stream
-            var path = $"/predict/{tag}?stream=true&rawOutputs=true&dataUrlLimit={dataUrlLimit}";
-            await foreach (var prediction in client.Stream<Prediction?>(path, values)) {
+            var stream = client.Stream<Prediction?>(
+                @"POST",
+                $"/predict/{tag}?stream=true&rawOutputs=true&dataUrlLimit={dataUrlLimit}",
+                values,
+                new () { [@"fxn-client"] = clientId }
+            );
+            await foreach (var prediction in stream) {
                 // Collect results
                 prediction.results = await ParseResults(prediction.results, rawOutputs);
                 // Yield
@@ -289,7 +294,7 @@ namespace Function.Services {
                 var id = idBuffer.ToString();
                 // Get prediction error
                 var errorBuffer = new StringBuilder(2048);
-                var error = prediction.GetPredictionError(errorBuffer, errorBuffer.Length) == Status.Ok ? errorBuffer.ToString() : null;
+                var error = prediction.GetPredictionError(errorBuffer, errorBuffer.Capacity) == Status.Ok ? errorBuffer.ToString() : null;
                 // Get latency and logs
                 prediction.GetPredictionLatency(out var latency);
                 prediction.GetPredictionLogLength(out var logsLength);

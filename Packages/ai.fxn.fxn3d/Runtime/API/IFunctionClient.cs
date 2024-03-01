@@ -20,15 +20,30 @@ namespace Function.API {
     public interface IFunctionClient {
 
         /// <summary>
-        /// Perform a request to a Function REST endpoint.
+        /// Make a request to a REST endpoint.
         /// </summary>
         /// <typeparam name="T">Deserialized response type.</typeparam>
         /// <param name="method">HTTP request method.</param>
         /// <param name="path">Endpoint path.</param>
         /// <param name="payload">Request body.</param>
-        /// <param name="headers">Request body.</param>
+        /// <param name="headers">Request headers.</param>
         /// <returns>Deserialized response.</returns>
         Task<T> Request<T> (
+            string method,
+            string path,
+            object? payload = default,
+            Dictionary<string, string>? headers = default
+        );
+
+        /// <summary>
+        /// Make a request to a REST endpoint and consume the response as a stream.
+        /// </summary>
+        /// <typeparam name="T">Deserialized response type.</typeparam>
+        /// <param name="path">Endpoint path.</param>
+        /// <param name="payload">Request body.</param>
+        /// <param name="headers">Request headers.</param>
+        /// <returns>Stream of deserialized responses.</returns>
+        IAsyncEnumerable<T> Stream<T> (
             string method,
             string path,
             object? payload = default,
@@ -46,15 +61,6 @@ namespace Function.API {
             string query,
             Dictionary<string, object?>? variables = default
         );
-
-        /// <summary>
-        /// Perform a streaming POST request to a Function REST endpoint.
-        /// </summary>
-        /// <typeparam name="T">Deserialized response type.</typeparam>
-        /// <param name="path">Endpoint path.</param>
-        /// <param name="payload">POST request body.</param>
-        /// <returns>Stream of deserialized responses.</returns>
-        IAsyncEnumerable<T> Stream<T> (string path, Dictionary<string, object> payload);
 
         /// <summary>
         /// Download a file.
