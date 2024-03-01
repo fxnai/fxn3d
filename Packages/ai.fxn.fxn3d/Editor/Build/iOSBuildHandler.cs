@@ -14,14 +14,13 @@ namespace Function.Editor.Build {
     using UnityEditor.Build;
     using UnityEditor.Build.Reporting;
     using UnityEditor.iOS.Xcode;
+    using UnityEditor.iOS.Xcode.Extensions;
     using API;
     using Types;
     using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
-    using UnityEditor.iOS.Xcode.Extensions;
 
     internal sealed class iOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
-        #region --Operations--
         private List<CachedPrediction> cache;
         private const string Platform = @"ios:arm64";
 
@@ -90,19 +89,14 @@ namespace Function.Editor.Build {
             project.ReadFromFile(pbxPath);
             // Add frameworks
             var targetGuid = project.GetUnityMainTargetGuid();
-            var targetLinkPhaseGuid = project.GetFrameworksBuildPhaseByTarget(targetGuid);
-            //project.SetBuildProperty(targetGuid, "FRAMEWORK_SEARCH_PATHS", "$(inherited)"); // INCOMPLETE
-            //project.AddBuildProperty(targetGuid, "FRAMEWORK_SEARCH_PATHS", "$(PROJECT_DIR)/Frameworks/Function");
             foreach (var framework in frameworks) {
                 var frameworkGuid = project.AddFile("Frameworks/Function/" + framework, "Frameworks/" + framework, PBXSourceTree.Source);
                 project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
-                project.AddFileToBuildSection(targetGuid, targetLinkPhaseGuid, frameworkGuid);
             }
             // Write
             project.WriteToFile(pbxPath);
             // Empty cache
             cache = null;
         }
-        #endregion
     }
 }

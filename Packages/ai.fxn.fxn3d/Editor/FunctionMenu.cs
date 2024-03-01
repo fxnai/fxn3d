@@ -33,6 +33,7 @@ namespace Function.Editor {
 
         [MenuItem(@"Function/Clear Predictor Cache", false, BasePriority + 5)]
         private static void ClearCache () {
+            Directory.Delete(FunctionUnity.CachePath, true);
             Debug.Log("Function: Cleared predictor cache");
         }
     }

@@ -33,9 +33,8 @@ namespace Function {
             var settings = FunctionSettings.Instance;
             var key = !string.IsNullOrEmpty(accessKey) ? accessKey : settings?.accessKey;
             var apiUrl = url ?? Function.URL;
-            var cachePath = Path.Combine(Application.persistentDataPath, "fxn", "cache");
             var client = new PredictionCacheClient(apiUrl, accessKey: key, cache: settings?.cache);
-            var fxn = new Function(client, clientId: ClientId, cachePath: cachePath);
+            var fxn = new Function(client, clientId: ClientId, cachePath: CachePath);
             return fxn;
         }
 
@@ -177,6 +176,11 @@ namespace Function {
 
 
         #region --Operations--
+        /// <summary>
+        /// Predictor cache path.
+        /// </summary>
+        internal static string CachePath => Path.Combine(Application.persistentDataPath, "fxn", "cache");
+
         /// <summary>
         /// Function client identifier.
         /// </summary>
