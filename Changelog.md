@@ -1,3 +1,6 @@
+## 0.0.11
+*INCOMPLETE*
+
 ## 0.0.10
 + Fixed WebGL build error when Function is installed with Unity Package Manager.
 
