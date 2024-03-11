@@ -3,21 +3,184 @@
 *   Copyright © 2024 NatML Inc, The Emscripten Authors. All Rights Reserved.
 */
 
-mergeInto(LibraryManager.library, {
+const FXNC = {
+
+  $_throw_fxn_binding_error: function () {
+    throw new Error("Function Error: Binding for Function library function is missing. Send console logs to hi@fxn.ai");
+  },
+  FXNValueRelease: function (value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueGetData: function (value, data) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueGetType: function (value, type) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueGetDimensions: function (value, dimensions) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueGetShape: function (value, shape, shapeLen) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateArray: function (data, shape, dims, dtype, flags, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateString: function (data, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateList: function (data, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateDict: function (data, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateImage: function (pixelBuffer, width, height, channels, flags, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateBinary: function (buffer, bufferLen, flags, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateNull: function (value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueMapCreate: function (map) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueMapRelease: function (map) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueMapGetSize: function (map, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueMapGetKey: function (map, index, key, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueMapGetValue: function (map, key, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueMapSetValue: function (map, key, value) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationGetUniqueID: function (identifier, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationCreate: function (configuration) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationRelease: function (configuration) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationGetTag: function (configuration, tag, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationSetTag: function (configuration, tag) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationGetToken: function (configuration, token, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationSetToken: function (configuration, token) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationGetAcceleration: function (configuration, acceleration) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationSetAcceleration: function (configuration, acceleration) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationGetDevice: function (configuration, device) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationSetDevice: function (configuration, device) {
+    _throw_fxn_binding_error();
+  },
+  FXNConfigurationAddResource: function (configuration, type, path) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictionRelease: function (prediction) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictionGetID: function (prediction, destination, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictionGetLatency: function (prediction, latency) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictionGetResults: function (prediction, map) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictionGetError: function (prediction, error, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictionGetLogs: function (prediction, logs, size) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictionGetLogLength: function (prediction, length) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictorCreate: function (configuration, predictor) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictorRelease: function (predictor) {
+    _throw_fxn_binding_error();
+  },
+  FXNPredictorPredict: function (predictor, inputs, prediction) {
+    _throw_fxn_binding_error();
+  },
+  FXNGetVersion: function () {
+    _throw_fxn_binding_error();
+  },
+  FXNBind: function (handle, sym, ptr) {
+    var fxn = LDSO.loadedLibsByHandle[handle]?.module[UTF8ToString(sym)];
+    if (fxn) // don't break app if this fails
+      wasmTable.set(ptr, fxn);
+  },
+  FXNBind__postset: `addOnPreRun(() => {
+    var ___c_longjmp = new WebAssembly.Tag({ "parameters": ["i32"] });
+    var ___cpp_exception = new WebAssembly.Tag({ "parameters": ["i32"] });
+    var _emscripten_console_log = (str) => console.log(UTF8ToString(str));
+    var _emscripten_console_warn = (str) => console.warn(UTF8ToString(str));
+    var _emscripten_console_error = asmLibraryArg.emscripten_console_error;
+    var _emscripten_err = (str) => err(UTF8ToString(str));
+    var _emscripten_out = (str) => out(UTF8ToString(str));
+    var __emscripten_get_progname = (str, len) => stringToUTF8(thisProgram, str, len);
+    _emscripten_console_log.sig = "vi";
+    _emscripten_console_warn.sig = "vi";
+    _emscripten_console_error.sig = "vi";
+    _emscripten_err.sig = "vi";
+    _emscripten_out.sig = "vi";
+    __emscripten_get_progname.sig = "vii";
+    asmLibraryArg = {
+      ...asmLibraryArg,
+      __c_longjmp: ___c_longjmp,
+      __cpp_exception: ___cpp_exception,
+      __heap_base: 1,
+      emscripten_console_log: _emscripten_console_log,
+      emscripten_console_warn: _emscripten_console_warn,
+      emscripten_console_error: _emscripten_console_error,
+      emscripten_err: _emscripten_err,
+      emscripten_out: _emscripten_out,
+      _emscripten_get_progname: __emscripten_get_progname,
+    };
+  })`
+};
+autoAddDeps(FXNC, "$_throw_fxn_binding_error");
+
+const DLFCN = {
   
   $LDSO: {
     loadedLibsByName: {},
     loadedLibsByHandle: {}
   },
   $GOT: {},
-  $sph: {},
   $GOTHandler__deps: ["$GOT"],
   $GOTHandler: {
     get:function(obj, symName) {
       if (!GOT[symName]) {
         GOT[symName] = new WebAssembly.Global({'value': 'i32', 'mutable': true});
       }
-      return GOT[symName]
+      return GOT[symName];
     }
   },
   $asmjsMangle: function (x) {
@@ -30,7 +193,7 @@ mergeInto(LibraryManager.library, {
       if (!exports.hasOwnProperty(sym)) {
         continue;
       }
-      if (!asmLibraryArg.hasOwnProperty(sym)) {
+      if (!asmLibraryArg.hasOwnProperty(sym) || sym.startsWith("FXN")) {
         asmLibraryArg[sym] = exports[sym];
       }
       var module_sym = asmjsMangle(sym);
@@ -135,8 +298,10 @@ mergeInto(LibraryManager.library, {
     if (!sym) {
       sym = Module[asmjsMangle(symName)];
     }
-    if (symName == "__heap_base")
-      sym = 1;
+    if (symName === "__stack_high")
+      sym = _emscripten_stack_get_end();
+    if (symName === "__stack_low")
+      sym = _emscripten_stack_get_base();
     if (!sym && symName.startsWith('invoke_')) {
       sym = createInvokeFunction(symName.split('_')[1]);
     }
@@ -263,7 +428,7 @@ mergeInto(LibraryManager.library, {
     }
   },
 
-  $loadWebAssemblyModule__deps: ["$getDylinkMetadata", "$loadDynamicLibrary", "$getMemory", "$GOTHandler", "$resolveGlobalSymbol", "$sph", "$updateTableMap", "$relocateExports", "$reportUndefinedSymbols"],
+  $loadWebAssemblyModule__deps: ["$getDylinkMetadata", "$loadDynamicLibrary", "$getMemory", "$GOTHandler", "$resolveGlobalSymbol", "$updateTableMap", "$relocateExports", "$reportUndefinedSymbols"],
   $loadWebAssemblyModule: function(binary, flags, handle) {
     var metadata = getDylinkMetadata(binary);
     var originalTable = wasmTable;
@@ -329,9 +494,6 @@ mergeInto(LibraryManager.library, {
       // are. To do that here, we use a JS proxy (another option would
       // be to inspect the binary directly).
 
-      if (!sph.__stack_pointer)
-        sph.__stack_pointer = new WebAssembly.Global({'value': 'i32', 'mutable': true}, 5281840);
-
       var proxyHandler = {
           'get': function(stubs, prop) {
           // symbols that should be local to this module
@@ -339,7 +501,6 @@ mergeInto(LibraryManager.library, {
               case '__memory_base': return memoryBase;
               case '__table_base': return tableBase;
               //case "memory": return Module["asm"]["memory"];
-              case "__stack_pointer": return sph.__stack_pointer;
               //case "__indirect_function_table": return Module['asm']['__indirect_function_table'];
           }
           if (prop in asmLibraryArg) {
@@ -378,7 +539,23 @@ mergeInto(LibraryManager.library, {
         if (!flags.allowUndefined) {
           reportUndefinedSymbols();
         }
+
+        // If the runtime has already been initialized we set the stack limits
+        // now.  Otherwise this is delayed until `setDylinkStackLimits` is
+        // called after initialization.
+        if (moduleExports['__set_stack_limits'] && runtimeInitialized) {
+          moduleExports['__set_stack_limits'](_emscripten_stack_get_base(), _emscripten_stack_get_end());
+        }
+
         // initialize the module
+        var applyRelocs = moduleExports['__wasm_apply_data_relocs'];
+        if (applyRelocs) {
+          if (runtimeInitialized) {
+            applyRelocs();
+          } else {
+            __RELOC_FUNCS__.push(applyRelocs);
+          }
+        }
         var init = moduleExports['__wasm_call_ctors'];
         if (init) {
           if (runtimeInitialized) {
@@ -611,4 +788,7 @@ mergeInto(LibraryManager.library, {
     }
     return result;
   },
-});
+};
+
+mergeInto(LibraryManager.library, FXNC);
+mergeInto(LibraryManager.library, DLFCN);

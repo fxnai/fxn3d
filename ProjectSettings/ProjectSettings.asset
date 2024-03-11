@@ -143,6 +143,8 @@ PlayerSettings:
   preloadedAssets:
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 11400000, guid: beeae00bf2bf8409eb0cb65e9ce5d452, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -821,12 +823,14 @@ PlayerSettings:
   webGLShowDiagnostics: 0
   webGLDataCaching: 1
   webGLDebugSymbols: 0
-  webGLEmscriptenArgs: ' -lembind  -sALLOW_TABLE_GROWTH=1 '
+  webGLEmscriptenArgs: -Wl,--features=mutable-globals -Wl,--export=__stack_pointer
+    -Wl,-u,FXN_WEBGL_INIT -lembind -sALLOW_TABLE_GROWTH=1 -sSTACK_OVERFLOW_CHECK=2
+    --embed-file /Users/yusuf/Documents/Projects/fxnai/fxn3d/Packages/ai.fxn.fxn3d/Plugins/Web/libFunction.so@libFunction.so
   webGLModulesDirectory: 
   webGLTemplate: APPLICATION:Default
   webGLAnalyzeBuildSize: 0
   webGLUseEmbeddedResources: 0
-  webGLCompressionFormat: 1
+  webGLCompressionFormat: 2
   webGLWasmArithmeticExceptions: 0
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
@@ -957,4 +961,4 @@ PlayerSettings:
   hmiLoadingImage: {fileID: 0}
   platformRequiresReadableAssets: 0
   virtualTexturingSupportEnabled: 0
-  insecureHttpOption: 0
+  insecureHttpOption: 1
