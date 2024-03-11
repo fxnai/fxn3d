@@ -1,3 +1,6 @@
+## 0.0.10
++ Fixed WebGL build error when Function is installed with Unity Package Manager.
+
 ## 0.0.9
 + Added support for making on-device predictions on Android.
 + Added support for making on-device predictions on iOS.

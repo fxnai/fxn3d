@@ -24,7 +24,8 @@ namespace Function.Editor.Build {
         };
         private static string FxncPath => _FxncPath = _FxncPath ?? AssetDatabase.GetAllAssetPaths()
             .Select(path => new FileInfo(Path.GetFullPath(path)).FullName)
-            .FirstOrDefault(path => path.EndsWith(@"Web/libFunction.so"));
+            .FirstOrDefault(path => path.EndsWith(@"Web/libFunction.so"))?
+            .Replace(@"@", @"@@");
         private static string _FxncPath;
 
         protected override BuildTarget target => BuildTarget.WebGL;
@@ -32,7 +33,6 @@ namespace Function.Editor.Build {
         protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
             // Set Emscripten args
             PlayerSettings.WebGL.emscriptenArgs = GetEmscriptenArgs();
-            UnityEngine.Debug.Log(PlayerSettings.WebGL.emscriptenArgs);
             // Create settings
             var settings = FunctionProjectSettings.CreateSettings();
             // Return
