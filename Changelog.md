@@ -1,3 +1,6 @@
+## 0.0.12
+*INCOMPLETE*
+
 ## 0.0.11
 + Fixed WebGL build error when building in Release mode due to JavaScript minification.
 
