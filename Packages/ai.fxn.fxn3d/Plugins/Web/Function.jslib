@@ -132,7 +132,9 @@ const FXNC = {
     _throw_fxn_binding_error();
   },
   FXNBind: function (handle, sym, ptr) {
-    var fxn = LDSO.loadedLibsByHandle[handle]?.module[UTF8ToString(sym)];
+    var symName = UTF8ToString(sym);
+    var lib = LDSO.loadedLibsByHandle[handle]
+    var fxn = lib ? lib.module[symName] : null;
     if (fxn) // don't break app if this fails
       wasmTable.set(ptr, fxn);
   },
@@ -141,7 +143,7 @@ const FXNC = {
     var ___cpp_exception = new WebAssembly.Tag({ "parameters": ["i32"] });
     var _emscripten_console_log = (str) => console.log(UTF8ToString(str));
     var _emscripten_console_warn = (str) => console.warn(UTF8ToString(str));
-    var _emscripten_console_error = asmLibraryArg.emscripten_console_error;
+    var _emscripten_console_error = (str) => console.error(UTF8ToString(str));
     var _emscripten_err = (str) => err(UTF8ToString(str));
     var _emscripten_out = (str) => out(UTF8ToString(str));
     var __emscripten_get_progname = (str, len) => stringToUTF8(thisProgram, str, len);
@@ -151,8 +153,7 @@ const FXNC = {
     _emscripten_err.sig = "vi";
     _emscripten_out.sig = "vi";
     __emscripten_get_progname.sig = "vii";
-    asmLibraryArg = {
-      ...asmLibraryArg,
+    const fxnLibraryArg = {
       __c_longjmp: ___c_longjmp,
       __cpp_exception: ___cpp_exception,
       __heap_base: 1,
@@ -163,6 +164,7 @@ const FXNC = {
       emscripten_out: _emscripten_out,
       _emscripten_get_progname: __emscripten_get_progname,
     };
+    asmLibraryArg = Object.assign({}, asmLibraryArg, fxnLibraryArg); 
   })`
 };
 autoAddDeps(FXNC, "$_throw_fxn_binding_error");

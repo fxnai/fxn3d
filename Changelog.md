@@ -1,5 +1,5 @@
 ## 0.0.11
-*INCOMPLETE*
++ Fixed WebGL build error when building in Release mode due to JavaScript minification.
 
 ## 0.0.10
 + Fixed WebGL build error when Function is installed with Unity Package Manager.
