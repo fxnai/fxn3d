@@ -2,6 +2,7 @@
 + Added support for making on-device predictions on Android.
 + Added support for making on-device predictions on iOS.
 + Added support for making on-device predictions on macOS.
++ Added support for making on-device predictions on WebGL.
 + Added support for making on-device predictions on Windows.
 
 ## 0.0.8
