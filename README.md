@@ -23,6 +23,9 @@ Add the following items to your Unity project's `Packages/manifest.json`:
 }
 ```
 
+> [!IMPORTANT]  
+> When building for WebGL, make sure that the `Enable Exceptions` setting in Player Settings > Publishing Settings is set to `Full With Stacktrace`. Other exception modes will currently raise errors.
+
 ## Retrieving your Access Key
 Head over to [fxn.ai](https://fxn.ai) to create an account by logging in. Once you do, generate an access key:
 
@@ -31,6 +34,9 @@ Head over to [fxn.ai](https://fxn.ai) to create an account by logging in. Once y
 Then add it to your Unity project in `Project Settings > Function`:
 
 ![add access key to Unity](settings.gif)
+
+> [!CAUTION]
+> If your Unity project is open-source, make sure to add `ProjectSettings/Function.asset` to your `.gitignore` file to keep your Function access key private.
 
 ## Making a Prediction
 First, create a Function client:

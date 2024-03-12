@@ -20,7 +20,7 @@ namespace Function.Editor.Build {
             @"-lembind",
             @"-sALLOW_TABLE_GROWTH=1",
             @"-sSTACK_OVERFLOW_CHECK=2",
-            $"--embed-file {FxncPath}@libFunction.so"
+            $"--embed-file {FxncPath}@libFunction.so",
         };
         private static string FxncPath => _FxncPath = _FxncPath ?? AssetDatabase.GetAllAssetPaths()
             .Select(path => new FileInfo(Path.GetFullPath(path)).FullName)
@@ -64,6 +64,8 @@ namespace Function.Editor.Build {
 
         private static bool IsEmscriptenArgVolatile (string arg) {
             if (arg.StartsWith("--embed-file") && arg.Contains("libFunction.so"))
+                return true;
+            if (arg.StartsWith("-Wl"))
                 return true;
             return false;
         }

@@ -817,14 +817,15 @@ PlayerSettings:
   blurSplashScreenBackground: 1
   spritePackerPolicy: 
   webGLMemorySize: 16
-  webGLExceptionSupport: 3
+  webGLExceptionSupport: 2
   webGLNameFilesAsHashes: 0
   webGLShowDiagnostics: 0
   webGLDataCaching: 1
   webGLDebugSymbols: 0
-  webGLEmscriptenArgs: -Wl,--features=mutable-globals -Wl,--export=__stack_pointer
-    -Wl,-u,FXN_WEBGL_INIT -lembind -sALLOW_TABLE_GROWTH=1 -sSTACK_OVERFLOW_CHECK=2
+  webGLEmscriptenArgs: -lembind -sALLOW_TABLE_GROWTH=1 -sSTACK_OVERFLOW_CHECK=2 -O1
+    -g2 -Wl,--features=mutable-globals -Wl,--export=__stack_pointer -Wl,-u,FXN_WEBGL_INIT
     --embed-file /Users/yusuf/Documents/Projects/fxnai/fxn3d/Packages/ai.fxn.fxn3d/Plugins/Web/libFunction.so@libFunction.so
+    -sASSERTIONS=1
   webGLModulesDirectory: 
   webGLTemplate: APPLICATION:Default
   webGLAnalyzeBuildSize: 0
