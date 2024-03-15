@@ -20,7 +20,7 @@ namespace Function.Editor {
         private static bool EnableVersion () => false;
 
         [MenuItem(@"Function/Get Access Key", false, BasePriority + 1)]
-        private static void OpenAccessKey () => Help.BrowseURL(@"https://fxn.ai/account/developers");
+        private static void GetAccessKey () => Help.BrowseURL(@"https://fxn.ai/account/developers");
 
         [MenuItem(@"Function/Explore Predictors", false, BasePriority + 2)]
         private static void OpenExplore () => Help.BrowseURL(@"https://fxn.ai/explore");
@@ -28,8 +28,8 @@ namespace Function.Editor {
         [MenuItem(@"Function/View the Docs", false, BasePriority + 3)]
         private static void OpenDocs () => Help.BrowseURL(@"https://docs.fxn.ai");
 
-        [MenuItem(@"Function/Open an Issue", false, BasePriority + 4)]
-        private static void OpenIssue () => Help.BrowseURL(@"https://github.com/fxnai/fxn3d");
+        [MenuItem(@"Function/Report an Issue", false, BasePriority + 4)]
+        private static void ReportIssue () => Help.BrowseURL(@"https://github.com/fxnai/fxn3d");
 
         [MenuItem(@"Function/Clear Predictor Cache", false, BasePriority + 5)]
         private static void ClearCache () {
