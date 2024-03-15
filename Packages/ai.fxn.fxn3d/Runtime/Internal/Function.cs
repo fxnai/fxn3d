@@ -128,19 +128,19 @@ namespace Function.Internal {
         public static extern Status GetValueMapKey (
             this IntPtr map,
             int index,
-            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder key,
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder key,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueMapGetValue")]
         public static extern Status GetValueMapValue (
             this IntPtr map,
-            [MarshalAs(UnmanagedType.LPStr)] string key,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string key,
             out IntPtr value
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueMapSetValue")]
         public static extern Status SetValueMapValue (
             this IntPtr map,
-            [MarshalAs(UnmanagedType.LPStr)] string key,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string key,
             IntPtr value
         );
         #endregion
@@ -149,7 +149,7 @@ namespace Function.Internal {
         #region --FXNConfiguration--
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetUniqueID")]
         public static extern Status GetConfigurationUniqueID (
-            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder identifier,
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder identifier,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationCreate")]
@@ -159,18 +159,18 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetTag")]
         public static extern Status SetConfigurationTag (
             this IntPtr configuration,
-            [MarshalAs(UnmanagedType.LPStr)] string tag
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string tag
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetToken")]
         public static extern Status SetConfigurationToken (
             this IntPtr configuration,
-            [MarshalAs(UnmanagedType.LPStr)] string token
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string token
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationAddResource")]
         public static extern Status AddConfigurationResource (
             this IntPtr configuration,
-            [MarshalAs(UnmanagedType.LPStr)] string type,
-            [MarshalAs(UnmanagedType.LPStr)] string path
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string path
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetAcceleration")]
         public static extern Status SetConfigurationAcceleration (
@@ -191,7 +191,7 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNPredictionGetID")]
         public static extern Status GetPredictionID (
             this IntPtr prediction,
-            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder id,
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder id,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNPredictionGetLatency")]
@@ -207,13 +207,13 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNPredictionGetError")]
         public static extern Status GetPredictionError (
             this IntPtr prediction,
-            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder error,
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder error,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNPredictionGetLogs")]
         public static extern Status GetPredictionLogs (
             this IntPtr prediction,
-            [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder logs,
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder logs,
             int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNPredictionGetLogLength")]
