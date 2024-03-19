@@ -56,6 +56,7 @@ namespace Function.API {
                 downloadHandler = new DownloadHandlerBuffer(),
                 disposeDownloadHandlerOnDispose = true,
                 disposeUploadHandlerOnDispose = true,
+                timeout = 20,
             };
             // Add headers
             if (!string.IsNullOrEmpty(accessKey))
@@ -82,7 +83,7 @@ namespace Function.API {
                 throw new InvalidOperationException(error);
             }
             // Return
-            return JsonConvert.DeserializeObject<T>(responseStr);
+            return JsonConvert.DeserializeObject<T>(responseStr)!;
         }
 
         /// <summary>
@@ -106,6 +107,7 @@ namespace Function.API {
                 downloadHandler = downloadHandler,
                 disposeDownloadHandlerOnDispose = false,
                 disposeUploadHandlerOnDispose = true,
+                timeout = 20,
             };
             // Add headers
             if (!string.IsNullOrEmpty(accessKey))
@@ -129,7 +131,7 @@ namespace Function.API {
                     var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
                     throw new InvalidOperationException(error);
                 }
-                yield return JsonConvert.DeserializeObject<T>(responseStr);
+                yield return JsonConvert.DeserializeObject<T>(responseStr)!;
             }
         }
 
@@ -157,6 +159,7 @@ namespace Function.API {
         /// <param name="url">URL</param>
         public virtual async Task<Stream> Download (string url) {
             using var request = UnityWebRequest.Get(url);
+            request.timeout = 20;
             request.SendWebRequest();
             while (!request.isDone)
                 await Task.Yield();
@@ -180,6 +183,7 @@ namespace Function.API {
                 downloadHandler = new DownloadHandlerBuffer(),
                 disposeDownloadHandlerOnDispose = true,
                 disposeUploadHandlerOnDispose = true,
+                timeout = 20,
             };
             client.SetRequestHeader(@"Content-Type", mime ?? @"application/octet-stream");
             // Put
