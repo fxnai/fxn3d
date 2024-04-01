@@ -4,6 +4,7 @@
 */
 
 #nullable enable
+#pragma warning disable 8618
 
 namespace Function.Services {
 
@@ -40,74 +41,94 @@ namespace Function.Services {
         /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size. This only applies to `CLOUD` predictions.</param>
         /// <param name="acceleration">Prediction acceleration. This only applies to `EDGE` predictions.</param>
         /// <param name="device">Prediction device. Do not set this unless you know what you are doing. This only applies to `EDGE` predictions.</param>
+        /// <param name="client">Function client identifier. Specify this to override the current client identifier.</param>
+        /// <param name="configuration">Configuration identifier. Specify this to override the current client configuration token.</param>
         public async Task<Prediction> Create (
             string tag,
             Dictionary<string, object>? inputs = null,
             bool rawOutputs = false,
             int? dataUrlLimit = null,
             Acceleration acceleration = default,
-            IntPtr device = default
+            IntPtr device = default,
+            string? client = default,
+            string? configuration = default
         ) {
             // Check cache
-            if (cache.TryGetValue(tag, out var p))
-                return Predict(tag, p, inputs);
+            if (cache.TryGetValue(tag, out var p) && !rawOutputs)
+                return Predict(tag, p, inputs!);
             // Collect inputs
             var key = Guid.NewGuid().ToString();
             var values = inputs != null ?
                 (await Task.WhenAll(inputs.Select(async pair => (name: pair.Key, value: await ToValue(pair.Value, pair.Key, key: key))))).ToDictionary(pair => pair.name, pair => pair.value as object) :
                 null;
             // Query
-            var prediction = await client.Request<Prediction>(
+            var prediction = await fxn.Request<Prediction>(
                 @"POST",
                 $"/predict/{tag}?dataUrlLimit={dataUrlLimit}&rawOutputs=true",
                 values,
                 new () {
-                    [@"fxn-client"] = clientId,
-                    [@"fxn-configuration-token"] = ConfigurationId
+                    [@"fxn-client"] = client ?? this.client ?? string.Empty,
+                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId
                 }
             );
             // Parse results
-            prediction.results = await ParseResults(prediction.results, rawOutputs);
-            // Create edge prediction
-            if (prediction.type == PredictorType.Edge) {
-                var predictor = await Load(prediction, acceleration, device);
-                cache.Add(prediction.tag, predictor);
-                prediction = Predict(tag, predictor, inputs);
-            }
-            // Return
-            return prediction;
+            prediction!.results = await ParseResults(prediction.results, rawOutputs);
+            // Load edge predictor
+            if (prediction.type == PredictorType.Edge && !rawOutputs)
+                cache.Add(prediction.tag, await Load(prediction, acceleration, device));
+            // Make prediction
+            return prediction.type == PredictorType.Edge && !rawOutputs && inputs != null ?
+                Predict(tag, cache[prediction.tag], inputs) :
+                prediction;
         }
 
         /// <summary>
         /// Create a streaming prediction.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
-        /// <param name="inputs">Input values. Only applies to `CLOUD` predictions.</param>
+        /// <param name="inputs">Input values.</param>
         /// <param name="rawOutputs">Skip parsing output values into plain values.</param>
-        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size. Only applies to `CLOUD` predictions.</param>
+        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size.</param>
         public async IAsyncEnumerable<Prediction> Stream (
             string tag,
             Dictionary<string, object>? inputs = null,
             bool rawOutputs = false,
-            int? dataUrlLimit = null
+            int? dataUrlLimit = null,
+            Acceleration acceleration = default,
+            IntPtr device = default,
+            string? client = default,
+            string? configuration = default
         ) {
+            // Check cache
+            if (cache.TryGetValue(tag, out var p) && !rawOutputs) {
+                yield return Predict(tag, p, inputs!);
+                yield break;
+            }
             // Collect inputs
             var key = Guid.NewGuid().ToString();
             var values = inputs != null ?
                 (await Task.WhenAll(inputs.Select(async pair => (name: pair.Key, value: await ToValue(pair.Value, pair.Key, key: key))))).ToDictionary(pair => pair.name, pair => pair.value as object) :
                 null;
             // Stream
-            var stream = client.Stream<Prediction?>(
+            var stream = fxn.Stream<Prediction>(
                 @"POST",
                 $"/predict/{tag}?stream=true&rawOutputs=true&dataUrlLimit={dataUrlLimit}",
                 values,
-                new () { [@"fxn-client"] = clientId }
+                new () {
+                    [@"fxn-client"] = client ?? this.client ?? string.Empty,
+                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId
+                }
             );
             await foreach (var prediction in stream) {
                 // Collect results
-                prediction.results = await ParseResults(prediction.results, rawOutputs);
-                // Yield
-                yield return prediction;
+                prediction!.results = await ParseResults(prediction.results, rawOutputs);
+                // Load edge predictor
+                if (prediction.type == PredictorType.Edge && !rawOutputs)
+                    cache.Add(prediction.tag, await Load(prediction, acceleration, device));
+                // Make prediction
+                yield return prediction.type == PredictorType.Edge && !rawOutputs && inputs != null ?
+                    Predict(tag, cache[prediction.tag], inputs) :
+                    prediction;
             }
         }
 
@@ -136,20 +157,20 @@ namespace Function.Services {
             if (value.type == Dtype.Null)
                 return null;
             // Download
-            var stream = await storage.Download(value.data);
+            var stream = await storage.Download(value.data!);
             // Switch
             switch (value.type) {
-                case Dtype.Float32: return ToObject<float>(stream, value.shape);
-                case Dtype.Float64: return ToObject<double>(stream, value.shape);
-                case Dtype.Int8:    return ToObject<sbyte>(stream, value.shape);
-                case Dtype.Int16:   return ToObject<short>(stream, value.shape);
-                case Dtype.Int32:   return ToObject<int>(stream, value.shape);
-                case Dtype.Int64:   return ToObject<long>(stream, value.shape);
-                case Dtype.Uint8:   return ToObject<byte>(stream, value.shape);
-                case Dtype.Uint16:  return ToObject<ushort>(stream, value.shape);
-                case Dtype.Uint32:  return ToObject<uint>(stream, value.shape);
-                case Dtype.Uint64:  return ToObject<ulong>(stream, value.shape);
-                case Dtype.Bool:    return ToObject<bool>(stream, value.shape);
+                case Dtype.Float32: return ToObject<float>(stream, value.shape!);
+                case Dtype.Float64: return ToObject<double>(stream, value.shape!);
+                case Dtype.Int8:    return ToObject<sbyte>(stream, value.shape!);
+                case Dtype.Int16:   return ToObject<short>(stream, value.shape!);
+                case Dtype.Int32:   return ToObject<int>(stream, value.shape!);
+                case Dtype.Int64:   return ToObject<long>(stream, value.shape!);
+                case Dtype.Uint8:   return ToObject<byte>(stream, value.shape!);
+                case Dtype.Uint16:  return ToObject<ushort>(stream, value.shape!);
+                case Dtype.Uint32:  return ToObject<uint>(stream, value.shape!);
+                case Dtype.Uint64:  return ToObject<ulong>(stream, value.shape!);
+                case Dtype.Bool:    return ToObject<bool>(stream, value.shape!);
                 case Dtype.String:  return new StreamReader(stream).ReadToEnd();
                 case Dtype.Binary:  return stream;
                 case Dtype.List:    return JsonConvert.DeserializeObject<List<object>>(new StreamReader(stream).ReadToEnd());
@@ -217,21 +238,21 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly IFunctionClient client;
+        private readonly FunctionClient fxn;
         private readonly StorageService storage;
-        private readonly string? clientId;
+        private readonly string? client;
         private readonly string cachePath;
         private readonly Dictionary<string, IntPtr> cache;
 
         internal PredictionService (
-            IFunctionClient client,
+            FunctionClient client,
             StorageService storage,
             string? clientId,
             string? cachePath
         ) {
-            this.client = client;
+            this.fxn = client;
             this.storage = storage;
-            this.clientId = clientId;        
+            this.client = clientId;        
             this.cachePath = cachePath ?? Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 ".fxn",
@@ -264,13 +285,14 @@ namespace Function.Services {
         private async Task<string> Retrieve (PredictionResource resource) {
             // Check cache
             Directory.CreateDirectory(cachePath);
-            var path = Path.Combine(cachePath, GetResourceName(resource.url));
+            var name = !string.IsNullOrEmpty(resource.name) ? resource.name : GetResourceName(resource.url);
+            var path = Path.Combine(cachePath, name);
             if (File.Exists(path))
                 return path;
             // Download
-            using var dataStream = await client.Download(resource.url);
+            using var dataStream = await fxn.Download(resource.url);
             using var fileStream = File.Create(path);
-            if (clientId == @"browser")
+            if (client == @"browser")
                 dataStream.CopyTo(fileStream); // Workaround for lack of pthreads on browser
             else
                 await dataStream.CopyToAsync(fileStream);
@@ -328,14 +350,14 @@ namespace Function.Services {
             }
         }
 
-        private async Task<object?[]?> ParseResults (object[]? values, bool raw) {
+        private async Task<object?[]?> ParseResults (object?[]? values, bool raw) {
             // Check
             if (values == null)
                 return null;
             // Convert
             var results = await Task.WhenAll(values.Select(async r => {
-                var value = (r as JObject).ToObject<Value>();
-                return raw ? value : await ToObject(value);
+                var value = (r as JObject)!.ToObject<Value>();
+                return raw ? value : await ToObject(value!);
             }));
             // Return
             return results;

@@ -4,20 +4,25 @@
 */
 
 #nullable enable
+#pragma warning disable 8618
 
 namespace Function.API {
 
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
     using Internal;
-    using Types;
 
     /// <summary>
     /// Function API client.
     /// </summary>
-    public interface IFunctionClient {
+    public abstract class FunctionClient {
+
+        #region --Client API--
+        /// <summary>
+        /// Function API URL.
+        /// </summary>
+        public readonly string url;
 
         /// <summary>
         /// Make a request to a REST endpoint.
@@ -28,12 +33,12 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request headers.</param>
         /// <returns>Deserialized response.</returns>
-        Task<T> Request<T> (
+        public abstract Task<T?> Request<T> (
             string method,
             string path,
             object? payload = default,
             Dictionary<string, string>? headers = default
-        );
+        ) where T : class;
 
         /// <summary>
         /// Make a request to a REST endpoint and consume the response as a stream.
@@ -43,12 +48,12 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request headers.</param>
         /// <returns>Stream of deserialized responses.</returns>
-        IAsyncEnumerable<T> Stream<T> (
+        public abstract IAsyncEnumerable<T?> Stream<T> (
             string method,
             string path,
             object? payload = default,
             Dictionary<string, string>? headers = default
-        );
+        ) where T : class;
 
         /// <summary>
         /// Query the Function graph API.
@@ -57,16 +62,16 @@ namespace Function.API {
         /// <param name="query">Graph query.</param>
         /// <param name="input">Query inputs.</param>
         /// <returns>Deserialized query result.</returns>
-        Task<T> Query<T> (
+        public abstract Task<T?> Query<T> (
             string query,
             Dictionary<string, object?>? variables = default
-        );
+        ) where T : class;
 
         /// <summary>
         /// Download a file.
         /// </summary>
         /// <param name="url">URL</param>
-        Task<Stream> Download (string url);
+        public abstract Task<Stream> Download (string url);
 
         /// <summary>
         /// Upload a data stream.
@@ -74,7 +79,21 @@ namespace Function.API {
         /// <param name="stream">Data stream.</param>
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
-        Task Upload (Stream stream, string url, string? mime = null);
+        public abstract Task Upload (Stream stream, string url, string? mime = null);
+        #endregion
+
+
+        #region --Operations--
+        /// <summary>
+        /// Function access key.
+        /// </summary>
+        protected internal readonly string? accessKey;
+    
+        protected FunctionClient (string url, string? accessKey) {
+            this.url = url;
+            this.accessKey = accessKey;
+        }
+        #endregion
     }
 
     /// <summary>
@@ -91,7 +110,7 @@ namespace Function.API {
     /// </summary>
     [Preserve]
     public sealed class GraphResponse<T> {
-        public T data;
+        public T? data;
     }
 
     /// <summary>

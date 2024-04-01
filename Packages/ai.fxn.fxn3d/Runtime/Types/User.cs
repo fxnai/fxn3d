@@ -3,6 +3,9 @@
 *   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
+#nullable enable
+#pragma warning disable 8618
+
 namespace Function.Types {
 
     using System;

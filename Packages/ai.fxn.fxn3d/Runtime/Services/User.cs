@@ -4,6 +4,7 @@
 */
 
 #nullable enable
+#pragma warning disable 8618
 
 namespace Function.Services {
 
@@ -31,7 +32,7 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly IFunctionClient client;
+        private readonly FunctionClient client;
         public const string ProfileFields = @"
         username
         created
@@ -47,7 +48,7 @@ namespace Function.Services {
         }
         ";
 
-        internal UserService (IFunctionClient client) => this.client = client;
+        internal UserService (FunctionClient client) => this.client = client;
         
         private async Task<T?> Retrieve<T> (string? username = null) where T : Profile {
             var response = await client.Query<UserResponse<T>>(
@@ -61,7 +62,7 @@ namespace Function.Services {
                     ["input"] = !string.IsNullOrEmpty(username) ? new UserInput { username = username } : null
                 }
             );
-            return response.user;
+            return response!.user;
         }
         #endregion
 

@@ -15,12 +15,11 @@ namespace Function.API {
     using System.Text;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
-    using Types;
 
     /// <summary>
     /// Function API client for .NET.
     /// </summary>
-    public sealed class DotNetClient : IFunctionClient {
+    public sealed class DotNetClient : FunctionClient {
 
         #region --Client API--
         /// <summary>
@@ -31,10 +30,10 @@ namespace Function.API {
         /// <param name="clientId">Client identifier.</param>
         /// <param name="deviceId">Device model identifier.</param>
         /// <param name="cachePath">Prediction resource cache path.</param>
-        public DotNetClient (string url, string? accessKey = default) {
-            this.url = url.TrimEnd('/');
-            this.accessKey = accessKey;
-        }
+        public DotNetClient (
+            string url,
+            string? accessKey = default
+        ) : base(url.TrimEnd('/'), accessKey) { }
 
         /// <summary>
         /// Make a request to a REST endpoint.
@@ -45,12 +44,12 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request headers.</param>
         /// <returns>Deserialized response.</returns>
-        public async Task<T> Request<T> (
+        public override async Task<T?> Request<T> (
             string method,
             string path,
             object? payload = default,
             Dictionary<string, string>? headers = default
-        ) {
+        ) where T : class {
             path = path.TrimStart('/');
             // Create client and message
             using var client = new HttpClient();
@@ -77,7 +76,7 @@ namespace Function.API {
                 throw new InvalidOperationException(error);
             }
             // Return
-            return JsonConvert.DeserializeObject<T>(responseStr);
+            return JsonConvert.DeserializeObject<T>(responseStr)!;
         }
 
         /// <summary>
@@ -88,12 +87,12 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request headers.</param>
         /// <returns>Stream of deserialized responses.</returns>
-        public async IAsyncEnumerable<T> Stream<T> (
+        public override async IAsyncEnumerable<T?> Stream<T> (
             string method,
             string path,
             object? payload = default,
             Dictionary<string, string>? headers = default
-        ) {
+        ) where T : class {
             path = path.TrimStart('/');
             // Create client and message
             using var client = new HttpClient();
@@ -124,7 +123,7 @@ namespace Function.API {
                     var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
                     throw new InvalidOperationException(error);
                 }
-                yield return JsonConvert.DeserializeObject<T>(responseStr);
+                yield return JsonConvert.DeserializeObject<T>(responseStr)!;
             }
         }
 
@@ -134,23 +133,23 @@ namespace Function.API {
         /// <param name="query">Graph query.</param>
         /// <param name="key">Query result key.</param>
         /// <param name="input">Query inputs.</param>
-        public async Task<T> Query<T> ( // DEPLOY
+        public override async Task<T?> Query<T> ( // DEPLOY
             string query,
             Dictionary<string, object?>? variables = default
-        ) {
+        ) where T : class {
             var response = await Request<GraphResponse<T>>(
                 @"POST",
                 @"/graph",
                 new GraphRequest { query = query, variables = variables }
             );
-            return response.data;
+            return response!.data;
         }
 
         /// <summary>
         /// Download a file.
         /// </summary>
         /// <param name="url">Data URL.</param>
-        public async Task<Stream> Download (string url) {
+        public override async Task<Stream> Download (string url) {
             // Create client
             using var client = new HttpClient();
             var ua = new ProductInfoHeaderValue(@"FunctionDotNet", Function.Version);
@@ -166,19 +165,13 @@ namespace Function.API {
         /// <param name="stream">Data stream.</param>
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
-        public async Task Upload (Stream stream, string url, string? mime = null) {
+        public override async Task Upload (Stream stream, string url, string? mime = null) {
             using var client = new HttpClient();
             using var content = new StreamContent(stream);
             content.Headers.ContentType = new MediaTypeHeaderValue(mime ?? @"application/octet-stream");
             using var response = await client.PutAsync(url, content);
             response.EnsureSuccessStatusCode();
         }
-        #endregion
-
-
-        #region --Operations--
-        private readonly string url;
-        private readonly string? accessKey;
         #endregion
     }
 }

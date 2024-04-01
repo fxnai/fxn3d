@@ -21,7 +21,7 @@ namespace Function.API {
     /// Function API client for Unity Engine.
     /// This uses Unity APIs for performing web requests.
     /// </summary>
-    internal class UnityClient : IFunctionClient {
+    internal class UnityClient : FunctionClient {
 
         #region --Client API--
         /// <summary>
@@ -30,10 +30,10 @@ namespace Function.API {
         /// <param name="url">Function API URL.</param>
         /// <param name="accessKey">Function access key.</param>
         /// <param name="cache">Prediction cache.</param>
-        public UnityClient (string url, string? accessKey) {
-            this.url = url.TrimEnd('/');
-            this.accessKey = accessKey;    
-        }
+        public UnityClient (
+            string url,
+            string? accessKey
+        ) : base(url.TrimEnd('/'), accessKey) { }
 
         /// <summary>
         /// Make a request to a REST endpoint.
@@ -44,12 +44,12 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request headers.</param>
         /// <returns>Deserialized response.</returns>
-        public virtual async Task<T> Request<T> (
+        public override async Task<T?> Request<T> (
             string method,
             string path,
             object? payload = default,
             Dictionary<string, string>? headers = default
-        ) {
+        ) where T : class {
             path = path.TrimStart('/');
             // Create client
             using var client = new UnityWebRequest($"{this.url}/{path}", method) {
@@ -94,7 +94,7 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request headers.</param>
         /// <returns>Stream of deserialized responses.</returns>
-        public virtual async IAsyncEnumerable<T> Stream<T> ( // DEPLOY
+        public override async IAsyncEnumerable<T> Stream<T> ( // DEPLOY
             string method,
             string path,
             object? payload = default,
@@ -141,23 +141,23 @@ namespace Function.API {
         /// <param name="query">Graph query.</param>
         /// <param name="key">Query result key.</param>
         /// <param name="input">Query inputs.</param>
-        public virtual async Task<T> Query<T> (
+        public override async Task<T?> Query<T> (
             string query,
             Dictionary<string, object?>? variables = default
-        ) {
+        ) where T : class {
             var response = await Request<GraphResponse<T>>(
                 @"POST",
                 @"/graph",
                 new GraphRequest { query = query, variables = variables }
             );
-            return response.data;      
+            return response?.data;
         }
 
         /// <summary>
         /// Download a file.
         /// </summary>
         /// <param name="url">URL</param>
-        public virtual async Task<Stream> Download (string url) {
+        public override async Task<Stream> Download (string url) {
             using var request = UnityWebRequest.Get(url);
             request.timeout = 20;
             request.SendWebRequest();
@@ -176,7 +176,7 @@ namespace Function.API {
         /// <param name="stream">Data stream.</param>
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
-        public virtual async Task Upload (Stream stream, string url, string? mime = null) {
+        public override async Task Upload (Stream stream, string url, string? mime = null) {
             // Create client
             using var client = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT) {
                 uploadHandler = new UploadHandlerRaw(stream.ToArray()),
@@ -194,12 +194,6 @@ namespace Function.API {
             if (client.error != null)
                 throw new InvalidOperationException(@"Failed to upload stream with error: {error}");
         }
-        #endregion
-
-
-        #region --Operations--
-        protected readonly string url;
-        protected readonly string? accessKey;
         #endregion
     }
 }

@@ -59,7 +59,7 @@
     <UnityVersion>2022.3.20f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-0.9.4/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.0/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.20f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.20f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
@@ -68,6 +68,7 @@
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/macOSBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/AndroidBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/WindowsBuildHandler.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionInfo.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionSettingsProvider.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/LinuxBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionProjectSettings.cs" />

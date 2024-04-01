@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "Function.Runtime",
+        "Function.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

@@ -4,7 +4,6 @@
 */
 
 #nullable enable
-#pragma warning disable 8618
 
 namespace Function.Types {
 

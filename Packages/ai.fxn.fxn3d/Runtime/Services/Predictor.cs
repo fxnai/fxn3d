@@ -4,6 +4,7 @@
 */
 
 #nullable enable
+#pragma warning disable 8618
 
 namespace Function.Services {
 
@@ -34,7 +35,7 @@ namespace Function.Services {
                     ["input"] = new PredictorInput { tag = tag }
                 }
             );
-            return response.predictor;
+            return response!.predictor;
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace Function.Services {
                     ["predictors"] = new UserPredictorsInput { status = status, offset = offset, count = count }
                 }
             );
-            return response.user?.predictors;
+            return response!.user?.predictors;
         }
 
         /// <summary>
@@ -87,7 +88,7 @@ namespace Function.Services {
                     ["input"] = new PredictorsInput { query = query, offset = offset, count = count }
                 }
             );
-            return response.predictors;
+            return response!.predictors;
         }
 
         /// <summary>
@@ -137,7 +138,7 @@ namespace Function.Services {
                     }
                 }
             );
-            return response.createPredictor;
+            return response!.createPredictor;
         }
 
         /// <summary>
@@ -154,7 +155,7 @@ namespace Function.Services {
                     ["input"] = new DeletePredictorInput { tag = tag }
                 }
             );
-            return response.deletePredictor;
+            return response!.deletePredictor;
         }
 
         /// <summary>
@@ -173,13 +174,13 @@ namespace Function.Services {
                     ["input"] = new ArchivePredictorInput { tag = tag }
                 }
             );
-            return response.archivePredictor;
+            return response!.archivePredictor;
         }
         #endregion
 
 
         #region --Operations--
-        private readonly IFunctionClient client;
+        private readonly FunctionClient client;
         public static string Fields = @$"
         tag
         owner {{
@@ -222,7 +223,7 @@ namespace Function.Services {
         license
         ";
 
-        internal PredictorService (IFunctionClient client) => this.client = client;
+        internal PredictorService (FunctionClient client) => this.client = client;
         #endregion
 
 

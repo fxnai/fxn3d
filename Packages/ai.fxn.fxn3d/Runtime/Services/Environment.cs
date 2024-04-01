@@ -4,18 +4,11 @@
 */
 
 #nullable enable
+#pragma warning disable 8618
 
 namespace Function.Services {
 
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.IO;
-    using System.Text;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using API;
     using Types;
 
@@ -49,7 +42,7 @@ namespace Function.Services {
                     ["input"] = !string.IsNullOrEmpty(organization) ? new UserService.UserInput { username = organization } : null,
                 }
             );
-            return response.user?.environmentVariables;
+            return response!.user?.environmentVariables;
         }
 
         /// <summary>
@@ -73,7 +66,7 @@ namespace Function.Services {
                     ["input"] = new CreateEnvironmentVariableInput { name = name, value = value, organization = organization }
                 }
             );
-            return response.createEnvironmentVariable;
+            return response!.createEnvironmentVariable;
         }
 
         /// <summary>
@@ -93,18 +86,18 @@ namespace Function.Services {
                     ["input"] = new DeleteEnvironmentVariableInput { name = name, organization = organization }
                 }
             );
-            return response.deleteEnvironmentVariable;
+            return response!.deleteEnvironmentVariable;
         }
         #endregion
 
 
         #region --Operations--
-        private readonly IFunctionClient client;
+        private readonly FunctionClient client;
         public static string Fields = @$"
         name
         ";
 
-        internal EnvironmentVariableService (IFunctionClient client) => this.client = client;
+        internal EnvironmentVariableService (FunctionClient client) => this.client = client;
         #endregion
 
 

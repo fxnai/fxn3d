@@ -18,31 +18,23 @@ namespace Function {
 
         #region --Attributes--
         /// <summary>
-        /// Embed an edge predictor at build time to improve initial prediction latency.
-        /// Note that this is required to use edge predictors on Android and iOS.
+        /// Embed predictors at build time to avoid errors due to sandboxing restrictions.
+        /// NOTE: This is required to use edge predictors on Android and iOS.
         /// </summary>
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
         public sealed class EmbedAttribute : Attribute {
-
+            
             #region --Client API--
             /// <summary>
-            /// Embed an edge predictor at build time.
+            /// Embed predictors at build time.
             /// </summary>
-            /// <param name="tag">Predictor tag.</param>
-            /// <param name="accessKey">Function access key. If `null` the project access key will be used.</param>
-            /// <param name="apiUrl">Function API URL.</param>
-            public EmbedAttribute (string tag, string? accessKey = null, string? apiUrl = null) {
-                this.tag = tag;
-                this.accessKey = accessKey;
-                this.apiUrl = apiUrl;
-            }
+            public EmbedAttribute (params string[] tags) => this.tags = tags;
             #endregion
 
 
             #region --Operations--
-            internal readonly string tag;
-            internal readonly string? accessKey;
-            internal readonly string? apiUrl;
+            internal readonly string[] tags;
+            internal Func<Function>? getFunction;
             #endregion
         }
         #endregion
@@ -95,7 +87,7 @@ namespace Function {
         /// <param name="clientId">Client identifier.</param>
         /// <param name="cachePath">Predictor cache path.</param>
         public Function (
-            IFunctionClient client,
+            FunctionClient client,
             string? clientId = null,
             string? cachePath = null
         ) {
@@ -110,7 +102,7 @@ namespace Function {
 
 
         #region --Operations--
-        public readonly IFunctionClient client;
+        public readonly FunctionClient client;
         public const string Version = @"0.0.12";
         internal const string URL = @"https://api.fxn.ai";
         #endregion

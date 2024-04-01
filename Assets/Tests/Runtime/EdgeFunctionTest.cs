@@ -8,7 +8,7 @@ namespace Function.Tests {
     using UnityEngine;
     using Newtonsoft.Json;
 
-    [Function.Embed(EdgeFunctionTest.Tag, apiUrl: @"https://api.fxn.dev")]
+    [Function.Embed(EdgeFunctionTest.Tag)]
     internal sealed class EdgeFunctionTest : MonoBehaviour {
 
         private Function fxn;

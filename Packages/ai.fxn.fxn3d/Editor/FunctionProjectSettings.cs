@@ -5,7 +5,6 @@
 
 namespace Function.Editor {
 
-    using System.Threading.Tasks;
     using UnityEngine;
     using UnityEditor;
     using Internal;

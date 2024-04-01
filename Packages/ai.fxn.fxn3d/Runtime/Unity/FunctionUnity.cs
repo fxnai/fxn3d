@@ -28,13 +28,27 @@ namespace Function {
         /// Create a Function client for Unity.
         /// </summary>
         /// <param name="accessKey">Function access key. This defaults to your access key in Project Settings.</param>
+        /// <param name="url">Function API URL.</param>
+        /// <param name="clientId">Client identifier.</param>
+        /// <param name="cachePath">Predictor cache path.</param>
         /// <returns>Function client.</returns>
-        public static Function Create (string? accessKey = null, string? url = null) {
-            var settings = FunctionSettings.Instance;
-            var key = !string.IsNullOrEmpty(accessKey) ? accessKey : settings?.accessKey;
-            var apiUrl = url ?? Function.URL;
-            var client = new PredictionCacheClient(apiUrl, accessKey: key, cache: settings?.cache);
-            var fxn = new Function(client, clientId: ClientId, cachePath: CachePath);
+        public static Function Create (
+            string? accessKey = null,
+            string? url = null,
+            string? clientId = null,
+            string? cachePath = null
+        ) {
+            var settings = FunctionSettings.Instance!;
+            var client = new PredictionCacheClient(
+                url ?? Function.URL,
+                accessKey: accessKey ?? settings?.accessKey,
+                cache: settings?.cache
+            );
+            var fxn = new Function(
+                client,
+                clientId: clientId ?? ClientId,
+                cachePath: cachePath ?? CachePath
+            );
             return fxn;
         }
 
@@ -114,9 +128,9 @@ namespace Function {
                 throw new InvalidOperationException($"Value cannot be converted to a texture because it has an invalid type: {value?.type}");
             // Download
             var client = Create();
-            using var stream = await client.Storage.Download(value.data);
+            using var stream = await client.Storage.Download(value.data!);
             // Create
-            texture = texture ? texture : new Texture2D(16, 16);
+            texture = texture != null ? texture : new Texture2D(16, 16);
             texture.LoadImage(stream.ToArray());
             // Return
             return texture;
@@ -129,7 +143,7 @@ namespace Function {
         /// <returns>Audio clip.</returns>
         public static async Task<AudioClip> ToAudioClip (this Value value) {
             // Create download URL
-            using var urlCreator = new DownloadUrlCreator(value.data);
+            using var urlCreator = new DownloadUrlCreator(value.data!);
             var url = await urlCreator.URL();
             // Download
             using var www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.WAV);

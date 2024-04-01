@@ -3,6 +3,9 @@
 *   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
+#nullable enable
+
+using FunctionClient = Function.Function;
 using EmbedAttribute = Function.Function.EmbedAttribute;
 
 namespace Function.Editor.Build {
@@ -11,6 +14,7 @@ namespace Function.Editor.Build {
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using UnityEditor;
     using UnityEditor.Build;
     using UnityEditor.Build.Reporting;
@@ -24,13 +28,25 @@ namespace Function.Editor.Build {
 
         protected abstract FunctionSettings CreateSettings (BuildReport report);
 
-        protected static EmbedAttribute[] GetEmbeds () => AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly => assembly
-                .GetTypes()
-                .SelectMany(type => Attribute.GetCustomAttributes(type, typeof(EmbedAttribute)))
-            )
-            .Cast<EmbedAttribute>()
-            .ToArray();
+        internal static EmbedAttribute[] GetEmbeds () {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var types = assemblies.SelectMany(assembly => assembly.GetTypes()).ToArray();
+            var fxn = FunctionUnity.Create();
+            Func<FunctionClient> getDefaultFunction = () => fxn;
+            var defaultEmbeds = types.SelectMany(type => Attribute.GetCustomAttributes(type, typeof(EmbedAttribute)))
+                .Cast<EmbedAttribute>()
+                .Select(embed => { embed.getFunction = getDefaultFunction; return embed; })
+                .ToArray();
+            var customEmbeds = types.SelectMany(type => type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                .Where(property => Attribute.IsDefined(property, typeof(EmbedAttribute)) && property.PropertyType == typeof(FunctionClient))
+                .Select(property  => {
+                    var embed = property.GetCustomAttribute<EmbedAttribute>();
+                    embed.getFunction = CreateDelegateForProperty<FunctionClient>(property);
+                    return embed;
+                })
+                .ToArray();
+            return Enumerable.Concat(defaultEmbeds, customEmbeds).ToArray();
+        }
         #endregion
 
 
@@ -82,6 +98,13 @@ namespace Function.Editor.Build {
                 PlayerSettings.SetPreloadedAssets(assets.ToArray());
             }
             AssetDatabase.DeleteAsset(CachePath);
+        }
+
+        private static Func<T>? CreateDelegateForProperty<T> (PropertyInfo property) {
+            var getter = property.GetGetMethod(true);
+            return getter != null && getter.ReturnType == typeof(T) ?
+                (Func<T>)Delegate.CreateDelegate(typeof(Func<T>), getter) :
+                null;
         }
         #endregion
     }

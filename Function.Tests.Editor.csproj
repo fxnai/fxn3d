@@ -59,13 +59,14 @@
     <UnityVersion>2022.3.20f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-0.9.4/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.0/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.20f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.20f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Tests/Editor/UserTest.cs" />
     <Compile Include="Assets/Tests/Editor/PredictorTest.cs" />
+    <Compile Include="Assets/Tests/Editor/EmbedAttributeTest.cs" />
     <Compile Include="Assets/Tests/Editor/EnvironmentTest.cs" />
     <Compile Include="Assets/Tests/Editor/PredictionTest.cs" />
     <Compile Include="Assets/Tests/Editor/StorageTest.cs" />
@@ -933,6 +934,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Function.Runtime.csproj" />
+    <ProjectReference Include="Function.Editor.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

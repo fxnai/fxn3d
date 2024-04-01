@@ -4,6 +4,7 @@
 */
 
 #nullable enable
+#pragma warning disable 8618
 
 namespace Function.Types {
 
@@ -88,5 +89,10 @@ namespace Function.Types {
         /// Resource URL.
         /// </summary>
         public string url;
+
+        /// <summary>
+        /// Resource name.
+        /// </summary>
+        public string? name;
     }
 }

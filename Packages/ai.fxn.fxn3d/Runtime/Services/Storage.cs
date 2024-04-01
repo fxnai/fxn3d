@@ -4,13 +4,13 @@
 */
 
 #nullable enable
+#pragma warning disable 8618
 
 namespace Function.Services {
 
     using System;
     using System.IO;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
     using API;
     using Internal;
     using Types;
@@ -93,15 +93,15 @@ namespace Function.Services {
                     }
                 }
             );
-            return response.createUploadUrl;
+            return response!.createUploadUrl!;
         }
         #endregion
 
 
         #region --Operations--
-        private readonly IFunctionClient client;
+        private readonly FunctionClient client;
 
-        internal StorageService (IFunctionClient client) => this.client = client;
+        internal StorageService (FunctionClient client) => this.client = client;
         #endregion
 
 
