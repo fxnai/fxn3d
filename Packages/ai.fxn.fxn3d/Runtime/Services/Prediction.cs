@@ -400,17 +400,18 @@ namespace Function.Services {
                 case uint[] x:          return ToValue(x);
                 case ulong[] x:         return ToValue(x);
                 case bool[] x:          return ToValue(x);
-                case Tensor<float> x:   return ToValue(x.data, x.shape);
-                case Tensor<double> x:  return ToValue(x.data, x.shape);
-                case Tensor<sbyte> x:   return ToValue(x.data, x.shape);
-                case Tensor<short> x:   return ToValue(x.data, x.shape);
-                case Tensor<int> x:     return ToValue(x.data, x.shape);
-                case Tensor<long> x:    return ToValue(x.data, x.shape);
-                case Tensor<byte> x:    return ToValue(x.data, x.shape);
-                case Tensor<ushort> x:  return ToValue(x.data, x.shape);
-                case Tensor<uint> x:    return ToValue(x.data, x.shape);
-                case Tensor<ulong> x:   return ToValue(x.data, x.shape);
-                case Tensor<bool> x:    return ToValue(x.data, x.shape);
+                case Tensor<float> x:   return ToValue(x);
+                case Tensor<double> x:  return ToValue(x);
+                case Tensor<sbyte> x:   return ToValue(x);
+                case Tensor<short> x:   return ToValue(x);
+                case Tensor<int> x:     return ToValue(x);
+                case Tensor<long> x:    return ToValue(x);
+                case Tensor<byte> x:    return ToValue(x);
+                case Tensor<ushort> x:  return ToValue(x);
+                case Tensor<uint> x:    return ToValue(x);
+                case Tensor<ulong> x:   return ToValue(x);
+                case Tensor<bool> x:    return ToValue(x);
+                case Image x:           return ToValue(x);
                 case string x:
                     Function.CreateStringValue(x, out var str).Throw();
                     return str;
@@ -455,35 +456,55 @@ namespace Function.Services {
                 case Dtype.Bool:    return ToObject<bool>(data, shape);
                 case Dtype.String:  return Marshal.PtrToStringUTF8(data);
                 case Dtype.Binary:  return new MemoryStream(ToArray<byte>(data, shape));
-                case Dtype.List:    return JsonConvert.DeserializeObject<object[]>(Marshal.PtrToStringUTF8(data));
-                case Dtype.Dict:    return JsonConvert.DeserializeObject<Dictionary<string, object>>(Marshal.PtrToStringUTF8(data));
+                case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(Marshal.PtrToStringUTF8(data))!.ToObjectNested();
+                case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(Marshal.PtrToStringUTF8(data))!.ToObjectNested();
                 default:            throw new InvalidOperationException($"Cannot convert Function value to object because value type is unsupported: {dtype}");
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue<T> (T* data, int[]? shape = null) where T : unmanaged {
-            Function.CreateArrayValue(
-                data,
-                shape,
-                shape?.Length ?? 0,
-                typeof(T).ToDtype(),
-                ValueFlags.CopyData,
-                out var result
-            ).Throw();
-            return result;
+        private static unsafe IntPtr ToValue<T> (
+            T* data,
+            int[]? shape = null,
+            ValueFlags flags = ValueFlags.CopyData
+        ) where T : unmanaged => Function.CreateArrayValue(
+            data,
+            shape,
+            shape?.Length ?? 0,
+            typeof(T).ToDtype(),
+            flags,
+            out var result
+        ).Throw() == Status.Ok ? result : default;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe IntPtr ToValue<T> (T[] array) where T : unmanaged {
+            fixed (T* data = array)
+                return ToValue(data, new [] { array.Length });
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue<T> (T[] array, int[]? shape = null) where T : unmanaged {
-            fixed (T* data = array)
-                return ToValue(data, shape ?? new [] { array.Length });
+        private static unsafe IntPtr ToValue<T> (Tensor<T> tensor) where T : unmanaged {
+            fixed (T* data = tensor)
+                return ToValue(data, tensor.shape, ValueFlags.None);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe IntPtr ToValue (Image image) {
+            fixed (byte* data = image)
+                return Function.CreateImageValue(
+                    data,
+                    image.width,
+                    image.height,
+                    image.channels,
+                    image.data != null ? ValueFlags.CopyData : ValueFlags.None,
+                    out var value
+                ).Throw() == Status.Ok ? value : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static object ToObject<T> (MemoryStream stream, int[] shape) where T : unmanaged {
             var data = stream.ToArray<T>();
-            return shape.Length <= 1 ? shape.Length < 1 ? data[0] : data : new Tensor<T>(data, shape);
+            return shape.Length > 0 ? new Tensor<T>(data, shape) : data[0];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -491,7 +512,7 @@ namespace Function.Services {
             if (shape.Length == 0)
                 return *(T*)data;
             var array = ToArray<T>(data, shape);
-            return shape.Length > 1 ? new Tensor<T>(array, shape) : array;
+            return new Tensor<T>(array, shape);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

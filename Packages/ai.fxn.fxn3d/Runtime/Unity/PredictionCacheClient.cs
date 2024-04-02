@@ -11,6 +11,7 @@ namespace Function.API {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Types;
     using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
     /// <summary>
@@ -42,12 +43,12 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request body.</param>
         /// <returns>Deserialized response.</returns>
-        public override async Task<T> Request<T> (
+        public override async Task<T?> Request<T> (
             string method,
             string path,
             object? payload = default,
             Dictionary<string, string>? headers = default
-        ) {
+        ) where T : class {
             path = path.TrimStart('/');
             // Check prediction
             if (!path.StartsWith(@"predict"))
@@ -67,7 +68,11 @@ namespace Function.API {
             var prefix = path.Contains("?") ? "&" : "?";
             path = $"{path}{prefix}{qs}";
             // Request
-            return await base.Request<T>(method, path, payload: payload, headers: headers);
+            var completedPrediction = await base.Request<Prediction>(method, path, payload: payload, headers: headers);
+            var result = cachedPrediction.prediction;
+            result.configuration = completedPrediction!.configuration;
+            // Return
+            return result as T;
         }
         #endregion
 

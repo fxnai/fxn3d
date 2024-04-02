@@ -4,7 +4,6 @@
 */
 
 #nullable enable
-#pragma warning disable 8618
 
 namespace Function.Types {
 
@@ -14,8 +13,9 @@ namespace Function.Types {
     /// Tensor.
     /// </summary>
     [Preserve]
-    public readonly struct Tensor<T> where T : unmanaged {
+    public unsafe readonly struct Tensor<T> where T : unmanaged {
 
+        #region --Client API--
         /// <summary>
         /// Tensor data.
         /// </summary>
@@ -33,7 +33,22 @@ namespace Function.Types {
         /// <param name="shape">Tensor shape.</param>
         public Tensor (T[] data, int[] shape) {
             this.data = data;
+            this.nativeData = null;
             this.shape = shape;
         }
+        #endregion
+
+
+        #region --Operations--
+        private readonly T* nativeData;
+
+        public Tensor (T* data, int[] shape) { // Zero copy into `FXNValue`
+            this.data = null!;
+            this.nativeData = data;
+            this.shape = shape;
+        }
+
+        public ref T GetPinnableReference () => ref (nativeData == null ? ref data[0] : ref *nativeData);
+        #endregion
     }
 }

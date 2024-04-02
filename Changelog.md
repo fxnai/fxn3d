@@ -1,5 +1,6 @@
 ## 0.0.12
-*INCOMPLETE*
++ Added `Function.Types.Image` struct for making edge predictions on images.
++ Added `FunctionUnity.ToImage(Texture2D)` helper function for creating an image from a `Texture2D`.
 
 ## 0.0.11
 + Fixed WebGL build error when building in Release mode due to JavaScript minification.

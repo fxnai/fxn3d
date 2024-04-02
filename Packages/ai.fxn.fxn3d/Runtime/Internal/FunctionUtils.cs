@@ -3,12 +3,17 @@
 *   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
+#nullable enable
+
 namespace Function.Internal {
 
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Text;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Helpful extension methods.
@@ -49,5 +54,11 @@ namespace Function.Internal {
             Buffer.BlockCopy(rawData, 0, data, 0, rawData.Length);
             return data;
         }
+
+        public static object? ToObjectNested (this object o) => o switch {
+            JObject dict => dict.ToObject<Dictionary<string, object>>().ToDictionary(k => k.Key, v => v.Value.ToObjectNested()),
+            JArray list => list.ToObject<List<object>>().Select(ToObjectNested).ToList(),
+            _ => o,
+        };
     }
 }
