@@ -20,7 +20,12 @@ namespace Function.Editor.Build {
     internal sealed class AndroidBuildHandler : BuildHandler, IPostGenerateGradleAndroidProject {
 
         private static List<CachedPrediction> cache;
-        private static readonly string[] Architectures = new [] { "armeabi-v7a", "arm64-v8a", "x86", "x86_64" };
+        private static readonly string[] Platforms = new [] {
+            "android:armeabi-v7a",
+            "android:arm64-v8a",
+            "android:x86",
+            "android:x86_64"
+        };
 
         protected override BuildTarget target => BuildTarget.Android;
 
@@ -31,26 +36,27 @@ namespace Function.Editor.Build {
             var embeds = GetEmbeds();
             var cache = new List<CachedPrediction>();
             foreach (var embed in embeds) {
-                // Create client
-                var url = embed.apiUrl ?? Function.URL;
-                var accessKey = embed.accessKey ?? settings.accessKey;
-                var client = new DotNetClient(url, accessKey);
-                // Embed
-                foreach (var arch in Architectures) {
-                    // Create prediction
-                    var platform = $"android:{arch}";
-                    var prediction = Task.Run(() => client.Request<Prediction>(
-                        @"POST",
-                        $"/predict/{embed.tag}",
-                        headers: new () { [@"fxn-client"] = platform }
-                    )).Result;
-                    // Check type
-                    if (prediction.type == PredictorType.Edge)
-                        cache.Add(new CachedPrediction {
-                            platform = platform,
-                            prediction = prediction
-                        });
-                }
+                var embedFxn = embed.getFunction();
+                var client = new DotNetClient(embedFxn.client.url, embedFxn.client.accessKey);
+                var fxn = new Function(client);
+                var predictions = (from tag in embed.tags from platform in Platforms select (platform, tag))
+                    .Select((pair) => {
+                        // Create prediction
+                        var (platform, tag) = pair;
+                        var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: platform)).Result;
+                        // Check type
+                        if (prediction.type != PredictorType.Edge)
+                            return null;
+                        // Populate names
+                        foreach (var resource in prediction.resources)
+                            if (resource.type == "dso")
+                                resource.name ??= PredictionService.GetResourceName(resource.url) + ".so";
+                        // Return
+                        return new CachedPrediction { platform = platform, prediction = prediction };
+                    })
+                    .Where(pred => pred != null)
+                    .ToArray();
+                cache.AddRange(predictions);
             }
             // Cache
             settings.cache = cache;
@@ -70,14 +76,16 @@ namespace Function.Editor.Build {
                 var libDir = Path.Combine(projectPath, @"src", @"main", @"jniLibs", arch);
                 if (!Directory.Exists(libDir))
                     continue;
-                // Fetch dso
+                // Fetch resources
                 var client = new DotNetClient(Function.URL);
-                var dso = cachedPrediction.prediction.resources.First(res => res.type == @"dso");
-                var dsoName = PredictionService.GetResourceName(dso.url);
-                var dsoPath = Path.Combine(libDir, $"{dsoName}.so");
-                using var dsoStream = Task.Run(async () => await client.Download(dso.url)).Result;
-                using var fileStream = File.Create(dsoPath);
-                dsoStream.CopyTo(fileStream);
+                var resources = cachedPrediction.prediction.resources.Where(res => res.type == @"dso");
+                foreach (var resource in resources) {
+                    var libName = !string.IsNullOrEmpty(resource.name) ? resource.name : PredictionService.GetResourceName(resource.url);
+                    var path = Path.Combine(libDir, libName);
+                    using var dsoStream = Task.Run(async () => await client.Download(resource.url)).Result;
+                    using var fileStream = File.Create(path);
+                    dsoStream.CopyTo(fileStream);
+                }
             }
             // Unset cache
             cache = null;

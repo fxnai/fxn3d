@@ -456,8 +456,8 @@ namespace Function.Services {
                 case Dtype.Bool:    return ToObject<bool>(data, shape);
                 case Dtype.String:  return Marshal.PtrToStringUTF8(data);
                 case Dtype.Binary:  return new MemoryStream(ToArray<byte>(data, shape));
-                case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(Marshal.PtrToStringUTF8(data))!.ToObjectNested();
-                case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(Marshal.PtrToStringUTF8(data))!.ToObjectNested();
+                case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(Marshal.PtrToStringUTF8(data));
+                case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(Marshal.PtrToStringUTF8(data));
                 default:            throw new InvalidOperationException($"Cannot convert Function value to object because value type is unsupported: {dtype}");
             }
         }

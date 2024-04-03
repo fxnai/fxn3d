@@ -1027,6 +1027,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Function.Runtime.csproj" />
+    <ProjectReference Include="Function.Unity.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

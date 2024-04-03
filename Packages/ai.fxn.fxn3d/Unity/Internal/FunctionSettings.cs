@@ -13,7 +13,7 @@ namespace Function.Internal {
     /// <summary>
     /// Function settings for the current Unity project.
     /// </summary>
-    [DefaultExecutionOrder(Int32.MinValue)]
+    [DefaultExecutionOrder(int.MinValue)]
     internal sealed class FunctionSettings : ScriptableObject {
 
         #region --Types--

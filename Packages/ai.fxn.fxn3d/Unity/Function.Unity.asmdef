@@ -1,9 +1,8 @@
 {
-    "name": "Function.Tests.Runtime",
+    "name": "Function.Unity",
     "rootNamespace": "",
     "references": [
-        "Function.Runtime",
-        "Function.Unity"
+        "Function.Runtime"
     ],
     "includePlatforms": [
         "Android",
@@ -19,6 +18,5 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+    "versionDefines": []
 }

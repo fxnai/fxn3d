@@ -8,6 +8,7 @@
 namespace Function {
 
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Text;
@@ -17,6 +18,7 @@ namespace Function {
     using API;
     using Internal;
     using Types;
+    using Unity.Collections.LowLevel.Unsafe;
 
     /// <summary>
     /// Utilities for working with Unity.
@@ -53,14 +55,63 @@ namespace Function {
         }
 
         /// <summary>
+        /// Convert a texture to a Function image.
+        /// This is useful for making edge predictions on images.
+        /// NOTE: The texture format must be `R8`, `Alpha8`, `RGB24`, or `RGBA32`.
+        /// </summary>
+        /// <param name="texture">Input texture.</param>
+        /// <returns>Image.</returns>
+        public static unsafe Image ToImage (this Texture2D texture) {
+            // Check texture
+            if (texture == null)
+                throw new ArgumentNullException(nameof(texture));
+            // Check
+            if (!texture.isReadable)
+                throw new InvalidOperationException(@"Texture cannot be converted to a Function image because it is not readable");
+            // Check format
+            var FormatChannelMap = new Dictionary<TextureFormat, int> {
+                [TextureFormat.R8] = 1,
+                [TextureFormat.Alpha8] = 1,
+                [TextureFormat.RGB24] = 3,
+                [TextureFormat.RGBA32] = 4,
+            };
+            if (!FormatChannelMap.TryGetValue(texture.format, out var channels))
+                throw new InvalidOperationException($"Texture cannot be converted ton a Function image because it has unsupported format: {texture.format}");
+            // Flip vertical
+            var rowStride = texture.width * channels;
+            var pixelBuffer = new byte[rowStride * texture.height];
+            fixed (void* dst = pixelBuffer)
+                UnsafeUtility.MemCpyStride(
+                    dst,
+                    rowStride,
+                    (byte*)texture.GetRawTextureData<byte>().GetUnsafePtr() + (rowStride * (texture.height - 1)),
+                    -rowStride,
+                    rowStride,
+                    texture.height
+                );
+            // Create image
+            var image = new Image(
+                pixelBuffer,
+                texture.width,
+                texture.height,
+                channels
+            );
+            // Return
+            return image;
+        }
+
+        /// <summary>
         /// Convert a texture to a prediction value.
         /// </summary>
         /// <param name="texture">Input texture.</param>
         /// <param name="minUploadSize">Textures larger than this size in bytes will be uploaded.</param>
         /// <returns>Prediction value.</returns>
         public static async Task<Value> ToValue (this Texture2D texture, int minUploadSize = 4096) {
-            // Check
-            if (!texture || !texture.isReadable)
+            // Check texture
+            if (texture == null)
+                throw new ArgumentNullException(nameof(texture));
+            // Check readable
+            if (!texture.isReadable)
                 throw new InvalidOperationException(@"Texture cannot be converted to a prediction value because it is not readable");
             // Encode
             var png = texture.format == TextureFormat.RGBA32;

@@ -1,7 +1,8 @@
 {
     "name": "Function.Editor",
     "references": [
-        "Function.Runtime"
+        "Function.Runtime",
+        "Function.Unity"
     ],
     "includePlatforms": [
         "Editor"
