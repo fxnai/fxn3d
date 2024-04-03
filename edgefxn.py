@@ -6,16 +6,23 @@
 from argparse import ArgumentParser
 from pathlib import Path
 from requests import get
+from shutil import unpack_archive
 
 parser = ArgumentParser()
 parser.add_argument("--version", type=str, default=None)
 
 def _download_fxnc (url: str, path: Path):
+    # Download
     response = get(url)
     response.raise_for_status()
     with open(path, "wb") as f:
         f.write(response.content)
     print(f"Wrote {url} to path: {path}")
+    # Unzip
+    if path.suffix == ".zip":
+        unpack_archive(path, extract_dir=path.parent)
+        path.unlink()
+        print(f"Extracted {path}")
 
 def _get_latest_version () -> str:
     response = get(f"https://api.github.com/repos/fxnai/fxnc/releases/latest")
@@ -43,6 +50,10 @@ def main (): # CHECK # Linux
         {
             "url": f"https://cdn.fxn.ai/edgefxn/{version}/libFunction-android-x86_64.so",
             "path": LIB_PATH_BASE / "Android" / "x86_64" / "libFunction.so"
+        },
+        {
+            "url": f"https://cdn.fxn.ai/edgefxn/{version}/Function-ios-iphoneos.framework.zip",
+            "path": LIB_PATH_BASE / "iOS" / "Function.framework.zip"
         },
         {
             "url": f"https://cdn.fxn.ai/edgefxn/{version}/Function-macos.dylib",

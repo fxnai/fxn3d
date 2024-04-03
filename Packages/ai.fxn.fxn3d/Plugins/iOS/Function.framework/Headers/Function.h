@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "FXNAPI.h"
-#include "FXNStatus.h"
-#include "FXNValue.h"
-#include "FXNValueMap.h"
-#include "FXNConfiguration.h"
-#include "FXNPrediction.h"
-#include "FXNPredictor.h"
-#include "FXNVersion.h"
+#include <Function/FXNAPI.h>
+#include <Function/FXNStatus.h>
+#include <Function/FXNValue.h>
+#include <Function/FXNValueMap.h>
+#include <Function/FXNConfiguration.h>
+#include <Function/FXNPrediction.h>
+#include <Function/FXNPredictor.h>
+#include <Function/FXNVersion.h>

@@ -13,8 +13,8 @@
 #include <utility>
 #include <vector>
 #include <Function/Function.h>
-#include "Configuration.hpp"
-#include "Prediction.hpp"
+#include <Function/cxx/Configuration.hpp>
+#include <Function/cxx/Prediction.hpp>
 
 namespace Function {
 

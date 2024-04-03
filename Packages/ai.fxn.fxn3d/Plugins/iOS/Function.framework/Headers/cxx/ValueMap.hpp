@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 #include <Function/Function.h>
-#include "Value.hpp"
+#include <Function/cxx/Value.hpp>
 
 namespace Function {
 
@@ -22,10 +22,14 @@ namespace Function {
         class Proxy {
             friend class ValueMap;
         public:
-            Value Get () const;
-            template<typename T>
-            T Get () const;
             operator Value () const;
+            explicit operator float () const;
+            explicit operator double () const;
+            explicit operator int16_t () const;
+            explicit operator int32_t () const;
+            explicit operator int64_t () const;
+            explicit operator std::string () const;
+            explicit operator bool () const;
             const Proxy& operator= (float value) const;
             const Proxy& operator= (double value) const;
             const Proxy& operator= (int8_t value) const;
@@ -77,7 +81,7 @@ namespace Function {
 
         size_t Size () const;
 
-        void Remove (const std::string& key) const;
+        Value Pop (const std::string& key);
 
         Proxy operator[] (const std::string& key) const;
 

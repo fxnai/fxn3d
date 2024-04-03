@@ -9,7 +9,7 @@
 #pragma once
 
 #include <stdbool.h>
-#include "FXNValue.h"
+#include <Function/FXNValue.h>
 
 #pragma region --Types--
 /*!
@@ -127,6 +127,9 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapGetValue (
  @abstract Set the value for a given key in the value map.
 
  @discussion Set the value for a given key in the value map.
+
+ NOTE: The value map takes ownership of the value.
+ As such, you must not call `FXNValueRelease` on the value.
 
  @param map
  Prediction value map.

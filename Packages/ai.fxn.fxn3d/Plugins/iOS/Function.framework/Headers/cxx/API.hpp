@@ -9,9 +9,9 @@
 #pragma once
 
 #include <vector>
-#include "Assert.hpp"
-#include "Configuration.hpp"
-#include "Value.hpp"
+#include <Function/cxx/Assert.hpp>
+#include <Function/cxx/Configuration.hpp>
+#include <Function/cxx/Value.hpp>
 
 #ifdef _WIN64
     #include <windows.h>
@@ -45,17 +45,14 @@ inline Configuration::~Configuration () {
 }
 
 inline Configuration& Configuration::operator= (Configuration&& other) noexcept {
-    // Check
     if (this == &other)
         return *this;
-    // Move
     if (owner)
         FXNConfigurationRelease(configuration);
-    configuration = other.configuration;
-    owner = other.owner;
-    other.configuration = nullptr;
-    other.owner = false;
-    // Return
+    configuration = nullptr;
+    owner = false;
+    std::swap(configuration, other.configuration);
+    std::swap(owner, other.owner);
     return *this;
 }
 
@@ -200,17 +197,14 @@ inline Value::~Value () {
 }
 
 inline Value& Value::operator= (Value&& other) noexcept {
-    // Check
     if (this == &other)
         return *this;
-    // Move
     if (owner)
         FXNValueRelease(value);
-    value = other.value;
-    owner = other.owner;
-    other.value = nullptr;
-    other.owner = false;
-    // Return
+    value = nullptr;
+    owner = false;
+    std::swap(value, other.value);
+    std::swap(owner, other.owner);
     return *this;
 }
 
@@ -240,7 +234,8 @@ inline int32_t Value::GetDimensions () const {
 inline std::vector<int32_t> Value::GetShape () const {
     int32_t dimensions = GetDimensions();
     std::vector<int32_t> shape(dimensions);
-    FXNValueGetShape(value, shape.data(), dimensions);
+    if (dimensions > 0)
+        FXNValueGetShape(value, shape.data(), dimensions);
     return shape;
 }
 
@@ -327,17 +322,14 @@ inline ValueMap::~ValueMap () {
 }
 
 inline ValueMap& ValueMap::operator= (ValueMap&& other) noexcept {
-    // Check
     if (this == &other)
         return *this;
-    // Move
     if (owner)
         FXNValueMapRelease(map);
     map = other.map;
     owner = other.owner;
     other.map = nullptr;
     other.owner = false;
-    // Return
     return *this;
 }
 
@@ -352,8 +344,12 @@ inline size_t ValueMap::Size () const {
     return size;
 }
 
-inline void ValueMap::Remove (const std::string& key) const {
+inline Value ValueMap::Pop (const std::string& key) {
+    FXNValue* value = nullptr;
+    auto status = FXNValueMapGetValue(map, key.c_str(), &value);
+    FXN_ASSERT_THROW(status == FXN_OK, "Value map does not contain a value for key `{}`", key);
     FXNValueMapSetValue(map, key.c_str(), nullptr);
+    return Value(value);
 }
 
 inline ValueMap::Proxy ValueMap::operator[] (const std::string& key) const {
@@ -376,16 +372,15 @@ inline ValueMap::Proxy::Proxy (const ValueMap& map, const std::string& key) : ma
 
 }
 
-inline Value ValueMap::Proxy::Get () const {
+inline ValueMap::Proxy::operator Value () const {
     FXNValue* value = nullptr;
     auto status = FXNValueMapGetValue(map, key.c_str(), &value);
     FXN_ASSERT_THROW(status == FXN_OK, "Value map does not contain a value for key `{}`", key);
     return Value(value, false);
 }
 
-template<>
-inline float ValueMap::Proxy::Get<float>() const {
-    auto value = Get();
+inline ValueMap::Proxy::operator float () const {
+    Value value = *this;
     auto type = value.GetType();
     auto shape = value.GetShape();
     FXN_ASSERT_THROW(type == FXN_DTYPE_FLOAT32, "Value map value for key `{}` with type {} cannot be cast to float", key, type);
@@ -393,9 +388,8 @@ inline float ValueMap::Proxy::Get<float>() const {
     return *value.GetData<float>();
 }
 
-template<>
-inline double ValueMap::Proxy::Get<double>() const {
-    auto value = Get();
+inline ValueMap::Proxy::operator double () const {
+    Value value = *this;
     auto type = value.GetType();
     auto shape = value.GetShape();
     FXN_ASSERT_THROW(type == FXN_DTYPE_FLOAT64, "Value map value for key `{}` with type {} cannot be cast to double", key, type);
@@ -403,9 +397,17 @@ inline double ValueMap::Proxy::Get<double>() const {
     return *value.GetData<double>();
 }
 
-template<>
-inline int32_t ValueMap::Proxy::Get<int32_t>() const {
-    auto value = Get();
+inline ValueMap::Proxy::operator int16_t () const {
+    Value value = *this;
+    auto type = value.GetType();
+    auto shape = value.GetShape();
+    FXN_ASSERT_THROW(type == FXN_DTYPE_INT16, "Value map value for key `{}` with type {} cannot be cast to short", key, type);
+    FXN_ASSERT_THROW(shape.size() == 0, "Value map value for key `{}` cannot be cast to short because it is not scalar", key);
+    return *value.GetData<int16_t>();
+}
+
+inline ValueMap::Proxy::operator int32_t () const {
+    Value value = *this;
     auto type = value.GetType();
     auto shape = value.GetShape();
     FXN_ASSERT_THROW(type == FXN_DTYPE_INT32, "Value map value for key `{}` with type {} cannot be cast to integer", key, type);
@@ -413,16 +415,29 @@ inline int32_t ValueMap::Proxy::Get<int32_t>() const {
     return *value.GetData<int32_t>();
 }
 
-template<>
-inline std::string ValueMap::Proxy::Get<std::string>() const {
-    auto value = Get();
+inline ValueMap::Proxy::operator int64_t () const {
+    Value value = *this;
+    auto type = value.GetType();
+    auto shape = value.GetShape();
+    FXN_ASSERT_THROW(type == FXN_DTYPE_INT64, "Value map value for key `{}` with type {} cannot be cast to long", key, type);
+    FXN_ASSERT_THROW(shape.size() == 0, "Value map value for key `{}` cannot be cast to long because it is not scalar", key);
+    return *value.GetData<int64_t>();
+}
+
+inline ValueMap::Proxy::operator std::string () const {
+    Value value = *this;
     auto type = value.GetType();
     FXN_ASSERT_THROW(type == FXN_DTYPE_STRING, "Value map value for key `{}` with type {} cannot be cast to string", key, type);
     return std::string(value.GetData<char>());
 }
 
-inline ValueMap::Proxy::operator Value () const {
-    return Get();
+inline ValueMap::Proxy::operator bool () const {
+    Value value = *this;
+    auto type = value.GetType();
+    auto shape = value.GetShape();
+    FXN_ASSERT_THROW(type == FXN_DTYPE_BOOL, "Value map value for key `{}` with type {} cannot be cast to boolean", key, type);
+    FXN_ASSERT_THROW(shape.size() == 0, "Value map value for key `{}` cannot be cast to boolean because it is not scalar", key);
+    return *value.GetData<int8_t>();
 }
 
 inline const ValueMap::Proxy& ValueMap::Proxy::operator= (float input) const {
@@ -508,6 +523,33 @@ inline const ValueMap::Proxy& ValueMap::Proxy::operator= (Value&& value) const {
     return *this;
 }
 
+inline ValueMap::Iterator::Iterator (const ValueMap& map, int index) : map(const_cast<ValueMap&>(map)), index(index) { }
+
+inline std::pair<std::string, Value> ValueMap::Iterator::operator* () const {
+    // Get key
+    char key[256] { };
+    auto status = FXNValueMapGetKey(map, index, key, sizeof key);
+    FXN_ASSERT_THROW(status == FXN_OK, "Value map iterator failed to get value map key with status: {}", status);
+    // Get value
+    FXNValue* value = nullptr;
+    status = FXNValueMapGetValue(map, key, &value);
+    FXN_ASSERT_THROW(status == FXN_OK, "Value map iterator failed to get value map value with status: {}", status);
+    // Return
+    return { std::string(key), Value(value, false) };
+}
+
+inline ValueMap::Iterator& ValueMap::Iterator::operator++ () {
+    ++index;
+    return *this;
+}
+
+inline bool ValueMap::Iterator::operator== (const ValueMap::Iterator& other) const {
+    return map.map == other.map.map && index == other.index;
+}
+
+inline bool ValueMap::Iterator::operator!= (const ValueMap::Iterator& other) const {
+    return !(*this == other);
+}
 #pragma endregion
 
 
@@ -528,17 +570,14 @@ inline Prediction::~Prediction () {
 }
 
 inline Prediction& Prediction::operator= (Prediction&& other) noexcept {
-    // Check
     if (this == &other)
         return *this;
-    // Move
     if (owner)
         FXNPredictionRelease(prediction);
-    prediction = other.prediction;
-    owner = other.owner;
-    other.prediction = nullptr;
-    other.owner = false;
-    // Return
+    prediction = nullptr;
+    owner = false;
+    std::swap(prediction, other.prediction);
+    std::swap(owner, other.owner);
     return *this;
 }
 
@@ -608,17 +647,14 @@ inline Predictor::~Predictor () {
 }
 
 inline Predictor& Predictor::operator= (Predictor&& other) noexcept {
-    // Check
     if (this == &other)
         return *this;
-    // Move
     if (owner)
         FXNPredictorRelease(predictor);
-    predictor = other.predictor;
-    owner = other.owner;
-    other.predictor = nullptr;
-    other.owner = false;
-    // Return
+    predictor = nullptr;
+    owner = false;
+    std::swap(predictor, other.predictor);
+    std::swap(owner, other.owner);
     return *this;
 }
 

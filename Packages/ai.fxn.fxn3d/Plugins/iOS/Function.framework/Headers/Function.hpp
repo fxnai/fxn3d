@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "cxx/Dialect.hpp"
-#include "cxx/Assert.hpp"
-#include "cxx/Configuration.hpp"
-#include "cxx/Value.hpp"
-#include "cxx/ValueMap.hpp"
-#include "cxx/Prediction.hpp"
-#include "cxx/Predictor.hpp"
-#include "cxx/API.hpp"
+#include <Function/cxx/Dialect.hpp>
+#include <Function/cxx/Assert.hpp>
+#include <Function/cxx/Configuration.hpp>
+#include <Function/cxx/Value.hpp>
+#include <Function/cxx/ValueMap.hpp>
+#include <Function/cxx/Prediction.hpp>
+#include <Function/cxx/Predictor.hpp>
+#include <Function/cxx/API.hpp>

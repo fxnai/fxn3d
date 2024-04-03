@@ -11,7 +11,7 @@
 /**
  @abstract Function dialect definition.
  
- @discussion This header provides enables developers to bring their custom operators to the Function platform.
+ @discussion This header enables developers to bring their custom operators to the Function platform.
  
  NOTE: This header is EXPERIMENTAL.
 */
@@ -64,8 +64,14 @@
  @constant FXN_PLATFORM_LINUX
  Linux platform across all architectures.
 
+ @constant FXN_PLATFORM_WASM32
+ WebAssembly 32-bit platform.
+
+ @constant FXN_PLATFORM_WASM64
+ WebAssembly 64-bit platform (MEMORY64).
+
  @constant FXN_PLATFORM_WASM
- WebAssembly platform.
+ WebAssembly platform across all architectures.
 
  @constant FXN_PLATFORM_WINDOWS_X64
  Windows x86_64 platform.
@@ -88,7 +94,9 @@ enum FXNPlatform {
     FXN_PLATFORM_LINUX_X64      = 1 << 7,
     FXN_PLATFORM_LINUX_ARM64    = 1 << 8,
     FXN_PLATFORM_LINUX          = FXN_PLATFORM_LINUX_X64 | FXN_PLATFORM_LINUX_ARM64,
-    FXN_PLATFORM_WASM           = 1 << 9,
+    FXN_PLATFORM_WASM32         = 1 << 9,
+    FXN_PLATFORM_WASM64         = 1 << 12,
+    FXN_PLATFORM_WASM           = FXN_PLATFORM_WASM32 | FXN_PLATFORM_WASM64,
     FXN_PLATFORM_WINDOWS_X64    = 1 << 10,
     FXN_PLATFORM_WINDOWS        = FXN_PLATFORM_WINDOWS_X64,
 };
@@ -108,38 +116,32 @@ typedef enum FXNPlatform FXNPlatform;
 
 
 #pragma region --Inference--
+/*!
+ @abstract ONNX inference format.
+
+ @discussion Inference operator expects an ONNX model.
+
+ @see FXN_INFERENCE_OP
+*/
+#define FXN_INFERENCE_FORMAT_ONNX "onnx"
 
 /*!
- @enum FXNInferenceFormat
+ @abstract CoreML inference format.
 
- @abstract Model format used by inference operators.
+ @discussion Inference operator expects a CoreML model.
 
- @discussion Inference operators can define their desired neural network format.
- EdgeFunction will attempt to convert any models encountered during tracing into this format.
- 
- @constant FXN_INFERENCE_FORMAT_UNKNOWN
- Unknown or unsupported inference format.
-
- @constant FXN_INFERENCE_FORMAT_FXN
- Function built-in inference format.
-
- @constant FXN_INFERENCE_FORMAT_ONNX
- ONNX inference format.
-
- @constant FXN_INFERENCE_FORMAT_COREML
- Apple CoreML inference format.
-
- @constant FXN_INFERENCE_FORMAT_GGML
- GGML inference format for quantized large language model (LLM) inference.
+ @see FXN_INFERENCE_OP
 */
-enum FXNInferenceFormat {
-    FXN_INFERENCE_FORMAT_UNKNOWN    = 0,
-    FXN_INFERENCE_FORMAT_FXN        = 1,
-    FXN_INFERENCE_FORMAT_ONNX       = 2,
-    FXN_INFERENCE_FORMAT_COREML     = 3,
-    FXN_INFERENCE_FORMAT_GGML       = 4,
-};
-typedef enum FXNInferenceFormat FXNInferenceFormat;
+#define FXN_INFERENCE_FORMAT_COREML "coreml"
+
+/*!
+ @abstract GGML inference format.
+
+ @discussion Inference operator expects a GGUF v3 model.
+
+ @see FXN_INFERENCE_OP
+*/
+#define FXN_INFERENCE_FORMAT_GGUF "gguf"
 #pragma endregion
 
 
@@ -169,7 +171,9 @@ typedef enum FXNInferenceFormat FXNInferenceFormat;
  @param format
  Neural network format that should be provided to the operator.
 
- @see FXNInferenceFormat
+ @see FXN_INFERENCE_FORMAT_ONNX
+ @see FXN_INFERENCE_FORMAT_COREML
+ @see FXN_INFERENCE_FORMAT_GGUF
 */
 #define FXN_INFERENCE_OP(format)
 #pragma endregion
@@ -213,7 +217,7 @@ typedef enum FXNInferenceFormat FXNInferenceFormat;
  @see FXNPlatform
  @see FXN_LIBRARY_NO_INCLUDE
 */
-#define FXN_OP_LIBRARY(target,platform,include)
+#define FXN_OP_LIBRARY(target, platform, include)
 
 /*!
  @abstract Operator metadata.

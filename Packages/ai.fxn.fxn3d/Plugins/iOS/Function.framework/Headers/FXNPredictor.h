@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "FXNConfiguration.h"
-#include "FXNPrediction.h"
+#include <Function/FXNConfiguration.h>
+#include <Function/FXNPrediction.h>
 
 #pragma region --Types--
 /*!

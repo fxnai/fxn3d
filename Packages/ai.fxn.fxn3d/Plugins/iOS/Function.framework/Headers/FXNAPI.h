@@ -21,6 +21,7 @@
 #endif
 
 #ifdef __EMSCRIPTEN__
+    #include <emscripten.h>
     #define FXN_API EMSCRIPTEN_KEEPALIVE
 #else
     #define FXN_API
