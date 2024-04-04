@@ -1,0 +1,18 @@
+# Unity
+Library/
+Temp/
+obj/
+Logs/
+
+# Function
+ProjectSettings/Function.asset
+
+# IDE
+.vscode/
+.gradle/
+.vs/
+
+# Misc
+.DS_Store
+
+Packages/ai.fxn.fxn3d/Plugins/
