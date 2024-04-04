@@ -33,22 +33,17 @@ namespace Function.Editor.Build {
             var embeds = GetEmbeds();
             var cache = new List<CachedPrediction>();
             foreach (var embed in embeds) {
-                // Create client
-                var url = embed.apiUrl ?? Function.URL;
-                var accessKey = embed.accessKey ?? settings.accessKey;
-                var client = new DotNetClient(url, accessKey);
-                // Create prediction
-                var prediction = Task.Run(() => client.Request<Prediction>(
-                    @"POST",
-                    $"/predict/{embed.tag}",
-                    headers: new () { [@"fxn-client"] = Platform }
-                )).Result;
-                // Add to settings
-                if (prediction.type == PredictorType.Edge)
-                    cache.Add(new CachedPrediction {
-                        platform = Platform,
-                        prediction = prediction
-                    });
+                var embedFxn = embed.getFunction();
+                var client = new DotNetClient(embedFxn.client.url, embedFxn.client.accessKey);
+                var fxn = new Function(client);
+                var predictions = embed.tags.Select(tag => {
+                    var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: Platform)).Result;
+                    return prediction.type == PredictorType.Edge ?
+                        new CachedPrediction { platform = Platform, prediction = prediction } :
+                        null;
+                })
+                .Where(pred => pred != null)
+                .ToArray();
             }
             // Cache
             settings.cache = cache;
