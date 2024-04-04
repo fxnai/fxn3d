@@ -21,10 +21,10 @@ namespace Function.Editor.Build {
 
         private static List<CachedPrediction> cache;
         private static readonly string[] Platforms = new [] {
-            "android:armeabi-v7a",
-            "android:arm64-v8a",
-            "android:x86",
-            "android:x86_64"
+            "android-armeabi-v7a",
+            "android-arm64-v8a",
+            "android-x86",
+            "android-x86_64"
         };
 
         protected override BuildTarget target => BuildTarget.Android;

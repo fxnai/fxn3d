@@ -24,7 +24,10 @@ namespace Function.Editor.Build {
     internal sealed class macOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
         private List<CachedPrediction> cache;
-        private static readonly string[] Platforms = new [] { "macos:arm64", "macos:x86_64" };
+        private static readonly string[] Platforms = new [] {
+            "macos-arm64",
+            "macos-x86_64"
+        };
 
         protected override BuildTarget target => BuildTarget.StandaloneOSX;
 

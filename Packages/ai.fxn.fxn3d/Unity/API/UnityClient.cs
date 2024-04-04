@@ -94,7 +94,7 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request headers.</param>
         /// <returns>Stream of deserialized responses.</returns>
-        public override async IAsyncEnumerable<T> Stream<T> ( // DEPLOY
+        public override async IAsyncEnumerable<T> Stream<T> (
             string method,
             string path,
             object? payload = default,

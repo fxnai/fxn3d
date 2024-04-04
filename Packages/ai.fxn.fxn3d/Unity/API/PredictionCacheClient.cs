@@ -17,7 +17,7 @@ namespace Function.API {
     /// <summary>
     /// Function API client for Unity Engine.
     /// This uses Unity APIs for performing web requests.
-    /// Furthermore, this handles partial prediction caching for on-device predictors.
+    /// Furthermore, this handles partial prediction caching for edge predictors.
     /// </summary>
     internal sealed class PredictionCacheClient : UnityClient {
 

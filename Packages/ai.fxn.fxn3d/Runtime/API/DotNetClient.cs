@@ -133,7 +133,7 @@ namespace Function.API {
         /// <param name="query">Graph query.</param>
         /// <param name="key">Query result key.</param>
         /// <param name="input">Query inputs.</param>
-        public override async Task<T?> Query<T> ( // DEPLOY
+        public override async Task<T?> Query<T> (
             string query,
             Dictionary<string, object?>? variables = default
         ) where T : class {

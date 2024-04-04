@@ -22,7 +22,7 @@ namespace Function.Editor.Build {
     internal sealed class iOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
         private List<CachedPrediction> cache;
-        private const string Platform = @"ios:arm64";
+        private const string Platform = @"ios-arm64";
 
         protected override BuildTarget target => BuildTarget.iOS;
 
@@ -44,6 +44,7 @@ namespace Function.Editor.Build {
                 })
                 .Where(pred => pred != null)
                 .ToArray();
+                cache.AddRange(predictions);
             }
             // Cache
             settings.cache = cache;
@@ -62,21 +63,25 @@ namespace Function.Editor.Build {
             // Get frameworks path
             var frameworkDir = Path.Combine(report.summary.outputPath, "Frameworks", "Function");
             Directory.CreateDirectory(frameworkDir);
-            // Get dso
+            // Copy dsos
             var client = new DotNetClient(Function.URL);
             var frameworks = new List<string>();
             foreach (var cachedPrediction in cache) {
-                var dso = cachedPrediction.prediction.resources.First(res => res.type == @"dso");
-                var dsoPath = Path.GetTempFileName();
-                {
-                    using var dsoStream = Task.Run(async () => await client.Download(dso.url)).Result;
-                    using var fileStream = File.Create(dsoPath);
-                    dsoStream.CopyTo(fileStream);
+                foreach (var resource in cachedPrediction.prediction.resources) {
+                    // Check
+                    if (resource.type != @"dso")
+                        continue;
+                    // Download
+                    var dsoPath = Path.GetTempFileName();
+                    {
+                        using var dsoStream = Task.Run(async () => await client.Download(resource.url)).Result;
+                        using var fileStream = File.Create(dsoPath);
+                        dsoStream.CopyTo(fileStream);
+                    }
+                    ZipFile.ExtractToDirectory(dsoPath, frameworkDir, true);
+                    using var archive = ZipFile.Open(dsoPath, ZipArchiveMode.Read);
+                    frameworks.Add(resource.name);
                 }
-                ZipFile.ExtractToDirectory(dsoPath, frameworkDir, true);
-                using var archive = ZipFile.Open(dsoPath, ZipArchiveMode.Read);
-                var frameworkName = archive.Entries.First(e => !e.FullName.TrimEnd('/').Contains("/")).FullName.TrimEnd('/');
-                frameworks.Add(frameworkName);
             }
             // Load Xcode project
             var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);

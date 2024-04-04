@@ -244,7 +244,7 @@ namespace Function {
         /// <summary>
         /// Predictor cache path.
         /// </summary>
-        internal static string CachePath => Path.Combine(Application.persistentDataPath, "fxn", "cache");
+        internal static string CachePath => Path.Combine(Application.persistentDataPath, @"fxn", @"cache");
 
         /// <summary>
         /// Function client identifier.
@@ -253,24 +253,24 @@ namespace Function {
             get {
                 if (Application.platform == RuntimePlatform.Android)
                     switch (RuntimeInformation.ProcessArchitecture) {
-                        case Architecture.Arm:          return "android:armeabi-v7a";
-                        case Architecture.Arm64:        return "android:arm64-v8a";
-                        case Architecture.X86:          return "android:x86";
-                        case Architecture.X64:          return "android:x86_64";
+                        case Architecture.Arm:          return @"android-armeabi-v7a";
+                        case Architecture.Arm64:        return @"android-arm64-v8a";
+                        case Architecture.X86:          return @"android-x86";
+                        case Architecture.X64:          return @"android-x86_64";
                         default:                        return null;
                     }
                 if (Application.platform == RuntimePlatform.IPhonePlayer)
-                    return "ios:arm64";
+                    return @"ios-arm64";
                 if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
                     switch (RuntimeInformation.ProcessArchitecture) {
-                        case Architecture.Arm64:    return "macos:arm64";
-                        case Architecture.X64:      return "macos:x86_64";
+                        case Architecture.Arm64:    return @"macos-arm64";
+                        case Architecture.X64:      return @"macos-x86_64";
                         default:                    return null;
                     }
                 if (Application.platform == RuntimePlatform.WebGLPlayer)
                     return @"browser";
                 if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer)
-                    return @"windows:x86_64"; // assume no ARM support for now
+                    return @"windows-x86_64"; // assume no ARM support for now
                 return null;
             }
         }
