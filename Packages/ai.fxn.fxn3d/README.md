@@ -16,7 +16,7 @@ Add the following items to your Unity project's `Packages/manifest.json`:
     }
   ],
   "dependencies": {
-    "ai.fxn.fxn3d": "0.0.12"
+    "ai.fxn.fxn3d": "0.0.13"
   }
 }
 ```
@@ -55,7 +55,7 @@ Debug.Log(prediction.results[0]);
 ___
 
 ## Requirements
-- Unity 2022.3+
+- Unity 2021.3+
 
 ## Supported Platforms
 - Android API Level 24+

@@ -1,3 +1,6 @@
+## 0.0.13
++ Added support for Unity 2021 LTS.
+
 ## 0.0.12
 + Added `Function.Types.Image` struct for making edge predictions on images.
 + Added `FunctionUnity.ToImage(Texture2D)` helper function for creating an image from a `Texture2D`.

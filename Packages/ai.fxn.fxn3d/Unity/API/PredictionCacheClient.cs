@@ -58,7 +58,7 @@ namespace Function.API {
             var uri = new Uri(url);
             var segments = uri.AbsolutePath.Split('/');
             var tag = string.Join("/", segments[2], segments[3]);
-            var platform = (headers?.TryGetValue(@"fxn-client", out var p) ?? false) ? p : null;
+            var platform = headers != null && headers.TryGetValue(@"fxn-client", out var p) ? p : null;
             var cachedPrediction = cache.FirstOrDefault(p => p.platform == platform && p.prediction.tag == tag);
             // Check
             if (cachedPrediction == null)
