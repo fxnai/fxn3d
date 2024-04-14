@@ -20,7 +20,7 @@ namespace Function.Editor {
         private static bool EnableVersion () => false;
 
         [MenuItem(@"Function/Get Access Key", false, BasePriority + 1)]
-        private static void GetAccessKey () => Help.BrowseURL(@"https://fxn.ai/account/developers");
+        private static void GetAccessKey () => Help.BrowseURL(@"https://fxn.ai/settings/developer");
 
         [MenuItem(@"Function/Explore Predictors", false, BasePriority + 2)]
         private static void OpenExplore () => Help.BrowseURL(@"https://fxn.ai/explore");
