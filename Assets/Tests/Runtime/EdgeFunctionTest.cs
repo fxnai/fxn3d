@@ -39,7 +39,7 @@ namespace Function.Tests {
             Debug.Log(JsonConvert.SerializeObject(prediction, Formatting.Indented));
         }
 
-        private async void OnDestroy () {
+        private async void OnDisable () {
             var deleted = await fxn.Predictions.Delete(Tag);
             Debug.Log($"Deleted predictor: {deleted}");
         }

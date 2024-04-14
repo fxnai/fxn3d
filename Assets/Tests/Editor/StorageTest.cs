@@ -9,10 +9,7 @@ namespace Function.Tests {
     using System.IO;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using UnityEngine;
-    using UnityEngine.TestTools;
     using Unity.Collections.LowLevel.Unsafe;
-    using Services;
     using Types;
 
     internal sealed class StorageTest {
@@ -20,7 +17,7 @@ namespace Function.Tests {
         private Function fxn;
 
         [SetUp]
-        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev/graph");
+        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
 
         [Test(Description = @"Should create an upload URL")]
         public async Task CreateUploadURL () {

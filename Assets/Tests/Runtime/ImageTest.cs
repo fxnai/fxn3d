@@ -20,12 +20,11 @@ namespace Function.Tests {
 
         private async void Start () {
             // Predict
-            var fxn = FunctionUnity.Create(url: @"https://api.fxn.dev/graph");
+            var fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
             var prediction = await fxn.Predictions.Create(
-                "@natml/auto-test-v1",
+                "@yusuf/image-identity",
                 new () {
-                    ["image"] = await image.ToValue(),
-                    ["contrast"] = contrast
+                    ["image"] = image.ToImage(),
                 }
             );
             // Display

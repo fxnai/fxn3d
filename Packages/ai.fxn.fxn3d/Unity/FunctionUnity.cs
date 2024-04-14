@@ -60,8 +60,12 @@ namespace Function {
         /// NOTE: The texture format must be `R8`, `Alpha8`, `RGB24`, or `RGBA32`.
         /// </summary>
         /// <param name="texture">Input texture.</param>
+        /// <param name="pixelBuffer">Pixel buffer to store image data. Use this to prevent allocations.</param>
         /// <returns>Image.</returns>
-        public static unsafe Image ToImage (this Texture2D texture) {
+        public static unsafe Image ToImage (
+            this Texture2D texture,
+            byte[]? pixelBuffer = null
+        ) {
             // Check texture
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -76,10 +80,14 @@ namespace Function {
                 [TextureFormat.RGBA32] = 4,
             };
             if (!FormatChannelMap.TryGetValue(texture.format, out var channels))
-                throw new InvalidOperationException($"Texture cannot be converted ton a Function image because it has unsupported format: {texture.format}");
-            // Flip vertical
+                throw new InvalidOperationException($"Texture cannot be converted to a Function image because it has unsupported format: {texture.format}");
+            // Check buffer
             var rowStride = texture.width * channels;
-            var pixelBuffer = new byte[rowStride * texture.height];
+            var bufferSize = rowStride * texture.height;
+            pixelBuffer ??= new byte[bufferSize];
+            if (pixelBuffer.Length != bufferSize)
+                throw new InvalidOperationException($"Texture cannot be converted to a Function image because pixel buffer length was expected to be {bufferSize} but got {pixelBuffer.Length}");
+            // Flip vertical
             fixed (void* dst = pixelBuffer)
                 UnsafeUtility.MemCpyStride(
                     dst,
@@ -98,31 +106,6 @@ namespace Function {
             );
             // Return
             return image;
-        }
-
-        /// <summary>
-        /// Convert a texture to a prediction value.
-        /// </summary>
-        /// <param name="texture">Input texture.</param>
-        /// <param name="minUploadSize">Textures larger than this size in bytes will be uploaded.</param>
-        /// <returns>Prediction value.</returns>
-        public static async Task<Value> ToValue (this Texture2D texture, int minUploadSize = 4096) {
-            // Check texture
-            if (texture == null)
-                throw new ArgumentNullException(nameof(texture));
-            // Check readable
-            if (!texture.isReadable)
-                throw new InvalidOperationException(@"Texture cannot be converted to a prediction value because it is not readable");
-            // Encode
-            var png = texture.format == TextureFormat.RGBA32;
-            var imageData = png ? texture.EncodeToPNG() : texture.EncodeToJPG();
-            var ext = png ? ".png" : ".jpg";
-            // Upload
-            var client = Create();
-            using var stream = new MemoryStream(imageData);
-            var value = await client.Predictions.ToValue(stream, $"image{ext}", Dtype.Image, minUploadSize: minUploadSize);
-            // Return
-            return value;
         }
 
         /// <summary>

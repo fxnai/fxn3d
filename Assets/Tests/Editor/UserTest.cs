@@ -15,7 +15,7 @@ namespace Function.Tests {
         private Function fxn;
 
         [SetUp]
-        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev/graph");
+        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
 
         [Test(Description = @"Should retrieve the current user")]
         public async Task RetrieveUser () {

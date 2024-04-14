@@ -36,17 +36,23 @@ namespace Function.Types {
             this.nativeData = null;
             this.shape = shape;
         }
+
+        /// <summary>
+        /// Create a tensor.
+        /// NOTE: DO NOT use this overload unless you absolutely know what you are doing.
+        /// </summary>
+        /// <param name="data">Tensor data.</param>
+        /// <param name="shape">Tensor shape.</param>
+        public Tensor (T* data, int[] shape) { // Enables zero copy into `FXNValue`
+            this.data = null!;
+            this.nativeData = data;
+            this.shape = shape;
+        }
         #endregion
 
 
         #region --Operations--
         private readonly T* nativeData;
-
-        public Tensor (T* data, int[] shape) { // Zero copy into `FXNValue`
-            this.data = null!;
-            this.nativeData = data;
-            this.shape = shape;
-        }
 
         public ref T GetPinnableReference () => ref (nativeData == null ? ref data[0] : ref *nativeData);
         #endregion

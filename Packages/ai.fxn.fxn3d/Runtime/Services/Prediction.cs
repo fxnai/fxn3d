@@ -188,13 +188,15 @@ namespace Function.Services {
         /// <param name="minUploadSize">Values larger than this size in bytes will be uploaded.</param>
         /// <returns>Function value.</returns>
         public async Task<Value> ToValue (
-            object value,
+            object? value,
             string name,
             Dtype? type = null,
             int minUploadSize = 4096,
+            string? mime = null,
             string? key = null
         ) => value switch {
             Value           x => x,
+            null              => new Value { type = Dtype.Null },
             float           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new int[0] },
             double          x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new int[0] },
             sbyte           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new int[0] },
@@ -227,12 +229,12 @@ namespace Function.Services {
             Tensor<ushort>  x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = x.shape },
             Tensor<uint>    x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = x.shape },
             Tensor<ulong>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = x.shape },
-            string          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
-            Stream          x => new Value { data = await storage.Upload(name, x, UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
-            IList           x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
-            IDictionary     x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
-            null              => new Value { type = Dtype.Null },
-            _                 => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}"),
+            string          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, mime: @"text/plain", dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
+            IList           x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, mime: @"application/json", dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
+            IDictionary     x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, mime: @"application/json", dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
+            Image           x => await ToValue(x, name, minUploadSize: minUploadSize, key: key),
+            Stream          x => new Value { data = await storage.Upload(name, x, UploadType.Value, mime: mime, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
+            _                 => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type `{value.GetType()}`"),
         };
         #endregion
 
@@ -489,16 +491,33 @@ namespace Function.Services {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue (Image image) {
+        private static unsafe IntPtr ToValue (Image image, bool forcePin = false) {
             fixed (byte* data = image)
                 return Function.CreateImageValue(
                     data,
                     image.width,
                     image.height,
                     image.channels,
-                    image.data != null ? ValueFlags.CopyData : ValueFlags.None,
+                    !forcePin && image.data != null ? ValueFlags.CopyData : ValueFlags.None,
                     out var value
                 ).Throw() == Status.Ok ? value : default;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe Task<Value> ToValue (
+            Image image,
+            string name,
+            int minUploadSize,
+            string? key
+        ) {
+            fixed (byte* data = image) {
+                var imageValue = ToValue(image, forcePin: true); // zero copy even for managed arrays
+                imageValue.CreateSerializedValue(0, out var serializedValue).Throw();
+                var stream = ToObject(serializedValue) as Stream;
+                imageValue.ReleaseValue();
+                serializedValue.ReleaseValue();
+                return ToValue(stream, name, type: Dtype.Image, minUploadSize: minUploadSize, mime: @"image/png", key: key);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -18,7 +18,7 @@ namespace Function.Tests {
         private Function fxn;
 
         [SetUp]
-        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev/graph");
+        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
 
         [Test(Description = @"Should create a cloud prediction")]
         public async Task CreateCloudPrediction () {

@@ -1,5 +1,7 @@
 ## 0.0.13
 + Added support for Unity 2021 LTS.
++ Updated `FunctionUnity.ToImage` extension method to accept an optional buffer to avoid allocating memory.
++ Removed `FunctionUnity.ToValue(Texture2D)` extension method. Use `FunctionUnity.ToImage` method instead.
 
 ## 0.0.12
 + Added `Function.Types.Image` struct for making edge predictions on images.

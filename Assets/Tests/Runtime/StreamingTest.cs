@@ -5,19 +5,21 @@
 
 namespace Function.Tests {
 
-    using System.Collections.Generic;
     using UnityEngine;
     using Newtonsoft.Json;
-    using API;
+    using Internal;
 
     internal sealed class StreamingTest : MonoBehaviour {
 
         private async void Start () {
-            var fxn = FunctionUnity.Create("fxn-aVPMIDpsxTsr4of8dknUt", "https://api.fxn.dev");
+            var fxn = FunctionUnity.Create(
+                accessKey: FunctionSettings.Instance.accessKey,
+                url: @"https://api.fxn.dev"
+            );
             var stream = fxn.Predictions.Stream(
                 tag: "@yusuf-delete/streaming",
                 inputs: new () {
-                    ["sentence"] = "Hello world"
+                    ["sentence"] = @"Hello world"
                 }
             );
             await foreach (var prediction in stream)
