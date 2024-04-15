@@ -433,7 +433,7 @@ namespace Function.Services {
             }
         }
 
-        private static unsafe object? ToObject (IntPtr value) {
+        private static unsafe object? ToObject (IntPtr value) { // INCOMPLETE // Images
             // Null
             value.GetValueType(out var dtype).Throw();
             if (dtype == Dtype.Null)
@@ -457,9 +457,9 @@ namespace Function.Services {
                 case Dtype.Uint64:  return ToObject<ulong>(data, shape);
                 case Dtype.Bool:    return ToObject<bool>(data, shape);
                 case Dtype.String:  return Marshal.PtrToStringUTF8(data);
-                case Dtype.Binary:  return new MemoryStream(ToArray<byte>(data, shape));
                 case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(Marshal.PtrToStringUTF8(data));
                 case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(Marshal.PtrToStringUTF8(data));
+                case Dtype.Binary:  return new MemoryStream(ToArray<byte>(data, shape));
                 default:            throw new InvalidOperationException($"Cannot convert Function value to object because value type is unsupported: {dtype}");
             }
         }
