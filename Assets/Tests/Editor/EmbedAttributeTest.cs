@@ -17,7 +17,7 @@ namespace Function.Tests {
         private const string CustomURL = "https://www.google.com";
         private const string CustomAccessKey = @"hello world"; 
 
-        [Function.Embed(CustomPredictor)]
+        //[Function.Embed(CustomPredictor)]
         private static Function fxn => new Function(url: CustomURL, accessKey: CustomAccessKey);
 
         [Test(Description = @"Should extract default embed attribute")]
