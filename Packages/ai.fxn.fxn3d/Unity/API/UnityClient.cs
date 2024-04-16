@@ -192,7 +192,7 @@ namespace Function.API {
                 await Task.Yield();
             // Check
             if (client.error != null)
-                throw new InvalidOperationException(@"Failed to upload stream with error: {error}");
+                throw new InvalidOperationException($"Failed to upload stream with error: {client.error}");
         }
         #endregion
     }
