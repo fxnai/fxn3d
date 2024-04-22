@@ -44,6 +44,12 @@ const FXNC = {
   FXNValueCreateNull: function (value) {
     _throw_fxn_binding_error();
   },
+  FXNValueCreateBySerializingValue: function (value, flags, result) {
+    _throw_fxn_binding_error();
+  },
+  FXNValueCreateByDeserializingValue: function (value, type, flags, result) {
+    _throw_fxn_binding_error();
+  },
   FXNValueMapCreate: function (map) {
     _throw_fxn_binding_error();
   },
@@ -747,7 +753,7 @@ const DLFCN = {
         }
     },
   _dlopen_js__deps: ["$dlopenInternal"],
-  _dlopen_js__sig: 'iiii',
+  _dlopen_js__sig: "ii",
   _dlopen_js: function(handle) {
     var jsflags = {
       loadAsync: false,
@@ -793,4 +799,4 @@ const DLFCN = {
 };
 
 mergeInto(LibraryManager.library, FXNC);
-mergeInto(LibraryManager.library, DLFCN);
+//mergeInto(LibraryManager.library, DLFCN);

@@ -14,10 +14,10 @@ namespace Function.Editor.Build {
     internal sealed class WebGLBuildHandler : BuildHandler {
 
         private static string[] EM_ARGS => new [] {
-            @"-Wl,--features=mutable-globals",
+            @"-lembind",                        // CHECK // Requires `sign-ext`
+            @"-Wl,--features=mutable-globals",  // CHECK // Requires `sign-ext`
             @"-Wl,--export=__stack_pointer",
             @"-Wl,-u,FXN_WEBGL_INIT",
-            @"-lembind",
             @"-sALLOW_TABLE_GROWTH=1",
             @"-sSTACK_OVERFLOW_CHECK=2",
             $"--embed-file {FxncPath}@libFunction.so",
