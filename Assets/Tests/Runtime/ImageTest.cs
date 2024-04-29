@@ -13,7 +13,6 @@ namespace Function.Tests {
 
         [Header(@"Image")]
         [SerializeField] private Texture2D image;
-        [SerializeField, Range(0f, 2f)] private float contrast = 1f;
 
         [Header(@"UI")]
         [SerializeField] private RawImage rawImage;

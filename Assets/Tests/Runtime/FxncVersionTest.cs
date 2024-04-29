@@ -13,10 +13,12 @@ namespace Function.Tests {
     internal sealed class FxncVersionTest : MonoBehaviour {
 
         private void Start () {
-            var configId = new StringBuilder(2048);
+            // Version
             var version = Marshal.PtrToStringAuto(Function.GetVersion());
-            Function.GetConfigurationUniqueID(configId, configId.Capacity);
             Debug.Log($"Function {version}");
+            // Configuration
+            var configId = new StringBuilder(2048);
+            Function.GetConfigurationUniqueID(configId, configId.Capacity);
             Debug.Log($"Configuration: {configId}");
         }
     }
