@@ -8,145 +8,152 @@ const FXNC = {
   $_throw_fxn_binding_error: function () {
     throw new Error("Function Error: Binding for Function library function is missing. Send console logs to hi@fxn.ai");
   },
-  $_get_fxn: function (symName) {
+  $_get_fxn: function (symName, require=true) {
     const fxnc = LDSO.loadedLibsByName["libFunction.so"];
     const fxn = fxnc ? fxnc.module[symName] : null;
-    return fxn;
+    return fxn || !require ? fxn : _throw_fxn_binding_error();
   },
   FXNValueRelease: function (value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueRelease")(value);
   },
   FXNValueGetData: function (value, data) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueGetData")(value, data);
   },
   FXNValueGetType: function (value, type) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueGetType")(value, type);
   },
   FXNValueGetDimensions: function (value, dimensions) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueGetDimensions")(value, dimensions);
   },
   FXNValueGetShape: function (value, shape, shapeLen) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueGetShape")(value, shape, shapeLen);
   },
   FXNValueCreateArray: function (data, shape, dims, dtype, flags, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateArray")(data, shape, dims, dtype, flags, value);
   },
   FXNValueCreateString: function (data, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateString")(data, value);
   },
   FXNValueCreateList: function (data, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateList")(data, value);
   },
   FXNValueCreateDict: function (data, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateDict")(data, value);
   },
   FXNValueCreateImage: function (pixelBuffer, width, height, channels, flags, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateImage")(pixelBuffer, width, height, channels, flags, value);
   },
   FXNValueCreateBinary: function (buffer, bufferLen, flags, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateBinary")(buffer, bufferLen, flags, value);
   },
   FXNValueCreateNull: function (value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateNull")(value);
   },
   FXNValueCreateBySerializingValue: function (value, flags, result) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateBySerializingValue")(value, flags, result);
   },
   FXNValueCreateByDeserializingValue: function (value, type, flags, result) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueCreateByDeserializingValue")(value, type, flags, result);
   },
   FXNValueMapCreate: function (map) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueMapCreate")(map);
   },
   FXNValueMapRelease: function (map) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueMapRelease")(map);
   },
   FXNValueMapGetSize: function (map, size) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueMapGetSize")(map, size);
   },
   FXNValueMapGetKey: function (map, index, key, size) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueMapGetKey")(map, index, key, size);
   },
   FXNValueMapGetValue: function (map, key, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueMapGetValue")(map, key, value);
   },
   FXNValueMapSetValue: function (map, key, value) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNValueMapSetValue")(map, key, value);
   },
   FXNConfigurationGetUniqueID: function (identifier, size) {
-    const fxn = _get_fxn("FXNConfigurationGetUniqueID");
-    return fxn ? fxn(identifier, size) : _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationGetUniqueID")(identifier, size);
   },
   FXNConfigurationCreate: function (configuration) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationCreate")(configuration);
   },
   FXNConfigurationRelease: function (configuration) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationRelease")(configuration);
   },
   FXNConfigurationGetTag: function (configuration, tag, size) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationGetTag")(configuration, tag, size);
   },
   FXNConfigurationSetTag: function (configuration, tag) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationSetTag")(configuration, tag);
   },
   FXNConfigurationGetToken: function (configuration, token, size) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationGetToken")(configuration, token, size);
   },
   FXNConfigurationSetToken: function (configuration, token) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationSetToken")(configuration, token);
   },
   FXNConfigurationGetAcceleration: function (configuration, acceleration) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationGetAcceleration")(configuration, acceleration);
   },
   FXNConfigurationSetAcceleration: function (configuration, acceleration) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationSetAcceleration")(configuration, acceleration);
   },
   FXNConfigurationGetDevice: function (configuration, device) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationGetDevice")(configuration, device);
   },
   FXNConfigurationSetDevice: function (configuration, device) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationSetDevice")(configuration, device);
   },
   FXNConfigurationAddResource: function (configuration, type, path) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNConfigurationAddResource")(configuration, type, path);
   },
   FXNPredictionRelease: function (prediction) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictionRelease")(prediction);
   },
   FXNPredictionGetID: function (prediction, destination, size) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictionGetID")(prediction, destination, size);
   },
   FXNPredictionGetLatency: function (prediction, latency) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictionGetLatency")(prediction, latency);
   },
   FXNPredictionGetResults: function (prediction, map) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictionGetResults")(prediction, map);
   },
   FXNPredictionGetError: function (prediction, error, size) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictionGetError")(prediction, error, size);
   },
   FXNPredictionGetLogs: function (prediction, logs, size) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictionGetLogs")(prediction, logs, size);
   },
   FXNPredictionGetLogLength: function (prediction, length) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictionGetLogLength")(prediction, length);
+  },
+  FXNPredictionStreamRelease: function (stream) {
+    return _get_fxn("FXNPredictionStreamRelease")(stream);
+  },
+  FXNPredictionStreamReadNext: function (stream, prediction) {
+    return _get_fxn("FXNPredictionStreamReadNext")(stream, prediction);
   },
   FXNPredictorCreate: function (configuration, predictor) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictorCreate")(configuration, predictor);
   },
   FXNPredictorRelease: function (predictor) {
-    _throw_fxn_binding_error();
+    return _get_fxn("FXNPredictorRelease")(predictor);
   },
-  FXNPredictorPredict: function (predictor, inputs, prediction) {
-    _throw_fxn_binding_error();
+  FXNPredictorCreatePrediction: function (predictor, inputs, prediction) {
+    return _get_fxn("FXNPredictorCreatePrediction")(predictor, inputs, prediction);
+  },
+  FXNPredictorStreamPrediction: function (predictor, inputs, stream) {
+    return _get_fxn("FXNPredictorStreamPrediction")(predictor, inputs, stream);
   },
   FXNGetVersion: function () {
-    const fxn = _get_fxn("FXNGetVersion");
-    return fxn ? fxn() : _throw_fxn_binding_error();
+    return _get_fxn("FXNGetVersion")();
   },
   FXNBind: function (handle, sym, ptr) {
     const symName = UTF8ToString(sym);
-    const fxn = _get_fxn(symName);
+    const fxn = _get_fxn(symName, false);
     if (fxn) // don't break app if this fails
       wasmTable.set(ptr, fxn);
   },
@@ -159,12 +166,14 @@ const FXNC = {
     var _emscripten_err = (str) => err(UTF8ToString(str));
     var _emscripten_out = (str) => out(UTF8ToString(str));
     var __emscripten_get_progname = (str, len) => stringToUTF8(thisProgram, str, len);
+    var _emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
     _emscripten_console_log.sig = "vi";
     _emscripten_console_warn.sig = "vi";
     _emscripten_console_error.sig = "vi";
     _emscripten_err.sig = "vi";
     _emscripten_out.sig = "vi";
     __emscripten_get_progname.sig = "vii";
+    _emscripten_memcpy_js.sig = "viii";
     const fxnImports = {
       __c_longjmp: ___c_longjmp,
       __cpp_exception: ___cpp_exception,
@@ -175,6 +184,7 @@ const FXNC = {
       emscripten_err: _emscripten_err,
       emscripten_out: _emscripten_out,
       _emscripten_get_progname: __emscripten_get_progname,
+      emscripten_memcpy_js: _emscripten_memcpy_js,
     };
     if (typeof wasmImports !== "undefined")
       wasmImports = Object.assign({}, wasmImports, fxnImports); 

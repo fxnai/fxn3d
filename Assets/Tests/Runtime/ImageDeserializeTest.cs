@@ -30,7 +30,7 @@ namespace Function.Tests {
                 Function.GetValueData(imageValue, out var imageData).Throw();
                 Debug.Log($"Image shape: (" + string.Join(",", shape) + ")");
                 // Create tex
-                var result = new Texture2D(shape[1], shape[0], TextureFormat.RGBA32, false);
+                var result = new Texture2D(shape[1], shape[0], GetTextureFormat(shape[2]), false);
                 var resultData = result.GetRawTextureData<byte>();
                 UnsafeUtility.MemCpy(resultData.GetUnsafePtr(), (void*)imageData, result.width * result.height * 4);
                 result.Apply();
@@ -41,5 +41,11 @@ namespace Function.Tests {
                 imageValue.ReleaseValue();
             }
         }
+
+        private static TextureFormat GetTextureFormat (int channels) => channels switch {
+            1 => TextureFormat.Alpha8,
+            3 => TextureFormat.RGB24,
+            _ => TextureFormat.RGBA32
+        };
     }
 }

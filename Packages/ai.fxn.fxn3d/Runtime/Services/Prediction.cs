@@ -424,7 +424,7 @@ namespace Function.Services {
                     Function.CreateListValue(JsonConvert.SerializeObject(x), out var dict).Throw();
                     return dict;
                 case Stream stream:
-                    Function.CreateBinaryValue(stream.ToArray(), stream.Length, ValueFlags.CopyData, out var binary).Throw();
+                    Function.CreateBinaryValue(stream.ToArray(), (int)stream.Length, ValueFlags.CopyData, out var binary).Throw();
                     return binary;
                 case null:
                     Function.CreateNullValue(out var nullptr).Throw();

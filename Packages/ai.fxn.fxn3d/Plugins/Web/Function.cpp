@@ -54,21 +54,26 @@ FXN_DECL(FXNPredictionGetResults);
 FXN_DECL(FXNPredictionGetError);
 FXN_DECL(FXNPredictionGetLogs);
 FXN_DECL(FXNPredictionGetLogLength);
+FXN_DECL(FXNPredictionStreamRelease);
+FXN_DECL(FXNPredictionStreamReadNext);
 FXN_DECL(FXNPredictorCreate);
 FXN_DECL(FXNPredictorRelease);
-FXN_DECL(FXNPredictorPredict);
+FXN_DECL(FXNPredictorCreatePrediction);
+FXN_DECL(FXNPredictorStreamPrediction);
 FXN_DECL(FXNGetVersion);
 
 FXN_BRIDGE void FXNBind (void*, const char*, void*);
 
 static void* FXNInitializeWebGL () {
     // Embind
+    /*
     const auto console = emscripten::val::global("console");
     console.call<void>("log", std::string("Initializing Function WebGL"));
     //const auto name = emscripten::val("document");
     const auto window = emscripten::val::global("window");
     const auto originVal = window["origin"];
     const auto origin = originVal.as<std::string>();
+    */
     // Function
     const auto handle = dlopen("libFunction.so", RTLD_LAZY | RTLD_GLOBAL | RTLD_NODELETE);
     FXN_BIND(handle, FXNValueRelease);
@@ -108,9 +113,12 @@ static void* FXNInitializeWebGL () {
     FXN_BIND(handle, FXNPredictionGetError);
     FXN_BIND(handle, FXNPredictionGetLogs);
     FXN_BIND(handle, FXNPredictionGetLogLength);
+    FXN_BIND(handle, FXNPredictionStreamRelease);
+    FXN_BIND(handle, FXNPredictionStreamReadNext);
     FXN_BIND(handle, FXNPredictorCreate);
     FXN_BIND(handle, FXNPredictorRelease);
-    FXN_BIND(handle, FXNPredictorPredict);
+    FXN_BIND(handle, FXNPredictorCreatePrediction);
+    FXN_BIND(handle, FXNPredictorStreamPrediction);
     FXN_BIND(handle, FXNGetVersion);
     return nullptr;
 }

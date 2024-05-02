@@ -105,7 +105,7 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateBinary")]
         public static extern Status CreateBinaryValue (
             [In] byte[] buffer,
-            long bufferLen,
+            int bufferLen,
             ValueFlags flags,
             out IntPtr value
         );
