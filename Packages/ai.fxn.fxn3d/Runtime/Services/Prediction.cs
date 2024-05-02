@@ -89,7 +89,7 @@ namespace Function.Services {
         /// <param name="inputs">Input values.</param>
         /// <param name="rawOutputs">Skip parsing output values into plain values.</param>
         /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size.</param>
-        public async IAsyncEnumerable<Prediction> Stream (
+        public async IAsyncEnumerable<Prediction> Stream ( // INCOMPLETE // Edge support
             string tag,
             Dictionary<string, object>? inputs = null,
             bool rawOutputs = false,

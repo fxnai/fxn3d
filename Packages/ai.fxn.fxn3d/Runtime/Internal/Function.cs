@@ -237,21 +237,36 @@ namespace Function.Internal {
         #endregion
 
 
+        #region --FXNPredictionStream--
+        [DllImport(Assembly, EntryPoint = @"FXNPredictionStreamRelease")]
+        public static extern Status ReleasePredictionStream (this IntPtr stream);
+        [DllImport(Assembly, EntryPoint = @"FXNPredictionStreamReadNext")]
+        public static extern Status ReadNextPrediction (
+            this IntPtr stream,
+            out IntPtr prediction
+        );
+        #endregion
+
+
         #region --FXNPredictor--
         [DllImport(Assembly, EntryPoint = @"FXNPredictorCreate")]
         public static extern Status CreatePredictor (
             IntPtr configuration,
             out IntPtr predictor
         );
-
         [DllImport(Assembly, EntryPoint = @"FXNPredictorRelease")]
         public static extern Status ReleasePredictor (this IntPtr predictor);
-
-        [DllImport(Assembly, EntryPoint = @"FXNPredictorPredict")]
+        [DllImport(Assembly, EntryPoint = @"FXNPredictorCreatePrediction")]
         public static extern Status Predict (
             this IntPtr predictor,
             IntPtr inputs,
             out IntPtr prediction
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNPredictorStreamPrediction")]
+        public static extern Status Stream (
+            this IntPtr predictor,
+            IntPtr inputs,
+            out IntPtr stream
         );
         #endregion
 

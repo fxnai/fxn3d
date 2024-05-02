@@ -8,19 +8,24 @@ namespace Function.Editor.Build {
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using UnityEditor;
     using UnityEditor.Build.Reporting;
 
     internal sealed class WebGLBuildHandler : BuildHandler {
 
         private static string[] EM_ARGS => new [] {
-            @"-lembind",                        // CHECK // Requires `sign-ext`
-            @"-Wl,--features=mutable-globals",  // CHECK // Requires `sign-ext`
+            @"-Xlinker --features=mutable-globals,sign-ext",
             @"-Wl,--export=__stack_pointer",
-            @"-Wl,-u,FXN_WEBGL_INIT",
+            @"-Wl,-uFXN_WEBGL_INIT",
+            @"-lembind",
+            //@"-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=_emval_get_global,_emval_new_cstring,__emval_get_property",
+            //@"-sEXPORTED_FUNCTIONS=__emval_get_global,__emval_new_cstring,__emval_get_property",
             @"-sALLOW_TABLE_GROWTH=1",
             @"-sSTACK_OVERFLOW_CHECK=2",
             $"--embed-file {FxncPath}@libFunction.so",
+
+            
         };
         private static string FxncPath => _FxncPath = _FxncPath ?? AssetDatabase.GetAllAssetPaths()
             .Select(path => new FileInfo(Path.GetFullPath(path)).FullName)
@@ -40,34 +45,18 @@ namespace Function.Editor.Build {
         }
 
         private static string GetEmscriptenArgs () {
-            // Get current args
-            var tokens = PlayerSettings.WebGL.emscriptenArgs 
-                .Split(' ')
-                .Select(arg => arg.Trim())
-                .Where(arg => !string.IsNullOrEmpty(arg))
-                .ToArray();
-            var args = tokens
-                .Aggregate(new List<string>(), (acc, current) => {
-                    if (current.StartsWith("-"))
-                        acc.Add(current);
-                    else if (acc.Count > 0)
-                        acc[acc.Count - 1] += " " + current;
-                    return acc;
-                })
-                .Where(arg => !IsEmscriptenArgVolatile(arg));
-            // Add new args
-            var result = new HashSet<string>(args);
-            result.UnionWith(EM_ARGS);
-            // Return
-            return string.Join(' ', result);
-        }
-
-        private static bool IsEmscriptenArgVolatile (string arg) {
-            if (arg.StartsWith("--embed-file") && arg.Contains("libFunction.so"))
-                return true;
-            if (arg.StartsWith("-Wl"))
-                return true;
-            return false;
+            var cleanedArgs = Regex.Replace(
+                PlayerSettings.WebGL.emscriptenArgs,
+                @"-Wl,-uFXN_WEBGL_PUSH.*?-Wl,-uFXN_WEBGL_POP",
+                string.Empty,
+                RegexOptions.Singleline
+            ).Split(' ');
+            var args = new List<string>();
+            args.AddRange(cleanedArgs);
+            args.Add(@"-Wl,-uFXN_WEBGL_PUSH");
+            args.AddRange(EM_ARGS);
+            args.Add(@"-Wl,-uFXN_WEBGL_POP");
+            return string.Join(@" ", args);
         }
     }
 }

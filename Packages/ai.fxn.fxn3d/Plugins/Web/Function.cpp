@@ -6,8 +6,12 @@
 //  Copyright © 2024 NatML Inc. All rights reserved.
 //
 
+#define EMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES 0
+
+#include <string>
 #include <dlfcn.h>
 #include <emscripten.h>
+#include <emscripten/val.h>
 
 #define FXN_BRIDGE extern "C"
 #define FXN_DECL(symbol) FXN_BRIDGE int symbol(void)
@@ -58,6 +62,14 @@ FXN_DECL(FXNGetVersion);
 FXN_BRIDGE void FXNBind (void*, const char*, void*);
 
 static void* FXNInitializeWebGL () {
+    // Embind
+    const auto console = emscripten::val::global("console");
+    console.call<void>("log", std::string("Initializing Function WebGL"));
+    //const auto name = emscripten::val("document");
+    const auto window = emscripten::val::global("window");
+    const auto originVal = window["origin"];
+    const auto origin = originVal.as<std::string>();
+    // Function
     const auto handle = dlopen("libFunction.so", RTLD_LAZY | RTLD_GLOBAL | RTLD_NODELETE);
     FXN_BIND(handle, FXNValueRelease);
     FXN_BIND(handle, FXNValueGetData);
@@ -104,3 +116,5 @@ static void* FXNInitializeWebGL () {
 }
 
 extern "C" void* FXN_WEBGL_INIT EMSCRIPTEN_KEEPALIVE = FXNInitializeWebGL(); // __ATINIT__
+extern "C" void* FXN_WEBGL_PUSH EMSCRIPTEN_KEEPALIVE = 0x0;
+extern "C" void* FXN_WEBGL_POP EMSCRIPTEN_KEEPALIVE = 0x0;
