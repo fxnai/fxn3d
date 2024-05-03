@@ -372,7 +372,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateImage (
 */
 FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateBinary (
     void* buffer,
-    int64_t bufferLen,
+    int32_t bufferLen, // CHECK // max buffer size becomes 2GB
     FXNValueFlags flags,
     FXNValue** value
 );

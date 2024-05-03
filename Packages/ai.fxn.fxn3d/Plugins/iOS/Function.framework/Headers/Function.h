@@ -14,5 +14,6 @@
 #include <Function/FXNValueMap.h>
 #include <Function/FXNConfiguration.h>
 #include <Function/FXNPrediction.h>
+#include <Function/FXNPredictionStream.h>
 #include <Function/FXNPredictor.h>
 #include <Function/FXNVersion.h>

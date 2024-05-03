@@ -16,9 +16,13 @@
 		<data>
 		ioLmgvbptzJ2VbDWVsoLdsnVp7A=
 		</data>
+		<key>Headers/FXNPredictionStream.h</key>
+		<data>
+		PRv213AjegcC/exGmE+6u7RoX9g=
+		</data>
 		<key>Headers/FXNPredictor.h</key>
 		<data>
-		7uME4Cir3AI+Sq6MikkYbagR0jQ=
+		YYpLYdh+fZO4NbAu7W4wj9e0r7I=
 		</data>
 		<key>Headers/FXNStatus.h</key>
 		<data>
@@ -26,7 +30,7 @@
 		</data>
 		<key>Headers/FXNValue.h</key>
 		<data>
-		Hu5pnMJ/1Ii4Se7FeySMQ46lvuE=
+		trmc/QqMxUeHcCvfGNbzyUYT7jc=
 		</data>
 		<key>Headers/FXNValueMap.h</key>
 		<data>
@@ -34,11 +38,11 @@
 		</data>
 		<key>Headers/FXNVersion.h</key>
 		<data>
-		8kFv4hi9SRf5/vTNFWpqPI2c07c=
+		74cxapWJ9Sv4ZxyXo74zPeTYTEs=
 		</data>
 		<key>Headers/Function.h</key>
 		<data>
-		MSeaEEqM7nrkhLlQmeDfAIgQ/aY=
+		3OL2WLYnh0ihWd8kdWbV82QdBXI=
 		</data>
 		<key>Headers/Function.hpp</key>
 		<data>
@@ -78,7 +82,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		4AzNpWBSvqdZNdKZlP6LQpLTSPo=
+		NIDvE7nLZFRdTSms0JxMbjYbj8c=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -108,11 +112,18 @@
 			eLSqRMEo0q2fLhH5rZ4BPbOlOm67X95TooWeWg2JmrA=
 			</data>
 		</dict>
+		<key>Headers/FXNPredictionStream.h</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			FTCPUInMx+EeCEqySX41QKSq6OgpVRMxxOubBhYF4nM=
+			</data>
+		</dict>
 		<key>Headers/FXNPredictor.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			dLJZh+9IiiHeVED4+OOLtY/IVlePSbzKObvo0rLS4co=
+			BXFMyV7o0E7LfEJU4MLShCPHqOzeBS7xTxXJzQehlfc=
 			</data>
 		</dict>
 		<key>Headers/FXNStatus.h</key>
@@ -126,7 +137,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			xLa3pgo2GoYvn32Gj2P+ZWPlabOktujfjG4KAuQH+ic=
+			nH+NgBUPn/bGAufmSrqFJghKxs9ZWGrmZwAoXLSeLyA=
 			</data>
 		</dict>
 		<key>Headers/FXNValueMap.h</key>
@@ -140,14 +151,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			dYfyhg8Vvwo++9NKfTUUl1BiNV7oNLnslzBkxXvYXOU=
+			OveqTGg3fWLUFWPQ9/USq+4pESdbBB0Ns34ku6JEvRo=
 			</data>
 		</dict>
 		<key>Headers/Function.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			jL6CdoMoeBSmhHGdJ3P4xnrbw+FYR8Cd4ZxlIuCNcpE=
+			T5Ywd6C9ddzi+fozUjNKAKP9xAXkbp8mjw+ai3RUfj8=
 			</data>
 		</dict>
 		<key>Headers/Function.hpp</key>

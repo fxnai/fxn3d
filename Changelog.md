@@ -1,5 +1,6 @@
 ## 0.0.14
-*INCOMPLETE*
++ Fixed Apple App Store app rejections due to missing Bundle Version key in Function.framework.
++ Updated to Function C 0.0.18.
 
 ## 0.0.13
 + Added support for Unity 2021 LTS.
