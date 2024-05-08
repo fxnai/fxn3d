@@ -15,7 +15,7 @@ namespace Function.Editor.Build {
     internal sealed class WebGLBuildHandler : BuildHandler {
 
         private static string[] EM_ARGS => new [] {
-            @"-Xlinker --features=mutable-globals,sign-ext",
+            @"-Xlinker --features=mutable-globals,sign-ext,simd128",
             @"-Wl,--export=__stack_pointer",
             @"-Wl,-uFXN_WEBGL_INIT",
             @"-lembind",
@@ -24,8 +24,6 @@ namespace Function.Editor.Build {
             @"-sALLOW_TABLE_GROWTH=1",
             @"-sSTACK_OVERFLOW_CHECK=2",
             $"--embed-file {FxncPath}@libFunction.so",
-
-            
         };
         private static string FxncPath => _FxncPath = _FxncPath ?? AssetDatabase.GetAllAssetPaths()
             .Select(path => new FileInfo(Path.GetFullPath(path)).FullName)
