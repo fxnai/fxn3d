@@ -19,8 +19,6 @@ namespace Function.Editor.Build {
             @"-Wl,--export=__stack_pointer",
             @"-Wl,-uFXN_WEBGL_INIT",
             @"-lembind",
-            //@"-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=_emval_get_global,_emval_new_cstring,__emval_get_property",
-            //@"-sEXPORTED_FUNCTIONS=__emval_get_global,__emval_new_cstring,__emval_get_property",
             @"-sALLOW_TABLE_GROWTH=1",
             @"-sSTACK_OVERFLOW_CHECK=2",
             $"--embed-file {FxncPath}@libFunction.so",

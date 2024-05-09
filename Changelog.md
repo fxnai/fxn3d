@@ -1,5 +1,5 @@
 ## 0.0.15
-*INCOMPLETE*
++ Minor stability improvements.
 
 ## 0.0.14
 + Fixed Apple App Store app rejections due to missing Bundle Version key in Function.framework.

@@ -275,25 +275,5 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNGetVersion")]
         public static extern IntPtr GetVersion ();
         #endregion
-
-
-        #region --Utility--
-
-        public static Status Throw (this Status status) {
-            switch (status) {
-                case Status.Ok:                 return status;
-                case Status.InvalidArgument:    throw new ArgumentException();
-                case Status.InvalidOperation:   throw new InvalidOperationException();
-                case Status.NotImplemented:     throw new NotImplementedException();
-                default:                        throw new InvalidOperationException();
-            }
-        }
-        #endregion
     }
-
-    /// <summary>
-    /// Prevent code stripping.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
-    internal sealed class PreserveAttribute : Attribute { }
 }

@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using static Function.Function;
 
 // Metadata
-[assembly: AssemblyCompany(@"NatML Inc")]
+[assembly: AssemblyCompany(@"NatML Inc.")]
 [assembly: AssemblyTitle(@"Function.Runtime")]
 [assembly: AssemblyVersion(Version)]
 [assembly: AssemblyCopyright(@"Copyright © 2024 NatML Inc. All Rights Reserved.")]

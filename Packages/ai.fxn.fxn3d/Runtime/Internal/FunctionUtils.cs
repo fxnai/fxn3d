@@ -11,11 +11,22 @@ namespace Function.Internal {
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Text;
+    using Status = Internal.Function.Status;
 
     /// <summary>
     /// Helpful extension methods.
     /// </summary>
     internal static class FunctionUtils {
+
+        public static Status Throw (this Status status) {
+            switch (status) {
+                case Status.Ok:                 return status;
+                case Status.InvalidArgument:    throw new ArgumentException();
+                case Status.InvalidOperation:   throw new InvalidOperationException();
+                case Status.NotImplemented:     throw new NotImplementedException();
+                default:                        throw new InvalidOperationException();
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Stream ToStream (this string data) {
@@ -52,4 +63,10 @@ namespace Function.Internal {
             return data;
         }
     }
+
+    /// <summary>
+    /// Prevent code stripping.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
+    internal sealed class PreserveAttribute : Attribute { }
 }
