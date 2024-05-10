@@ -45,7 +45,7 @@ namespace Function.Services {
         /// <param name="configuration">Configuration identifier. Specify this to override the current client configuration token.</param>
         public async Task<Prediction> Create (
             string tag,
-            Dictionary<string, object>? inputs = null,
+            Dictionary<string, object?>? inputs = null,
             bool rawOutputs = false,
             int? dataUrlLimit = null,
             Acceleration acceleration = default,
@@ -91,7 +91,7 @@ namespace Function.Services {
         /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size.</param>
         public async IAsyncEnumerable<Prediction> Stream ( // INCOMPLETE // Edge support
             string tag,
-            Dictionary<string, object>? inputs = null,
+            Dictionary<string, object?>? inputs = null,
             bool rawOutputs = false,
             int? dataUrlLimit = null,
             Acceleration acceleration = default,
@@ -302,7 +302,11 @@ namespace Function.Services {
             return path;
         }
 
-        private Prediction Predict (string tag, IntPtr predictor, Dictionary<string, object> inputs) {
+        private Prediction Predict (
+            string tag,
+            IntPtr predictor,
+            Dictionary<string, object?> inputs
+        ) {
             IntPtr inputMap = default;
             IntPtr prediction = default;
             try {
