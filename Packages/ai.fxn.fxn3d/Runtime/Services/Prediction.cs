@@ -15,6 +15,7 @@ namespace Function.Services {
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
@@ -234,6 +235,7 @@ namespace Function.Services {
             IDictionary     x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, mime: @"application/json", dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
             Image           x => await ToValue(x, name, minUploadSize: minUploadSize, key: key),
             Stream          x => new Value { data = await storage.Upload(name, x, UploadType.Value, mime: mime, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
+            Enum            x => await ToValue(SerializeEnum(x), name, minUploadSize: minUploadSize, mime: mime, key: key),
             _                 => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type `{value.GetType()}`"),
         };
         #endregion
@@ -552,6 +554,12 @@ namespace Function.Services {
             var path = uri.AbsolutePath.TrimEnd('/');            
             var name = path.Substring(path.LastIndexOf('/') + 1);
             return name;
+        }
+
+        private static object SerializeEnum (Enum value) {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+            var attribute = fieldInfo?.GetCustomAttributes(typeof(EnumMemberAttribute), false)?.FirstOrDefault() as EnumMemberAttribute;
+            return (attribute?.IsValueSetExplicitly ?? false) ? attribute.Value : Convert.ToInt32(value);
         }
         #endregion
 

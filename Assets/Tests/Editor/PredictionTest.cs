@@ -8,9 +8,6 @@ namespace Function.Tests {
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using UnityEngine;
-    using UnityEngine.TestTools;
-    using Newtonsoft.Json;
     using Types;
 
     internal sealed class PredictionTest {

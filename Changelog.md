@@ -1,5 +1,5 @@
 ## 0.0.16
-*INCOMPLETE*
++ Added support for `Enum` input values in `Function.Predictions.Create` method.
 
 ## 0.0.15
 + Minor stability improvements.

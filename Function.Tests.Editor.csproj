@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Tests/Editor/UserTest.cs" />
+    <Compile Include="Assets/Tests/Editor/EnumValueTest.cs" />
     <Compile Include="Assets/Tests/Editor/PredictionTest.cs" />
     <Compile Include="Assets/Tests/Editor/PredictorTest.cs" />
     <Compile Include="Assets/Tests/Editor/EmbedAttributeTest.cs" />
