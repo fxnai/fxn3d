@@ -10,6 +10,7 @@ namespace Function.Services {
 
     using System.Threading.Tasks;
     using API;
+    using Internal;
     using Types;
 
     /// <summary>
@@ -103,31 +104,35 @@ namespace Function.Services {
 
         #region --Types--
 
-        public sealed class CreateEnvironmentVariableInput {
+        private sealed class CreateEnvironmentVariableInput {
             public string name;
             public string value;
             public string? organization;
         }
 
-        public sealed class DeleteEnvironmentVariableInput {
+        private sealed class DeleteEnvironmentVariableInput {
             public string name;
             public string? organization;
         }
 
         private sealed class UserWithEnvironmentVariablesResponse {
             public UserWithEnvironmentVariables? user;
+            [Preserve] public UserWithEnvironmentVariablesResponse () { }
 
             public sealed class UserWithEnvironmentVariables {
                 public EnvironmentVariable[] environmentVariables;
+                [Preserve] public UserWithEnvironmentVariables () { }
             }
         }
 
         private sealed class CreateEnvironmentVariableResponse {
             public EnvironmentVariable createEnvironmentVariable;
+            [Preserve] public CreateEnvironmentVariableResponse () { }
         }
 
         private sealed class DeleteEnvironmentVariableResponse {
             public bool deleteEnvironmentVariable;
+            [Preserve] public DeleteEnvironmentVariableResponse () { }
         }
         #endregion
     }

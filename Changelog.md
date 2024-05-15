@@ -1,5 +1,6 @@
 ## 0.0.16
 + Added support for `Enum` input values in `Function.Predictions.Create` method.
++ Fixed JSON deserialization errors caused by code stripping in builds.
 + Removed `Function.Types.Converters` namespace. Bring your own JSON converters.
 
 ## 0.0.15

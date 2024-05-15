@@ -10,6 +10,7 @@ namespace Function.Services {
 
     using System.Threading.Tasks;
     using API;
+    using Internal;
     using Types;
 
     /// <summary>
@@ -59,7 +60,7 @@ namespace Function.Services {
                     }}
                 }}",
                 new () {
-                    ["input"] = !string.IsNullOrEmpty(username) ? new UserInput { username = username } : null
+                    [@"input"] = !string.IsNullOrEmpty(username) ? new UserInput { username = username } : null
                 }
             );
             return response!.user;
@@ -69,12 +70,13 @@ namespace Function.Services {
 
         #region --Types--
 
-        public sealed class UserInput {
+        internal sealed class UserInput {
             public string username;
         }
 
         private sealed class UserResponse<T> where T : Profile {
             public T? user;
+            [Preserve] public UserResponse () { }
         }
         #endregion
     }

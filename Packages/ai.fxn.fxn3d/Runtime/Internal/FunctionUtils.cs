@@ -11,7 +11,7 @@ namespace Function.Internal {
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Text;
-    using Status = Internal.Function.Status;
+    using Status = Function.Status;
 
     /// <summary>
     /// Helpful extension methods.

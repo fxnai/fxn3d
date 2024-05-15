@@ -562,23 +562,5 @@ namespace Function.Services {
             return (attribute?.IsValueSetExplicitly ?? false) ? attribute.Value : Convert.ToInt32(value);
         }
         #endregion
-
-
-        #region --Types--
-
-        public sealed class CreatePredictionInput {
-            public string tag;
-            public string client;
-            public ValueInput[]? inputs;
-            public int? dataUrlLimit;
-            public string? configuration;
-            public string? device;
-            public string? clientVersion;
-        }
-
-        public sealed class ValueInput : Value {
-            public string name;
-        }
-        #endregion
     }
 }

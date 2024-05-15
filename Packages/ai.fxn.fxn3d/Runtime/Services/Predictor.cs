@@ -12,6 +12,7 @@ namespace Function.Services {
     using System.Linq;
     using System.Threading.Tasks;
     using API;
+    using Internal;
     using Types;
 
     /// <summary>
@@ -229,23 +230,23 @@ namespace Function.Services {
 
         #region --Types--
 
-        public sealed class PredictorInput {
+        private sealed class PredictorInput {
             public string tag;
         }
 
-        public sealed class PredictorsInput {
+        private sealed class PredictorsInput {
             public string? query;
             public int? offset;
             public int? count;
         }
 
-        public sealed class UserPredictorsInput {
+        private sealed class UserPredictorsInput {
             public PredictorStatus? status;
             public int? offset;
             public int? count;
         }
 
-        public sealed class CreatePredictorInput {
+        private sealed class CreatePredictorInput {
             public string tag;
             public string notebook;
             public PredictorType? type;
@@ -258,46 +259,52 @@ namespace Function.Services {
             public bool? overwrite;
         }
 
-        public sealed class DeletePredictorInput {
+        private sealed class DeletePredictorInput {
             public string tag;
         }
 
-        public sealed class ArchivePredictorInput {
+        private sealed class ArchivePredictorInput {
             public string tag;
         }
 
-        public sealed class EnvironmentVariableInput {
+        private sealed class EnvironmentVariableInput {
             public string name;
             public string value;
         }
 
         private sealed class PredictorResponse {
             public Predictor? predictor;
+            [Preserve] public PredictorResponse () { }
         }
 
         private sealed class PredictorListResponse {
             public Predictor[] predictors;
+            [Preserve] public PredictorListResponse () { }
         }
 
         private sealed class UserWithPredictorsResponse {
-
             public UserWithPredictors? user;
+            [Preserve] public UserWithPredictorsResponse () { }
 
             public sealed class UserWithPredictors {
                 public Predictor[] predictors;
+                [Preserve] public UserWithPredictors () { }
             }
         }
 
         private sealed class CreatePredictorResponse {
             public Predictor createPredictor;
+            [Preserve] public CreatePredictorResponse () { }
         }
 
         private sealed class DeletePredictorResponse {
             public bool deletePredictor;
+            [Preserve] public DeletePredictorResponse () { }
         }
 
         private sealed class ArchivePredictorResponse {
             public Predictor archivePredictor;
+            [Preserve] public ArchivePredictorResponse () { }
         }
         #endregion
     }
