@@ -1,5 +1,5 @@
 ## 0.0.17
-*INCOMPLETE*
++ Fixed edge prediction errors caused by request backpressure while the predictor is being loaded.
 
 ## 0.0.16
 + Added support for `Enum` input values in `Function.Predictions.Create` method.

@@ -4,7 +4,6 @@
 */
 
 #nullable enable
-#pragma warning disable 8618
 
 namespace Function.Services {
 
@@ -55,8 +54,8 @@ namespace Function.Services {
             string? configuration = default
         ) {
             // Check cache
-            if (cache.TryGetValue(tag, out var p) && !rawOutputs)
-                return Predict(tag, p, inputs!);
+            if (cache.TryGetValue(tag, out var predictorTask) && !rawOutputs)
+                return Predict(tag, await predictorTask, inputs!);
             // Collect inputs
             var key = Guid.NewGuid().ToString();
             var values = inputs != null ?
@@ -76,10 +75,10 @@ namespace Function.Services {
             prediction!.results = await ParseResults(prediction.results, rawOutputs);
             // Load edge predictor
             if (prediction.type == PredictorType.Edge && !rawOutputs)
-                cache.Add(prediction.tag, await Load(prediction, acceleration, device));
+                cache.Add(prediction.tag, Load(prediction, acceleration, device));
             // Make prediction
             return prediction.type == PredictorType.Edge && !rawOutputs && inputs != null ?
-                Predict(tag, cache[prediction.tag], inputs) :
+                Predict(tag, await cache[prediction.tag], inputs) :
                 prediction;
         }
 
@@ -101,8 +100,8 @@ namespace Function.Services {
             string? configuration = default
         ) {
             // Check cache
-            if (cache.TryGetValue(tag, out var p) && !rawOutputs) {
-                yield return Predict(tag, p, inputs!);
+            if (cache.TryGetValue(tag, out var predictorTask) && !rawOutputs) {
+                yield return Predict(tag, await predictorTask, inputs!);
                 yield break;
             }
             // Collect inputs
@@ -125,10 +124,10 @@ namespace Function.Services {
                 prediction!.results = await ParseResults(prediction.results, rawOutputs);
                 // Load edge predictor
                 if (prediction.type == PredictorType.Edge && !rawOutputs)
-                    cache.Add(prediction.tag, await Load(prediction, acceleration, device));
+                    cache.Add(prediction.tag, Load(prediction, acceleration, device));
                 // Make prediction
                 yield return prediction.type == PredictorType.Edge && !rawOutputs && inputs != null ?
-                    Predict(tag, cache[prediction.tag], inputs) :
+                    Predict(tag, await cache[prediction.tag], inputs) :
                     prediction;
             }
         }
@@ -138,14 +137,15 @@ namespace Function.Services {
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
         /// <returns>Whether the edge predictor was successfully deleted from memory.</returns>
-        public Task<bool> Delete (string tag) {
+        public async Task<bool> Delete (string tag) {
             // Check
-            if (!cache.TryGetValue(tag, out var predictor))
-                return Task.FromResult(false);
+            if (!cache.TryGetValue(tag, out var predictorTask))
+                return false;
             // Release
+            var predictor = await predictorTask;
             predictor.ReleasePredictor().Throw();
             // Return
-            return Task.FromResult(true);
+            return true;
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace Function.Services {
         private readonly StorageService storage;
         private readonly string? client;
         private readonly string cachePath;
-        private readonly Dictionary<string, IntPtr> cache;
+        private readonly Dictionary<string, Task<IntPtr>> cache;
 
         internal PredictionService (
             FunctionClient client,
@@ -262,7 +262,7 @@ namespace Function.Services {
                 ".fxn",
                 "cache"
             );
-            this.cache = new Dictionary<string, IntPtr>();
+            this.cache = new Dictionary<string, Task<IntPtr>>();
         }
 
         private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
