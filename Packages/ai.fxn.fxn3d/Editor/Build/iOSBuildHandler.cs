@@ -64,7 +64,7 @@ namespace Function.Editor.Build {
             if (cache == null)
                 return;
             // Get frameworks path
-            var frameworkDir = Path.Combine(report.summary.outputPath, "Frameworks", "Function");
+            var frameworkDir = Path.Combine(report.summary.outputPath, @"Frameworks", @"Function");
             Directory.CreateDirectory(frameworkDir);
             // Copy dsos
             var client = new DotNetClient(Function.URL);
@@ -82,28 +82,27 @@ namespace Function.Editor.Build {
                         dsoStream.CopyTo(fileStream);
                     }
                     ZipFile.ExtractToDirectory(dsoPath, frameworkDir, true);
-                    using var archive = ZipFile.Open(dsoPath, ZipArchiveMode.Read);
                     frameworks.Add(resource.name);
                 }
             }
-            #if UNITY_IOS
-                // Load Xcode project
-                var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);
-                var project = new PBXProject();
-                project.ReadFromFile(pbxPath);
-                // Add frameworks
-                var targetGuid = project.GetUnityMainTargetGuid();
-                foreach (var framework in frameworks) {
-                    var frameworkGuid = project.AddFile(
-                        "Frameworks/Function/" + framework,
-                        "Frameworks/" + framework,
-                        PBXSourceTree.Source
-                    );
-                    project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
-                }
-                // Write
-                project.WriteToFile(pbxPath);
-            #endif
+        #if UNITY_IOS
+            // Load Xcode project
+            var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);
+            var project = new PBXProject();
+            project.ReadFromFile(pbxPath);
+            // Add frameworks
+            var targetGuid = project.GetUnityMainTargetGuid();
+            foreach (var framework in frameworks) {
+                var frameworkGuid = project.AddFile(
+                    "Frameworks/Function/" + framework,
+                    "Frameworks/" + framework,
+                    PBXSourceTree.Source
+                );
+                project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
+            }
+            // Write
+            project.WriteToFile(pbxPath);
+        #endif
             // Empty cache
             cache = null;
         }
