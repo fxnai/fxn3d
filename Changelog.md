@@ -1,3 +1,6 @@
+## 0.0.18
+*INCOMPLETE*
+
 ## 0.0.17
 + Fixed edge prediction errors caused by request backpressure while the predictor is being loaded.
 
