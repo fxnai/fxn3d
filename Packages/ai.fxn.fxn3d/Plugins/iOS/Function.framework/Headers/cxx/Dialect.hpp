@@ -76,6 +76,9 @@
  @constant FXN_PLATFORM_WINDOWS_X64
  Windows x86_64 platform.
 
+ @constant FXN_PLATFORM_WINDOWS_ARM64
+ Windows arm64 platform.
+
  @constant FXN_PLATFORM_WINDOWS
  Windows platform across all architectures.
 */
@@ -98,7 +101,8 @@ enum FXNPlatform {
     FXN_PLATFORM_WASM64         = 1 << 12,
     FXN_PLATFORM_WASM           = FXN_PLATFORM_WASM32 | FXN_PLATFORM_WASM64,
     FXN_PLATFORM_WINDOWS_X64    = 1 << 10,
-    FXN_PLATFORM_WINDOWS        = FXN_PLATFORM_WINDOWS_X64,
+    FXN_PLATFORM_WINDOWS_ARM64  = 1 << 11,
+    FXN_PLATFORM_WINDOWS        = FXN_PLATFORM_WINDOWS_X64 | FXN_PLATFORM_WINDOWS_ARM64,
 };
 typedef enum FXNPlatform FXNPlatform;
 

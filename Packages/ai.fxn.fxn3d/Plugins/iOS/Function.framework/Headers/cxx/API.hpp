@@ -660,7 +660,7 @@ inline Predictor& Predictor::operator= (Predictor&& other) noexcept {
 
 inline Prediction Predictor::operator() (const ValueMap& inputs) const {
     FXNPrediction* prediction = nullptr;
-    FXNPredictorPredict(predictor, inputs, &prediction);
+    FXNPredictorCreatePrediction(predictor, inputs, &prediction);
     return Prediction(prediction, true);
 }
 #pragma endregion
