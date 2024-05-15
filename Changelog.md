@@ -1,3 +1,6 @@
+## 0.0.17
+*INCOMPLETE*
+
 ## 0.0.16
 + Added support for `Enum` input values in `Function.Predictions.Create` method.
 + Fixed JSON deserialization errors caused by code stripping in builds.
