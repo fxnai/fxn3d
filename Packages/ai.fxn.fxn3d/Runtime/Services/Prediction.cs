@@ -73,11 +73,14 @@ namespace Function.Services {
             );
             // Parse
             prediction!.results = await ParseResults(prediction.results, rawOutputs);
-            if (prediction.type == PredictorType.Edge && !rawOutputs) {
-                cache.Add(prediction.tag, Load(prediction, acceleration, device));
-                return inputs != null ? Predict(tag, await cache[prediction.tag], inputs) : prediction;
-            } else
+            // Check
+            if (rawOutputs || prediction.type != PredictorType.Edge)
                 return prediction;
+            // Load
+            var predictor = Load(prediction, acceleration, device);
+            cache.Add(prediction.tag, predictor);
+            // Return
+            return inputs != null ? Predict(tag, await predictor, inputs) : prediction;
         }
 
         /// <summary>
@@ -120,11 +123,16 @@ namespace Function.Services {
             await foreach (var prediction in stream) {
                 // Parse
                 prediction!.results = await ParseResults(prediction.results, rawOutputs);
-                if (prediction.type == PredictorType.Edge && !rawOutputs) {
-                    cache.Add(prediction.tag, Load(prediction, acceleration, device));
-                    yield return inputs != null ? Predict(tag, await cache[prediction.tag], inputs) : prediction;
-                } else
+                // Check
+                if (rawOutputs || prediction.type != PredictorType.Edge) {
                     yield return prediction;
+                    continue;
+                }
+                // Load
+                var predictor = Load(prediction, acceleration, device);
+                cache.Add(prediction.tag, predictor);
+                // Yield
+                yield return inputs != null ? Predict(tag, await predictor, inputs) : prediction;
             }
         }
 
