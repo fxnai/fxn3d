@@ -148,6 +148,8 @@ namespace Function.Services {
             // Release
             var predictor = await predictorTask;
             predictor.ReleasePredictor().Throw();
+            // Pop
+            cache.Remove(tag);
             // Return
             return true;
         }
