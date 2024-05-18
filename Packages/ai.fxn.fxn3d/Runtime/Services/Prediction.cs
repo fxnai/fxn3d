@@ -71,15 +71,13 @@ namespace Function.Services {
                     [@"fxn-configuration-token"] = configuration ?? ConfigurationId
                 }
             );
-            // Parse results
+            // Parse
             prediction!.results = await ParseResults(prediction.results, rawOutputs);
-            // Load edge predictor
-            if (prediction.type == PredictorType.Edge && !rawOutputs)
+            if (prediction.type == PredictorType.Edge && !rawOutputs) {
                 cache.Add(prediction.tag, Load(prediction, acceleration, device));
-            // Make prediction
-            return prediction.type == PredictorType.Edge && !rawOutputs && inputs != null ?
-                Predict(tag, await cache[prediction.tag], inputs) :
-                prediction;
+                return inputs != null ? Predict(tag, await cache[prediction.tag], inputs) : prediction;
+            } else
+                return prediction;
         }
 
         /// <summary>
@@ -120,15 +118,13 @@ namespace Function.Services {
                 }
             );
             await foreach (var prediction in stream) {
-                // Collect results
+                // Parse
                 prediction!.results = await ParseResults(prediction.results, rawOutputs);
-                // Load edge predictor
-                if (prediction.type == PredictorType.Edge && !rawOutputs)
+                if (prediction.type == PredictorType.Edge && !rawOutputs) {
                     cache.Add(prediction.tag, Load(prediction, acceleration, device));
-                // Make prediction
-                yield return prediction.type == PredictorType.Edge && !rawOutputs && inputs != null ?
-                    Predict(tag, await cache[prediction.tag], inputs) :
-                    prediction;
+                    yield return inputs != null ? Predict(tag, await cache[prediction.tag], inputs) : prediction;
+                } else
+                    yield return prediction;
             }
         }
 
