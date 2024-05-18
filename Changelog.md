@@ -1,5 +1,5 @@
 ## 0.0.18
-*INCOMPLETE*
++ Fixed edge predictions failing when passing in `Dictionary<TKey, TValue>` input values.
 
 ## 0.0.17
 + Fixed edge prediction errors caused by request backpressure while the predictor is being loaded.

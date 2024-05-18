@@ -424,22 +424,12 @@ namespace Function.Services {
                 case Tensor<ulong> x:   return ToValue(x);
                 case Tensor<bool> x:    return ToValue(x);
                 case Image x:           return ToValue(x);
-                case string x:
-                    Function.CreateStringValue(x, out var str).Throw();
-                    return str;
-                case IList x:
-                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var list).Throw();
-                    return list;
-                case IDictionary x:
-                    Function.CreateListValue(JsonConvert.SerializeObject(x), out var dict).Throw();
-                    return dict;
-                case Stream stream:
-                    Function.CreateBinaryValue(stream.ToArray(), (int)stream.Length, ValueFlags.CopyData, out var binary).Throw();
-                    return binary;
-                case null:
-                    Function.CreateNullValue(out var nullptr).Throw();
-                    return nullptr;
-                default: throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}");
+                case string x:          return Function.CreateStringValue(x, out var str).Throw() == Status.Ok ? str : default;
+                case IList x:           return Function.CreateListValue(JsonConvert.SerializeObject(x), out var list).Throw() == Status.Ok ? list : default;
+                case IDictionary x:     return Function.CreateDictValue(JsonConvert.SerializeObject(x), out var dict).Throw() == Status.Ok ? dict : default;
+                case Stream stream:     return Function.CreateBinaryValue(stream.ToArray(), (int)stream.Length, ValueFlags.CopyData, out var binary).Throw() == Status.Ok ? binary : default;
+                case null:              return Function.CreateNullValue(out var nullptr).Throw() == Status.Ok ? nullptr : default; 
+                default:                throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}");
             }
         }
 
