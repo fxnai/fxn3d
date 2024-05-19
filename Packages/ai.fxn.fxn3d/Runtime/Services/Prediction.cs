@@ -323,7 +323,7 @@ namespace Function.Services {
                 foreach (var pair in inputs)
                     inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).Throw();
                 // Predict
-                predictor.Predict(inputMap, out prediction).Throw();
+                predictor.CreatePrediction(inputMap, out prediction).Throw();
                 // Get prediction id
                 var idBuffer = new StringBuilder(2048);
                 prediction.GetPredictionID(idBuffer, idBuffer.Capacity).Throw();
