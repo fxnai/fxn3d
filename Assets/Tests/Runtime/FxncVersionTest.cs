@@ -16,6 +16,10 @@ namespace Function.Tests {
             // Version
             var version = Marshal.PtrToStringAuto(Function.GetVersion());
             Debug.Log($"Function {version}");
+            // Client
+            var clientId = new StringBuilder(64);
+            Function.GetConfigurationClientID(clientId, clientId.Capacity);
+            Debug.Log($"Client: {clientId}");
             // Configuration
             var configId = new StringBuilder(2048);
             Function.GetConfigurationUniqueID(configId, configId.Capacity);

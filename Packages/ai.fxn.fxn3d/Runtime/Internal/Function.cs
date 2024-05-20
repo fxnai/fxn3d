@@ -165,6 +165,11 @@ namespace Function.Internal {
             [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder identifier,
             int size
         );
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetClientID")]
+        public static extern Status GetConfigurationClientID (
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder identifier,
+            int size
+        );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationCreate")]
         public static extern Status CreateConfiguration (out IntPtr configuration);
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationRelease")]

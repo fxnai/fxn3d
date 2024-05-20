@@ -67,8 +67,8 @@ namespace Function.Services {
                 $"/predict/{tag}?dataUrlLimit={dataUrlLimit}&rawOutputs=true",
                 values,
                 new () {
-                    [@"fxn-client"] = client ?? this.client ?? string.Empty,
-                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId
+                    [@"fxn-client"] = client ?? ClientId,
+                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId,
                 }
             );
             // Parse
@@ -116,8 +116,8 @@ namespace Function.Services {
                 $"/predict/{tag}?stream=true&rawOutputs=true&dataUrlLimit={dataUrlLimit}",
                 values,
                 new () {
-                    [@"fxn-client"] = client ?? this.client ?? string.Empty,
-                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId
+                    [@"fxn-client"] = client ?? ClientId,
+                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId,
                 }
             );
             await foreach (var prediction in stream) {
@@ -250,19 +250,32 @@ namespace Function.Services {
         #region --Operations--
         private readonly FunctionClient fxn;
         private readonly StorageService storage;
-        private readonly string? client;
         private readonly string cachePath;
         private readonly Dictionary<string, Task<IntPtr>> cache;
+
+        private static string ConfigurationId {
+            get {
+                var sb = new StringBuilder(2048);
+                Function.GetConfigurationUniqueID(sb, sb.Capacity).Throw();
+                return sb.ToString();
+            }
+        }
+
+        private static string ClientId {
+            get {
+                var sb = new StringBuilder(64);
+                Function.GetConfigurationClientID(sb, sb.Capacity).Throw();
+                return sb.ToString();
+            }
+        }
 
         internal PredictionService (
             FunctionClient client,
             StorageService storage,
-            string? clientId,
             string? cachePath
         ) {
             this.fxn = client;
             this.storage = storage;
-            this.client = clientId;        
             this.cachePath = cachePath ?? Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 ".fxn",
@@ -290,24 +303,6 @@ namespace Function.Services {
             configuration.ReleaseConfiguration().Throw();            
             // Return
             return predictor;
-        }
-
-        private async Task<string> Retrieve (PredictionResource resource) {
-            // Check cache
-            Directory.CreateDirectory(cachePath);
-            var name = !string.IsNullOrEmpty(resource.name) ? resource.name : GetResourceName(resource.url);
-            var path = Path.Combine(cachePath, name);
-            if (File.Exists(path))
-                return path;
-            // Download
-            using var dataStream = await fxn.Download(resource.url);
-            using var fileStream = File.Create(path);
-            if (client == @"browser")
-                dataStream.CopyTo(fileStream); // Workaround for lack of pthreads on browser
-            else
-                await dataStream.CopyToAsync(fileStream);
-            // Return
-            return path;
         }
 
         private Prediction Predict (
@@ -364,6 +359,21 @@ namespace Function.Services {
             }
         }
 
+        private async Task<string> Retrieve (PredictionResource resource) {
+            // Check cache
+            Directory.CreateDirectory(cachePath);
+            var name = !string.IsNullOrEmpty(resource.name) ? resource.name : GetResourceName(resource.url);
+            var path = Path.Combine(cachePath, name);
+            if (File.Exists(path))
+                return path;
+            // Download
+            using var dataStream = await fxn.Download(resource.url);
+            using var fileStream = File.Create(path);
+            dataStream.CopyTo(fileStream); // CHECK // Async usage
+            // Return
+            return path;
+        }
+
         private async Task<object?[]?> ParseResults (object?[]? values, bool raw) {
             // Check
             if (values == null)
@@ -380,14 +390,6 @@ namespace Function.Services {
 
 
         #region --Utilities--
-
-        private static string ConfigurationId {
-            get {
-                var sb = new StringBuilder(2048);
-                Function.GetConfigurationUniqueID(sb, sb.Capacity).Throw();
-                return sb.ToString();
-            }
-        }
 
         private static unsafe IntPtr ToValue (object? value) {
             switch (value) {

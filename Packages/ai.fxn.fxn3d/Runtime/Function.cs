@@ -71,24 +71,20 @@ namespace Function {
         /// </summary>
         /// <param name="accessKey">Function access key.</param>
         /// <param name="url">Function API URL.</param>
-        /// <param name="clientId">Client identifier.</param>
         /// <param name="cachePath">Predictor cache path.</param>
         public Function (
             string? accessKey = null,
             string? url = null,
-            string? clientId = null,
             string? cachePath = null
-        ) : this(new DotNetClient(url ?? URL, accessKey: accessKey), clientId, cachePath) { }
+        ) : this(new DotNetClient(url ?? URL, accessKey: accessKey), cachePath) { }
 
         /// <summary>
         /// Create a Function client.
         /// </summary>
         /// <param name="client">Function API client.</param>
-        /// <param name="clientId">Client identifier.</param>
         /// <param name="cachePath">Predictor cache path.</param>
         public Function (
             FunctionClient client,
-            string? clientId = null,
             string? cachePath = null
         ) {
             this.client = client;
@@ -96,7 +92,7 @@ namespace Function {
             this.Users = new UserService(client);
             this.Predictors = new PredictorService(client);
             this.EnvironmentVariables = new EnvironmentVariableService(client);
-            this.Predictions = new PredictionService(client, Storage, clientId, cachePath);
+            this.Predictions = new PredictionService(client, Storage, cachePath);
         }
         #endregion
 
