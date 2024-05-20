@@ -18,43 +18,43 @@
  @abstract Value data type.
 
  @constant FXN_DTYPE_NULL
- Value is `null` or undefined.
-
- @constant FXN_DTYPE_INT8
- Value is `int8_t` in C/C++ and `sbyte` in C#.
-
- @constant FXN_DTYPE_INT16
- Value is `int16_t` in C/C++ and `short` in C#.
-
- @constant FXN_DTYPE_INT32
- Value is `int32_t` in C/C++ and `int` in C#.
-
- @constant FXN_DTYPE_INT64
- Value is `int64_t` in C/C++ and `long` in C#.
-
- @constant FXN_DTYPE_UINT8
- Value is `uint8_t` in C/C++ and `byte` in C#.
-
- @constant FXN_DTYPE_UINT16
- Value is `uint16_t` in C/C++ and `ushort` in C#.
-
- @constant FXN_DTYPE_UINT32
- Value is `uint32_t` in C/C++ and `uint` in C#.
-
- @constant FXN_DTYPE_UINT64
- Value is `uint64_t` in C/C++ and `ulong` in C#.
+ Value is null or undefined.
 
  @constant FXN_DTYPE_FLOAT16
- Value is a generic half-precision float.
+ Value is IEEE 754 half precision 16-bit float.
 
  @constant FXN_DTYPE_FLOAT32
- Value is `float` in C/C++/C#.
+ Value is IEEE 754 single precision 32-bit float.
 
  @constant FXN_DTYPE_FLOAT64
- Value is `double` in C/C++/C#.
+ Value is IEEE 754 double precision 64-bit float.
+
+ @constant FXN_DTYPE_INT8
+ Value is signed 8-bit integer.
+
+ @constant FXN_DTYPE_INT16
+ Value is signed 16-bit integer.
+
+ @constant FXN_DTYPE_INT32
+ Value is signed 32-bit integer.
+
+ @constant FXN_DTYPE_INT64
+ Value is signed 64-bit integer.
+
+ @constant FXN_DTYPE_UINT8
+ Value is unsigned 8-bit integer.
+
+ @constant FXN_DTYPE_UINT16
+ Value is unsigned 16-bit integer.
+
+ @constant FXN_DTYPE_UINT32
+ Value is unsigned 32-bit integer.
+
+ @constant FXN_DTYPE_UINT64
+ Value is unsigned 64-bit integer.
 
  @constant FXN_DTYPE_BOOL
- Value is `bool` in C/C++/C#.
+ Value is 8-bit boolean where zero is `false` and non-zero is `true`.
 
  @constant FXN_DTYPE_STRING
  Value is a UTF-8 encoded string.
@@ -66,7 +66,7 @@
  Value is a JSON-serializable dictionary.
 
  @constant FXN_DTYPE_IMAGE
- Value is an image pixel buffer. This MUST always be interleaved by channel.
+ Value is a pixel buffer with 8 bits per intensity, interleaved by channel.
 
  @constant FXN_DTYPE_BINARY
  Value is a binary blob.

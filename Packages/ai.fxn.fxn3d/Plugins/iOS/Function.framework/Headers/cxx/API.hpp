@@ -130,6 +130,14 @@ inline std::string Configuration::GetUniqueID () {
     id.resize(strlen(id.c_str()));
     return id;
 }
+
+inline std::string Configuration::GetClientID () {
+    std::string id;
+    id.resize(64);
+    FXNConfigurationGetClientID(id.data(), static_cast<int>(id.size()));
+    id.resize(strlen(id.c_str()));
+    return id;
+}
 #pragma endregion
 
 

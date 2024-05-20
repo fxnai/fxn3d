@@ -59,6 +59,8 @@ namespace Function {
 
         static std::string GetUniqueID ();
 
+        static std::string GetClientID ();
+
     private:
         FXNConfiguration* configuration;
         bool owner;

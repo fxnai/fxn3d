@@ -54,17 +54,35 @@ typedef struct FXNConfiguration FXNConfiguration;
 /*!
  @function FXNConfigurationGetUniqueID
 
- @abstract Get a configuration identifier.
+ @abstract Get the configuration unique identifier.
 
- @discussion Get a configuration identifier.
+ @discussion Get the configuration unique identifier.
 
  @param identifier
- Predictor configuration identifier.
+ Configuration unique identifier.
 
  @param size
  Identifier size.
 */
 FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetUniqueID (
+    char* identifier,
+    int32_t size
+);
+
+/*!
+ @function FXNConfigurationGetClientID
+
+ @abstract Get the configuration client identifier.
+
+ @discussion Get the configuration client identifier.
+
+ @param identifier
+ Configuration client identifier.
+
+ @param size
+ Identifier size.
+*/
+FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetClientID (
     char* identifier,
     int32_t size
 );
