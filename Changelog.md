@@ -1,3 +1,6 @@
+## 0.0.19
+*INCOMPLETE*
+
 ## 0.0.18
 + Fixed edge predictions failing when passing in `Dictionary<TKey, TValue>` input values.
 + Updated to Function C 0.0.20.
