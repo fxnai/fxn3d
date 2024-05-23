@@ -68,6 +68,7 @@
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Function.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Internal/FunctionInfo.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/API/DotNetClient.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Acceleration.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Environment.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Internal/Function.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Tensor.cs" />
