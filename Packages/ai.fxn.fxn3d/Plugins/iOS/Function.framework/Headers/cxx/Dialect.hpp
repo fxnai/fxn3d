@@ -18,93 +18,104 @@
 
 #pragma region --Platform--
 /*!
- @enum FXNPlatform
-
- @abstract Function deployment platform.
-
- @constant FXN_PLATFORM_UNKNOWN
- Unknown platform.
-
- @constant FXN_PLATFORM_ANDROID_ARM
- Android armeabi-v7a platform.
-
- @constant FXN_PLATFORM_ANDROID_ARM64
- Android arm64-v8a platform.
-
- @constant FXN_PLATFORM_ANDROID_X86
- Android x86 platform.
-
- @constant FXN_PLATFORM_ANDROID_X64
- Android x86_64 platform.
-
- @constant FXN_PLATFORM_ANDROID
- Android platform across all architectures.
-
- @constant FXN_PLATFORM_IOS_ARM64
- iOS arm64 platform.
-
- @constant FXN_PLATFORM_IOS
- iOS platform across all architectures.
- 
- @constant FXN_PLATFORM_MACOS_X64
- macOS x86_64 platform.
-
- @constant FXN_PLATFORM_MACOS_ARM64
- macOS arm64 platform.
-
- @constant FXN_PLATFORM_MACOS
- macOS platform across all architectures.
-
- @constant FXN_PLATFORM_LINUX_X64
- Linux x86_64 platform.
-
- @constant FXN_PLATFORM_LINUX_ARM64
- Linux arm64 platform.
-
- @constant FXN_PLATFORM_LINUX
- Linux platform across all architectures.
-
- @constant FXN_PLATFORM_WASM32
- WebAssembly 32-bit platform.
-
- @constant FXN_PLATFORM_WASM64
- WebAssembly 64-bit platform (MEMORY64).
-
- @constant FXN_PLATFORM_WASM
- WebAssembly platform across all architectures.
-
- @constant FXN_PLATFORM_WINDOWS_X64
- Windows x86_64 platform.
-
- @constant FXN_PLATFORM_WINDOWS_ARM64
- Windows arm64 platform.
-
- @constant FXN_PLATFORM_WINDOWS
- Windows platform across all architectures.
+ @abstract Unknown platform.
 */
-enum FXNPlatform {
-    FXN_PLATFORM_UNKNOWN        = 0,
-    FXN_PLATFORM_ANDROID_ARM    = 1 << 0,
-    FXN_PLATFORM_ANDROID_ARM64  = 1 << 1,
-    FXN_PLATFORM_ANDROID_X86    = 1 << 2,
-    FXN_PLATFORM_ANDROID_X64    = 1 << 3,
-    FXN_PLATFORM_ANDROID        = FXN_PLATFORM_ANDROID_ARM | FXN_PLATFORM_ANDROID_ARM64 | FXN_PLATFORM_ANDROID_X86 | FXN_PLATFORM_ANDROID_X64,
-    FXN_PLATFORM_IOS_ARM64      = 1 << 4,
-    FXN_PLATFORM_IOS            = FXN_PLATFORM_IOS_ARM64,
-    FXN_PLATFORM_MACOS_X64      = 1 << 5,
-    FXN_PLATFORM_MACOS_ARM64    = 1 << 6,
-    FXN_PLATFORM_MACOS          = FXN_PLATFORM_MACOS_X64 | FXN_PLATFORM_MACOS_ARM64,
-    FXN_PLATFORM_LINUX_X64      = 1 << 7,
-    FXN_PLATFORM_LINUX_ARM64    = 1 << 8,
-    FXN_PLATFORM_LINUX          = FXN_PLATFORM_LINUX_X64 | FXN_PLATFORM_LINUX_ARM64,
-    FXN_PLATFORM_WASM32         = 1 << 9,
-    FXN_PLATFORM_WASM64         = 1 << 12,
-    FXN_PLATFORM_WASM           = FXN_PLATFORM_WASM32 | FXN_PLATFORM_WASM64,
-    FXN_PLATFORM_WINDOWS_X64    = 1 << 10,
-    FXN_PLATFORM_WINDOWS_ARM64  = 1 << 11,
-    FXN_PLATFORM_WINDOWS        = FXN_PLATFORM_WINDOWS_X64 | FXN_PLATFORM_WINDOWS_ARM64,
-};
-typedef enum FXNPlatform FXNPlatform;
+#define FXN_PLATFORM_UNKNOWN        0
+
+/*!
+ @abstract Android armeabi-v7a platform.
+*/
+#define FXN_PLATFORM_ANDROID_ARM    (1 << 0)
+
+/*!
+ @abstract Android arm64-v8a platform.
+*/
+#define FXN_PLATFORM_ANDROID_ARM64  (1 << 1)
+
+/*!
+ @abstract Android x86 platform.
+*/
+#define FXN_PLATFORM_ANDROID_X86    (1 << 2)
+
+/*!
+ @abstract Android x86_64 platform.
+*/
+#define FXN_PLATFORM_ANDROID_X64    (1 << 3)
+
+/*!
+ @abstract Android platform across all architectures.
+*/
+#define FXN_PLATFORM_ANDROID        (FXN_PLATFORM_ANDROID_ARM | FXN_PLATFORM_ANDROID_ARM64 | FXN_PLATFORM_ANDROID_X86 | FXN_PLATFORM_ANDROID_X64)
+
+/*!
+ @abstract iOS arm64 platform.
+*/
+#define FXN_PLATFORM_IOS_ARM64      (1 << 4)
+
+/*!
+ @abstract iOS platform across all architectures.
+*/
+#define FXN_PLATFORM_IOS            FXN_PLATFORM_IOS_ARM64
+
+/*!
+ @abstract macOS x86_64 platform.
+*/
+#define FXN_PLATFORM_MACOS_X64      (1 << 5)
+
+/*!
+ @abstract macOS arm64 platform.
+*/
+#define FXN_PLATFORM_MACOS_ARM64    (1 << 6)
+
+/*!
+ @abstract macOS platform across all architectures.
+*/
+#define FXN_PLATFORM_MACOS          (FXN_PLATFORM_MACOS_X64 | FXN_PLATFORM_MACOS_ARM64)
+
+/*!
+ @abstract Linux x86_64 platform.
+*/
+#define FXN_PLATFORM_LINUX_X64      (1 << 7)
+
+/*!
+ @abstract Linux arm64 platform.
+*/
+#define FXN_PLATFORM_LINUX_ARM64    (1 << 8)
+
+/*!
+ @abstract Linux platform across all architectures.
+*/
+#define FXN_PLATFORM_LINUX          (FXN_PLATFORM_LINUX_X64 | FXN_PLATFORM_LINUX_ARM64)
+
+/*!
+ @abstract WebAssembly 32-bit platform.
+*/
+#define FXN_PLATFORM_WASM32         (1 << 9)
+
+/*!
+ @abstract WebAssembly 64-bit platform (MEMORY64).
+*/
+#define FXN_PLATFORM_WASM64         (1 << 12)
+
+/*!
+ @abstract WebAssembly platform across all architectures.
+*/
+#define FXN_PLATFORM_WASM           (FXN_PLATFORM_WASM32 | FXN_PLATFORM_WASM64)
+
+/*!
+ @abstract Windows x86_64 platform.
+*/
+#define FXN_PLATFORM_WINDOWS_X64    (1 << 10)
+
+/*!
+ @abstract Windows arm64 platform.
+*/
+#define FXN_PLATFORM_WINDOWS_ARM64  (1 << 11)
+
+/*!
+ @abstract Windows platform across all architectures.
+*/
+#define FXN_PLATFORM_WINDOWS        (FXN_PLATFORM_WINDOWS_X64 | FXN_PLATFORM_WINDOWS_ARM64)
 
 #ifndef FXN_CURRENT_PLATFORM
 /*!
