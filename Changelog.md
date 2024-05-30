@@ -1,5 +1,7 @@
 ## 0.0.19
-*INCOMPLETE*
++ Fixed `InvalidOperationException` when edge predictions return image values.
++ Fixed Apple App Store upload errors due to incorrect `CFBundleVersion` key in `Function.framework`.
++ Updated to Function C 0.0.21.
 
 ## 0.0.18
 + Fixed edge predictions failing when passing in `Dictionary<TKey, TValue>` input values.

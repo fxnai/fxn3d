@@ -7,6 +7,7 @@
 
 namespace Function.Types {
 
+    using Newtonsoft.Json;
     using Internal;
 
     /// <summary>
@@ -20,6 +21,7 @@ namespace Function.Types {
         /// Image pixel buffer.
         /// This is always 8bpp interleaved by channel.
         /// </summary>
+        [JsonIgnore]
         public readonly byte[] data;
 
         /// <summary>
@@ -72,6 +74,19 @@ namespace Function.Types {
 
         #region --Operations--
         private readonly byte* nativeData;
+
+        [JsonProperty(@"data")]
+        private readonly string dataPlaceholder {
+            get {
+                var channelStr = "?";
+                switch (channels) {
+                    case 1: channelStr = "R8"; break;
+                    case 3: channelStr = "RGB888"; break;
+                    case 4: channelStr = "RGBA8888"; break;
+                }
+                return $"<{width}x{height},{channelStr},{data.Length} bytes>";
+            }
+        }
 
         public ref byte GetPinnableReference () => ref (nativeData == null ? ref data[0] : ref *nativeData);
         #endregion
