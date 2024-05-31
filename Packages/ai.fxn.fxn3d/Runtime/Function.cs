@@ -99,7 +99,7 @@ namespace Function {
 
         #region --Operations--
         public readonly FunctionClient client;
-        public const string Version = @"0.0.19";
+        public const string Version = @"0.0.20";
         internal const string URL = @"https://api.fxn.ai";
         #endregion
     }

@@ -1,3 +1,6 @@
+## 0.0.20
+*INCOMPLETE*
+
 ## 0.0.19
 + Added `PrivacyInfo.xcprivacy` iOS privacy manifest in `Function.framework`.
 + Fixed `InvalidOperationException` when edge predictions return image values.
