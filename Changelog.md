@@ -1,9 +1,10 @@
 ## 0.0.19
++ Added `PrivacyInfo.xcprivacy` iOS privacy manifest in `Function.framework`.
 + Fixed `InvalidOperationException` when edge predictions return image values.
 + Fixed Apple App Store upload errors due to incorrect `CFBundleVersion` key in `Function.framework`.
 + Fixed embedded edge predictors failing to load from cache causing unnecessary downloads.
 + Fixed Android build errors when embedding edge predictors.
-+ Updated to Function C 0.0.22.
++ Updated to Function C 0.0.23.
 
 ## 0.0.18
 + Fixed edge predictions failing when passing in `Dictionary<TKey, TValue>` input values.
