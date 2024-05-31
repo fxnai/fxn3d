@@ -10,6 +10,7 @@ namespace Function.API {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Types;
     using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
@@ -53,11 +54,13 @@ namespace Function.API {
             // Check prediction
             if (!path.StartsWith(@"predict"))
                 return await base.Request<T>(method, path, payload: payload, headers: headers);
+            // Check tag
+            var uri = new Uri($"{this.url}/{path}");
+            var match = Regex.Match(uri.AbsolutePath, @".*(@[a-z1-9-]+\/[a-z1-9-]+).*");
+            if (!match.Success)
+                return await base.Request<T>(method, path, payload: payload, headers: headers);
             // Get cached prediction
-            var url = $"{this.url}/{path}";
-            var uri = new Uri(url);
-            var segments = uri.AbsolutePath.Split('/');
-            var tag = string.Join("/", segments[2], segments[3]);
+            var tag = match.Groups[1].Value;
             var platform = headers != null && headers.TryGetValue(@"fxn-client", out var p) ? p : null;
             var cachedPrediction = cache.FirstOrDefault(p => p.platform == platform && p.prediction.tag == tag);
             // Check

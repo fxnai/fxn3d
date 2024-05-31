@@ -5,6 +5,7 @@
 
 namespace Function.Editor.Build {
 
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -47,10 +48,15 @@ namespace Function.Editor.Build {
                 var predictions = (from tag in embed.tags from platform in Platforms select (platform, tag))
                     .Select((pair) => {
                         var (platform, tag) = pair;
-                        var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: platform)).Result;
-                        return prediction.type == PredictorType.Edge ?
-                            new CachedPrediction { platform = platform, prediction = prediction } :
-                            null;
+                        try {
+                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: platform)).Result;
+                            return prediction.type == PredictorType.Edge ?
+                                new CachedPrediction { platform = platform, prediction = prediction } :
+                                null;
+                        } catch (Exception ex) {
+                            Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
+                            return null;
+                        }
                     })
                     .Where(pred => pred != null)
                     .ToArray();

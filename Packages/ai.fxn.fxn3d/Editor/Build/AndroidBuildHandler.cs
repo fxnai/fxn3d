@@ -5,10 +5,12 @@
 
 namespace Function.Editor.Build {
 
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using UnityEngine;
     using UnityEditor;
     using UnityEditor.Android;
     using UnityEditor.Build.Reporting;
@@ -41,18 +43,22 @@ namespace Function.Editor.Build {
                 var fxn = new Function(client);
                 var predictions = (from tag in embed.tags from platform in Platforms select (platform, tag))
                     .Select((pair) => {
-                        // Create prediction
                         var (platform, tag) = pair;
-                        var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: platform)).Result;
-                        // Check type
-                        if (prediction.type != PredictorType.Edge)
+                        try {
+                            // Create prediction
+                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: platform)).Result;
+                            if (prediction.type != PredictorType.Edge)
+                                return null;
+                            // Populate names
+                            foreach (var resource in prediction.resources)
+                                if (resource.type == @"dso")
+                                    resource.name ??= PredictionService.GetResourceName(resource.url) + @".so";
+                            // Return
+                            return new CachedPrediction { platform = platform, prediction = prediction };
+                        } catch (Exception ex) {
+                            Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
-                        // Populate names
-                        foreach (var resource in prediction.resources)
-                            if (resource.type == "dso")
-                                resource.name ??= PredictionService.GetResourceName(resource.url) + ".so";
-                        // Return
-                        return new CachedPrediction { platform = platform, prediction = prediction };
+                        }
                     })
                     .Where(pred => pred != null)
                     .ToArray();
@@ -72,7 +78,7 @@ namespace Function.Editor.Build {
             // Embed
             foreach (var cachedPrediction in cache) {
                 // Check
-                var arch = cachedPrediction.platform.Split(':')[1];
+                var arch = cachedPrediction.platform.Replace("android-", string.Empty).Replace(":", string.Empty);
                 var libDir = Path.Combine(projectPath, @"src", @"main", @"jniLibs", arch);
                 if (!Directory.Exists(libDir))
                     continue;

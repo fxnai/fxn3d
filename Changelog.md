@@ -1,7 +1,9 @@
 ## 0.0.19
 + Fixed `InvalidOperationException` when edge predictions return image values.
 + Fixed Apple App Store upload errors due to incorrect `CFBundleVersion` key in `Function.framework`.
-+ Updated to Function C 0.0.21.
++ Fixed embedded edge predictors failing to load from cache causing unnecessary downloads.
++ Fixed Android build errors when embedding edge predictors.
++ Updated to Function C 0.0.22.
 
 ## 0.0.18
 + Fixed edge predictions failing when passing in `Dictionary<TKey, TValue>` input values.

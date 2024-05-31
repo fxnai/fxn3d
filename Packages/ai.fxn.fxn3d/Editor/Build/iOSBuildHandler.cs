@@ -5,11 +5,13 @@
 
 namespace Function.Editor.Build {
 
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
     using System.Threading.Tasks;
+    using UnityEngine;
     using UnityEditor;
     using UnityEditor.Build;
     using UnityEditor.Build.Reporting;
@@ -17,10 +19,10 @@ namespace Function.Editor.Build {
     using Types;
     using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
-    #if UNITY_IOS
+#if UNITY_IOS
     using UnityEditor.iOS.Xcode;
     using UnityEditor.iOS.Xcode.Extensions;
-    #endif
+#endif
 
     internal sealed class iOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
@@ -40,10 +42,15 @@ namespace Function.Editor.Build {
                 var client = new DotNetClient(embedFxn.client.url, embedFxn.client.accessKey);
                 var fxn = new Function(client);
                 var predictions = embed.tags.Select(tag => {
-                    var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: Platform)).Result;
-                    return prediction.type == PredictorType.Edge ?
-                        new CachedPrediction { platform = Platform, prediction = prediction } :
-                        null;
+                    try {
+                        var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: Platform)).Result;
+                        return prediction.type == PredictorType.Edge ?
+                            new CachedPrediction { platform = Platform, prediction = prediction } :
+                            null;
+                    } catch (Exception ex) {
+                        Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
+                        return null;
+                    }
                 })
                 .Where(pred => pred != null)
                 .ToArray();
