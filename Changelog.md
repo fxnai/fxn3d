@@ -1,5 +1,6 @@
 ## 0.0.20
-*INCOMPLETE*
++ Updated `fxn.Predictions.ToObject` to return a `Newtonsoft.Json.Linq.JArray` insteaf of a `List<object>` for list values.
++ Updated `fxn.Predictions.ToObject` to return a `Newtonsoft.Json.Linq.JObject` insteaf of a `Dictionary<string, object>` for dictionary values.
 
 ## 0.0.19
 + Added `PrivacyInfo.xcprivacy` iOS privacy manifest in `Function.framework`.

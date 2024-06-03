@@ -180,8 +180,8 @@ namespace Function.Services {
                 case Dtype.Bool:    return ToObject<bool>(stream, value.shape!);
                 case Dtype.String:  return new StreamReader(stream).ReadToEnd();
                 case Dtype.Binary:  return stream;
-                case Dtype.List:    return JsonConvert.DeserializeObject<List<object>>(new StreamReader(stream).ReadToEnd());
-                case Dtype.Dict:    return JsonConvert.DeserializeObject<Dictionary<string, object>>(new StreamReader(stream).ReadToEnd());
+                case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(new StreamReader(stream).ReadToEnd());
+                case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(new StreamReader(stream).ReadToEnd());
                 default:            return value;
             }
         }
