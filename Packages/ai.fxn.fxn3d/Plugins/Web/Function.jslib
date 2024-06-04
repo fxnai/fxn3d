@@ -624,6 +624,40 @@ const DLFCN = {
     }
     return result;
   },
+  _dlsym_js__postset: `addOnPreRun(() => {
+    var ___c_longjmp = new WebAssembly.Tag({ "parameters": ["i32"] });
+    var ___cpp_exception = new WebAssembly.Tag({ "parameters": ["i32"] });
+    var _emscripten_console_log = (str) => console.log(UTF8ToString(str));
+    var _emscripten_console_warn = (str) => console.warn(UTF8ToString(str));
+    var _emscripten_console_error = (str) => console.error(UTF8ToString(str));
+    var _emscripten_err = (str) => err(UTF8ToString(str));
+    var _emscripten_out = (str) => out(UTF8ToString(str));
+    var __emscripten_get_progname = (str, len) => stringToUTF8(thisProgram, str, len);
+    var _emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
+    _emscripten_console_log.sig = "vi";
+    _emscripten_console_warn.sig = "vi";
+    _emscripten_console_error.sig = "vi";
+    _emscripten_err.sig = "vi";
+    _emscripten_out.sig = "vi";
+    __emscripten_get_progname.sig = "vii";
+    _emscripten_memcpy_js.sig = "viii";
+    const fxnImports = {
+      __c_longjmp: ___c_longjmp,
+      __cpp_exception: ___cpp_exception,
+      __heap_base: 1,
+      emscripten_console_log: _emscripten_console_log,
+      emscripten_console_warn: _emscripten_console_warn,
+      emscripten_console_error: _emscripten_console_error,
+      emscripten_err: _emscripten_err,
+      emscripten_out: _emscripten_out,
+      _emscripten_get_progname: __emscripten_get_progname,
+      emscripten_memcpy_js: _emscripten_memcpy_js,
+    };
+    if (typeof wasmImports !== "undefined")
+      wasmImports = Object.assign({}, wasmImports, fxnImports); 
+    else if (typeof asmLibraryArg !== "undefined")
+      asmLibraryArg = Object.assign({}, asmLibraryArg, fxnImports); 
+  })`,
 };
 
 mergeInto(LibraryManager.library, DLFCN);

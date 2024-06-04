@@ -8,13 +8,13 @@ namespace Function.Tests {
     using UnityEngine;
     using Newtonsoft.Json;
 
-    //[Function.Embed(EdgeFunctionTest.Tag)]
+    [Function.Embed(Tag)]
     internal sealed class EdgeFunctionTest : MonoBehaviour {
 
         private Function fxn;
-        private const string Tag = "@fxn/math";
+        private const string Tag = "@yusuf/circle-area";
 
-        private void Awake () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
+        private void Awake () => fxn = FunctionUnity.Create();
 
         private async void Start () {
             // Create edge prediction

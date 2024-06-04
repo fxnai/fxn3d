@@ -291,13 +291,13 @@ namespace Function.Services {
             configuration.SetConfigurationToken(prediction.configuration).Throw();
             configuration.SetConfigurationAcceleration(acceleration).Throw();
             configuration.SetConfigurationDevice(device).Throw();
-            await Task.WhenAll(prediction.resources.Select(async resource => {
-                if (resource.type == @"fxn")
-                    return;
+            // Add resources
+            foreach (var resource in prediction.resources!) {
+                if (resource.type == @"fxn" || resource.type == @"js")
+                    continue;
                 var path = await Retrieve(resource);
-                lock (prediction)
-                    configuration.AddConfigurationResource(resource.type, path).Throw();
-            }));
+                configuration.AddConfigurationResource(resource.type, path).Throw();
+            }
             // Create predictor
             Function.CreatePredictor(configuration, out var predictor).Throw();
             configuration.ReleaseConfiguration().Throw();            
