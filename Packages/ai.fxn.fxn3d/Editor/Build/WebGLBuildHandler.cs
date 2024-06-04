@@ -3,6 +3,8 @@
 *   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
+#nullable enable
+
 namespace Function.Editor.Build {
 
     using System.Collections.Generic;
@@ -14,6 +16,7 @@ namespace Function.Editor.Build {
 
     internal sealed class WebGLBuildHandler : BuildHandler {
 
+        protected override BuildTarget target => BuildTarget.WebGL;
         private static string[] EM_ARGS => new [] {
             @"-Xlinker --features=mutable-globals,sign-ext,simd128",
             @"-Wl,--export=__stack_pointer",
@@ -23,17 +26,28 @@ namespace Function.Editor.Build {
             @"-sSTACK_OVERFLOW_CHECK=2",
             $"--embed-file {FxncPath}@libFunction.so",
         };
-        private static string FxncPath => _FxncPath = _FxncPath ?? AssetDatabase.GetAllAssetPaths()
-            .Select(path => new FileInfo(Path.GetFullPath(path)).FullName)
-            .FirstOrDefault(path => path.EndsWith(@"Web/libFunction.so"))?
-            .Replace(@"@", @"@@");
-        private static string _FxncPath;
-
-        protected override BuildTarget target => BuildTarget.WebGL;
+        private static string FxncPath => GetNativeLibraryPath(@"Plugins/Web/libFunction.so", fullPath: true)!.Replace(@"@", @"@@");        
+        private static string Function1JsPath => GetNativeLibraryPath(@"Plugins/Web/Function.1.jslib")!;
+        private static string Function2JsPath => GetNativeLibraryPath(@"Plugins/Web/Function.2.jslib")!;
+        private static string FunctionJsPath =>
+        #if UNITY_2023_1_OR_NEWER
+            Function2JsPath;
+        #else
+            Function1JsPath;
+        #endif
 
         protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
             // Set Emscripten args
             PlayerSettings.WebGL.emscriptenArgs = GetEmscriptenArgs();
+            // Enable library
+            foreach (var path in new [] { Function1JsPath, Function2JsPath }) {
+                var importer = AssetImporter.GetAtPath(path) as PluginImporter;
+                importer!.SetCompatibleWithPlatform(BuildTarget.WebGL, false);
+                importer.SaveAndReimport();
+            }
+            var jsImporter = AssetImporter.GetAtPath(FunctionJsPath) as PluginImporter;
+            jsImporter!.SetCompatibleWithPlatform(BuildTarget.WebGL, true);
+            jsImporter.SaveAndReimport();
             // Create settings
             var settings = FunctionProjectSettings.CreateSettings();
             // Return
@@ -54,5 +68,10 @@ namespace Function.Editor.Build {
             args.Add(@"-Wl,-uFXN_WEBGL_POP");
             return string.Join(@" ", args);
         }
+
+        private static string? GetNativeLibraryPath (string prefix, bool fullPath = false) => AssetDatabase
+            .GetAllAssetPaths()
+            .Select(path => fullPath ? new FileInfo(Path.GetFullPath(path)).FullName : path)
+            .FirstOrDefault(path => path.EndsWith(prefix));
     }
 }
