@@ -51,9 +51,9 @@ Then make a prediction:
 ```csharp
 // Make a prediction
 var prediction = await fxn.Predictions.Create(
-    tag: "@samplefxn/greeting",
+    tag: "@samples/greeting",
     inputs: new () {
-        ["name"] = "Rhea"
+        ["name"] = "Roberta"
     }
 );
 // Log the result
