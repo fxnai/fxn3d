@@ -26,7 +26,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 100}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 0
-  controlID: 222
+  controlID: 1032
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -433,6 +433,19 @@ MonoBehaviour:
       layout: 4
       size: {x: 0, y: 0}
       sizeOverriden: 0
+    - dockPosition: 1
+      containerId: overlay-container--right
+      floating: 0
+      collapsed: 0
+      displayed: 1
+      snapOffset: {x: 48, y: 48}
+      snapOffsetDelta: {x: 0, y: 0}
+      snapCorner: 0
+      id: UnityEditor.SceneViewCameraOverlay
+      index: 8
+      layout: 4
+      size: {x: 0, y: 0}
+      sizeOverriden: 0
     m_OverlaysVisible: 1
   m_WindowGUID: 61b8d514133d64d9cb1a35e0c8d2c4f8
   m_Gizmos: 1
@@ -671,7 +684,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 141
+  controlID: 1098
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -682,7 +695,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ConsoleWindow
+  m_Name: SceneHierarchyWindow
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -691,14 +704,14 @@ MonoBehaviour:
     y: 0
     width: 323
     height: 373
-  m_MinSize: {x: 102, y: 121}
+  m_MinSize: {x: 202, y: 221}
   m_MaxSize: {x: 4002, y: 4021}
-  m_ActualView: {fileID: 10}
+  m_ActualView: {fileID: 9}
   m_Panes:
   - {fileID: 9}
   - {fileID: 10}
-  m_Selected: 1
-  m_LastSelected: 0
+  m_Selected: 0
+  m_LastSelected: 1
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -720,9 +733,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 783.5
-    y: 83
+    y: 30
     width: 321
-    height: 306.5
+    height: 352
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -738,7 +751,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 0480feff5880feff9681feff0286feff5686feff9487fefffc8bfeff508cfeff8e8dfeff0692feff5a92feff9893feff2c98feff4498feff5a99feff329cfeff869cfeffc49dfeff16a2feff6aa2feffa8a3feff56b5feffaab5feffe8b6feff26b9feff
+      m_ExpandedIDs: 1eb5feff70b5feff74b6feff20bafeff72bafeff76bbfeff64bffeffb6bffeffbac0feff1ec5feff70c5feff52c6feff54cafeffa6cafeff82cbfeff5ccefeffaecefeff90cffeff94d2feffe0d2feffbcd3feff7edafeffd0dafeffb2dbfeffecdefeff3edffeff1ae0feffd4e2feff26e3feff02e4feffcce6feff1ee7fefffae7feffdceafeff2eebfeff10ecfeff9ceffeffeeeffeffcaf0feff9cf3feffeef3feffcaf4feffb4f7feff06f8feffe2f8feffd4fbfeff26fcfeff02fdfefff8fffeff4a00ffff2601ffffe803ffff3a04ffff1605ffff0008ffff5208ffff2e09ffff1a0cffff6c0cffff480dffff0e10ffff6010ffff3c11ffff1e14ffff7014ffff4c15ffff1e18ffff7018ffff4c19ffff121cffff641cffff401dffff0e20ffff6020ffff3c21ffff0a24ffff5c24ffff3825fffffa27ffff4c28ffff2829ffff0a2cffff5c2cffff382dffffca2fffff1c30fffff830ffffba33ffff0c34ffffe834ffffbe37ffff1038ffffec38ffffc23bffff143cfffff03cffffaa3ffffffc3fffffd840ffffca43ffff1c44fffff844ffffc247ffff1448fffff048ffffc24bffff144cfffff04cffffbe4fffff1050ffffec50ffffb253ffff0454ffffe054ffffaa57fffffc57ffffd858ffffaa5bfffffc5bffffd85cffffa65ffffff85fffffd460ffffaa63fffffc63ffffd864ffffe667ffff3868ffff4269ffff7a6bffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -754,7 +767,7 @@ MonoBehaviour:
         m_IsRenaming: 0
         m_OriginalEventType: 11
         m_IsRenamingFilename: 0
-        m_ClientGUIView: {fileID: 0}
+        m_ClientGUIView: {fileID: 8}
       m_SearchString: 
     m_ExpandedScenes: []
     m_CurrenRootInstanceID: 0
@@ -867,7 +880,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Packages/ai.fxn.fxn3d/Runtime
+    - Packages/ai.fxn.fxn3d/Plugins/Web
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -875,16 +888,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Packages/ai.fxn.fxn3d/Runtime
+  - Packages/ai.fxn.fxn3d/Plugins/Web
   m_LastFoldersGridSize: -1
   m_LastProjectPath: /Users/yusuf/Documents/Projects/fxnai/fxn3d
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 80}
-    m_SelectedIDs: 04420000
-    m_LastClickedID: 16900
-    m_ExpandedIDs: 00000000dc4000001441000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 38.499756}
+    m_SelectedIDs: 60420000
+    m_LastClickedID: 16992
+    m_ExpandedIDs: 00000000e440000018410000dc41000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -912,7 +925,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000dc40000000ca9a3bffffff7f
+    m_ExpandedIDs: 00000000e440000018410000dc41000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -956,7 +969,7 @@ MonoBehaviour:
       m_IsRenaming: 0
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
-      m_ClientGUIView: {fileID: 0}
+      m_ClientGUIView: {fileID: 11}
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
       m_InstanceID: 0
@@ -1063,10 +1076,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 1107.5
-    y: 83
+    x: 1106.5
+    y: 30
     width: 332.5
-    height: 725
+    height: 829
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -1078,12 +1091,12 @@ MonoBehaviour:
     m_SaveData: []
     m_OverlaysVisible: 1
   m_Spl:
-    ID: 367
+    ID: 164
     splitterInitialOffset: 0
     currentActiveSplitter: -1
     realSizes:
-    - 496.5
-    - 165.5
+    - 574.5
+    - 191.5
     relativeSizes:
     - 0.75
     - 0.25
@@ -1093,7 +1106,7 @@ MonoBehaviour:
     maxSizes:
     - 0
     - 0
-    lastTotalSize: 662
+    lastTotalSize: 766
     splitSize: 6
     xOffset: 0
     m_Version: 1

@@ -8,8 +8,6 @@
 namespace Function.Editor.Build {
 
     using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
     using System.Text.RegularExpressions;
     using UnityEditor;
     using UnityEditor.Build.Reporting;
@@ -18,18 +16,10 @@ namespace Function.Editor.Build {
 
         protected override BuildTarget target => BuildTarget.WebGL;
         private static string[] EM_ARGS => new [] {
-            @"-Xlinker --features=mutable-globals,sign-ext,simd128",
-            @"-Wl,--export=__stack_pointer",
             @"-Wl,-uFXN_WEBGL_INIT",
+            @"-Xlinker --features=mutable-globals,sign-ext,simd128",
             @"-lembind",
-            @"-sALLOW_TABLE_GROWTH=1",
-            @"-sSTACK_OVERFLOW_CHECK=2",
-            $"--embed-file {FxncPath}@libFunction.so",
         };
-        private static string FxncPath => AssetDatabase.GetAllAssetPaths()
-            .Select(path => new FileInfo(Path.GetFullPath(path)).FullName)
-            .FirstOrDefault(path => path.EndsWith(@"Plugins/Web/libFunction.so"))!
-            .Replace(@"@", @"@@"); 
 
         protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
             // Set Emscripten args

@@ -354,8 +354,8 @@ namespace Function.Services {
                     logs = logs,
                 };
             } finally {
-                inputMap.ReleaseValueMap().Throw();
-                prediction.ReleasePrediction().Throw();
+                inputMap.ReleaseValueMap();
+                prediction.ReleasePrediction();
             }
         }
 
@@ -391,7 +391,7 @@ namespace Function.Services {
 
         #region --Utilities--
 
-        private static unsafe IntPtr ToValue (object? value) {
+        internal static unsafe IntPtr ToValue (object? value) {
             switch (value) {
                 case IntPtr x:          return x;
                 case float x:           return ToValue(&x);
@@ -437,7 +437,7 @@ namespace Function.Services {
             }
         }
 
-        private static unsafe object? ToObject (IntPtr value) {
+        internal static unsafe object? ToObject (IntPtr value) {
             // Null
             value.GetValueType(out var dtype).Throw();
             if (dtype == Dtype.Null)
