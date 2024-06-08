@@ -1,5 +1,5 @@
 ## 0.0.21
-*INCOMPLETE*
++ Fixed edge prediction support on WebGL.
 
 ## 0.0.20
 + Fixed build errors on WebGL.
