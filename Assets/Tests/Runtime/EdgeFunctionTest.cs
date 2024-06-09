@@ -7,6 +7,7 @@ namespace Function.Tests {
 
     using UnityEngine;
     using Newtonsoft.Json;
+    using Stopwatch = System.Diagnostics.Stopwatch;
 
     [Function.Embed(Tag)]
     internal sealed class EdgeFunctionTest : MonoBehaviour {
@@ -16,27 +17,24 @@ namespace Function.Tests {
 
         private void Awake () => fxn = FunctionUnity.Create();
 
-        private async void Start () {
-            // Create edge prediction
-            var prediction = await fxn.Predictions.Create(
-                tag: Tag,
-                inputs: new () { ["radius"] = 4 }
-            );
-            // Log
-            Debug.Log(JsonConvert.SerializeObject(prediction, Formatting.Indented));            
+        private void Start () => Predict();
+
+        private void Update () {
+            if (Input.GetKeyUp(KeyCode.Space))
+                Predict();
         }
 
-        private async void Update () {
-            // Check
-            if (!Input.GetKeyUp(KeyCode.Space))
-                return;
+        private async void Predict () {
             // Predict
+            var watch = Stopwatch.StartNew();
             var prediction = await fxn.Predictions.Create(
                 tag: Tag,
                 inputs: new () { ["radius"] = 4 }
             );
+            watch.Stop();
             // Log
             Debug.Log(JsonConvert.SerializeObject(prediction, Formatting.Indented));
+            Debug.Log($"Prediction latency: {watch.Elapsed.TotalMilliseconds}ms"); 
         }
 
         private async void OnDisable () {
