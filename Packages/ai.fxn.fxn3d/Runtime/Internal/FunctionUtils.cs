@@ -64,9 +64,11 @@ namespace Function.Internal {
         }
     }
 
-    /// <summary>
-    /// Prevent code stripping.
-    /// </summary>
     [AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
     internal sealed class PreserveAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    internal sealed class MonoPInvokeCallbackAttribute : Attribute {
+        public MonoPInvokeCallbackAttribute (Type type) {}
+    }
 }

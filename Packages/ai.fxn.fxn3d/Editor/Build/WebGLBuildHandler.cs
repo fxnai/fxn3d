@@ -19,6 +19,7 @@ namespace Function.Editor.Build {
             @"-Wl,-uFXN_WEBGL_INIT",
             @"-Xlinker --features=mutable-globals,sign-ext,simd128",
             @"-lembind",
+            @"-sEXTRA_EXPORTED_RUNTIME_METHODS=FS",
         };
 
         protected override Internal.FunctionSettings CreateSettings (BuildReport report) {

@@ -3,6 +3,8 @@
 *   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
+#nullable enable
+
 namespace Function.Internal {
 
     using System;
@@ -22,6 +24,11 @@ namespace Function.Internal {
         #else
         @"Function";
         #endif
+
+        #region --Delegates--
+        public delegate void ResourceAddHandler (IntPtr context, Status status);
+        #endregion
+
 
         #region --Enumerations--
         /// <summary>
@@ -72,7 +79,7 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateArray")]
         public static unsafe extern Status CreateArrayValue (
             void* data,
-            [In] int[] shape,
+            [In] int[]? shape,
             int dims,
             Dtype dtype,
             ValueFlags flags,
@@ -177,12 +184,12 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetTag")]
         public static extern Status SetConfigurationTag (
             this IntPtr configuration,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string tag
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string? tag
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetToken")]
         public static extern Status SetConfigurationToken (
             this IntPtr configuration,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string token
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string? token
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationAddResource")]
         public static extern Status AddConfigurationResource (
@@ -279,6 +286,32 @@ namespace Function.Internal {
         #region --FXNVersion--
         [DllImport(Assembly, EntryPoint = @"FXNGetVersion")]
         public static extern IntPtr GetVersion ();
+        #endregion
+
+
+        #region --Experimental--
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationAddResourceAsync")]
+        public static extern Status AddConfigurationResourceAsync (
+            this IntPtr configuration,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
+            ResourceAddHandler? handler,
+            IntPtr context
+        );
+        #else
+        public static Status AddConfigurationResourceAsync (
+            this IntPtr configuration,
+            string type,
+            string path,
+            ResourceAddHandler? handler,
+            IntPtr context
+        ) {
+            var status = AddConfigurationResource(configuration, type, path);
+            handler?.Invoke(context, status);
+            return Status.Ok;
+        }
+        #endif
         #endregion
     }
 }

@@ -20,7 +20,7 @@ namespace Function.Tests {
         private void Start () => Predict();
 
         private void Update () {
-            if (Input.GetKeyUp(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Space))
                 Predict();
         }
 

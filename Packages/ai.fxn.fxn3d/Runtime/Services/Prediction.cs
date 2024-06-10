@@ -252,6 +252,7 @@ namespace Function.Services {
         private readonly StorageService storage;
         private readonly string cachePath;
         private readonly Dictionary<string, Task<IntPtr>> cache;
+        private readonly List<string> ResourceTypes = new () { @"bin", @"dso" };
 
         private static string ConfigurationId {
             get {
@@ -292,12 +293,13 @@ namespace Function.Services {
             configuration.SetConfigurationAcceleration(acceleration).Throw();
             configuration.SetConfigurationDevice(device).Throw();
             // Add resources
-            foreach (var resource in prediction.resources!) {
-                if (resource.type == @"fxn" || resource.type == @"js")
-                    continue;
-                var path = await Retrieve(resource);
-                configuration.AddConfigurationResource(resource.type, path).Throw();
-            }
+            foreach (var resource in prediction.resources!)
+                if (ResourceTypes.Contains(resource.type))
+                    await AddConfigurationResource(
+                        configuration,
+                        resource.type,
+                        await Retrieve(resource)
+                    );
             // Create predictor
             Function.CreatePredictor(configuration, out var predictor).Throw();
             configuration.ReleaseConfiguration().Throw();            
@@ -385,6 +387,26 @@ namespace Function.Services {
             }));
             // Return
             return results;
+        }
+
+        private static Task AddConfigurationResource (IntPtr configuration, string type, string path) {
+            var tcs = new TaskCompletionSource<bool>();
+            var context = GCHandle.Alloc(tcs, GCHandleType.Normal);
+            configuration.AddConfigurationResourceAsync(type, path, OnAddConfigurationResource, (IntPtr)context);
+            return tcs.Task;
+        }
+
+        [MonoPInvokeCallback(typeof(Function.ResourceAddHandler))]
+        private static void OnAddConfigurationResource (IntPtr context, Status status) {
+            var handle = (GCHandle)context;
+            var tcs = handle.Target as TaskCompletionSource<bool>;
+            handle.Free();
+            try {
+                status.Throw();
+                tcs?.SetResult(true);
+            } catch (Exception ex) {
+                tcs?.SetException(ex);
+            }
         }
         #endregion
 
