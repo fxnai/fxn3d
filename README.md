@@ -60,6 +60,9 @@ var prediction = await fxn.Predictions.Create(
 Debug.Log(prediction.results[0]);
 ```
 
+> [!TIP]
+> Explore public predictors [on Function](https://fxn.ai/explore) or [create your own](https://fxn.ai/waitlist).
+
 ___
 
 ## Requirements
