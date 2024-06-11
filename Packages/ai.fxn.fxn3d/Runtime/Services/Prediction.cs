@@ -182,6 +182,7 @@ namespace Function.Services {
                 case Dtype.Binary:  return stream;
                 case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(new StreamReader(stream).ReadToEnd());
                 case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(new StreamReader(stream).ReadToEnd());
+                case Dtype.Image:   return ToImage(stream);
                 default:            return value;
             }
         }
@@ -491,6 +492,16 @@ namespace Function.Services {
             }
         }
 
+        private static Image ToImage (MemoryStream stream) { // DEPLOY
+            var data = stream.ToArray();
+            Function.CreateBinaryValue(data, data.Length, default, out var binaryValue);
+            Function.CreateDeserializedValue(binaryValue, Dtype.Image, default, out var imageValue);
+            var image = (Image)ToObject(imageValue)!;
+            binaryValue.ReleaseValue();
+            imageValue.ReleaseValue();
+            return image;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe IntPtr ToValue<T> (
             T* data,
@@ -539,7 +550,7 @@ namespace Function.Services {
         ) {
             fixed (byte* data = image) {
                 var imageValue = ToValue(image, forcePin: true); // zero copy even for managed arrays
-                imageValue.CreateSerializedValue(0, out var serializedValue).Throw();
+                imageValue.CreateSerializedValue(default, out var serializedValue).Throw();
                 var stream = ToObject(serializedValue) as Stream;
                 imageValue.ReleaseValue();
                 serializedValue.ReleaseValue();

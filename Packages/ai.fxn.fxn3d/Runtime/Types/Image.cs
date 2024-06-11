@@ -75,7 +75,7 @@ namespace Function.Types {
         #region --Operations--
         private readonly byte* nativeData;
 
-        [JsonProperty(@"data")]
+        [JsonProperty(@"data"), Preserve]
         private readonly string dataPlaceholder {
             get {
                 var channelStr = "?";
@@ -87,7 +87,7 @@ namespace Function.Types {
                 return $"<{width}x{height},{channelStr},{data.Length} bytes>";
             }
         }
-
+        
         public ref byte GetPinnableReference () => ref (nativeData == null ? ref data[0] : ref *nativeData);
         #endregion
     }

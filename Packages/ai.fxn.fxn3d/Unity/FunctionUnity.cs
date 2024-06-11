@@ -10,15 +10,14 @@ namespace Function {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading.Tasks;
     using UnityEngine;
     using UnityEngine.Networking;
+    using Unity.Collections.LowLevel.Unsafe;
     using API;
     using Internal;
     using Types;
-    using Unity.Collections.LowLevel.Unsafe;
 
     /// <summary>
     /// Utilities for working with Unity.
@@ -51,17 +50,13 @@ namespace Function {
         }
 
         /// <summary>
-        /// Convert a texture to a Function image.
-        /// This is useful for making edge predictions on images.
+        /// Convert a texture to an image.
         /// NOTE: The texture format must be `R8`, `Alpha8`, `RGB24`, or `RGBA32`.
         /// </summary>
         /// <param name="texture">Input texture.</param>
         /// <param name="pixelBuffer">Pixel buffer to store image data. Use this to prevent allocations.</param>
         /// <returns>Image.</returns>
-        public static unsafe Image ToImage (
-            this Texture2D texture,
-            byte[]? pixelBuffer = null
-        ) {
+        public static unsafe Image ToImage (this Texture2D texture, byte[]? pixelBuffer = null) {
             // Check texture
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -105,6 +100,42 @@ namespace Function {
         }
 
         /// <summary>
+        /// Convert an image to a texture.
+        /// </summary>
+        /// <param name="value">Image.</param>
+        /// <param name="texture">Optional destination texture.</param>
+        /// <returns>Texture.</returns>
+        public static unsafe Texture2D ToTexture (this Image image, Texture2D? texture = null) {
+            // Check channels
+            var ChannelFormatMap = new Dictionary<int, TextureFormat> {
+                [1] = TextureFormat.Alpha8,
+                [3] = TextureFormat.RGB24,
+                [4] = TextureFormat.RGBA32
+            };
+            if (!ChannelFormatMap.TryGetValue(image.channels, out var format))
+                throw new InvalidOperationException($"Image cannot be converted to a Texture2D because it has unsupported channel count: {image.channels}");
+            // Create texture
+            texture = texture != null ? texture : new Texture2D(image.width, image.height, format, false);
+            if (texture.width != image.width || texture.height != image.height || texture.format != format)
+                texture.Reinitialize(image.width, image.height, format, false);
+            // Copy data
+            var rowStride = image.width * image.channels;
+            fixed (byte* srcData = image)
+                UnsafeUtility.MemCpyStride(
+                    texture.GetRawTextureData<byte>().GetUnsafePtr(),
+                    rowStride,
+                    srcData + (rowStride * (image.height - 1)),
+                    -rowStride,
+                    rowStride,
+                    image.height
+                );
+            // Apply
+            texture.Apply();
+            // Return
+            return texture;
+        }
+
+        /// <summary>
         /// Convert an audio clip to a prediction value.
         /// </summary>
         /// <param name="clip">Input audio clip.</param>
@@ -144,26 +175,6 @@ namespace Function {
             var value = await client.Predictions.ToValue(stream, @"audio.wav", Dtype.Audio, minUploadSize: minUploadSize);
             // Return
             return value;
-        }
-
-        /// <summary>
-        /// Convert an image value to a texture.
-        /// </summary>
-        /// <param name="value">Prediction value.</param>
-        /// <param name="texture">Optional destination texture.</param>
-        /// <returns>Texture.</returns>
-        public static async Task<Texture2D> ToTexture (this Value value, Texture2D? texture = null) {
-            // Check
-            if (value?.type != Dtype.Image)
-                throw new InvalidOperationException($"Value cannot be converted to a texture because it has an invalid type: {value?.type}");
-            // Download
-            var client = Create();
-            using var stream = await client.Storage.Download(value.data!);
-            // Create
-            texture = texture != null ? texture : new Texture2D(16, 16);
-            texture.LoadImage(stream.ToArray());
-            // Return
-            return texture;
         }
 
         /// <summary>
