@@ -1,3 +1,6 @@
+## 0.0.22
+*INCOMPLETE*
+
 ## 0.0.21
 + Fixed edge prediction support on WebGL.
 + Fixed duplicate interface compiler errors when project depends on `Microsoft.Bcl.AsyncInterfaces` library.
