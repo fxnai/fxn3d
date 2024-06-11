@@ -54,8 +54,8 @@ namespace Function.Services {
             string? configuration = default
         ) {
             // Check cache
-            if (cache.TryGetValue(tag, out var predictorTask) && !rawOutputs)
-                return Predict(tag, await predictorTask, inputs!);
+            if (cache.TryGetValue(tag, out var p) && !rawOutputs)
+                return Predict(tag, p, inputs!);
             // Collect inputs
             var key = Guid.NewGuid().ToString();
             var values = inputs != null ?
@@ -77,10 +77,10 @@ namespace Function.Services {
             if (rawOutputs || prediction.type != PredictorType.Edge)
                 return prediction;
             // Load
-            var predictor = Load(prediction, acceleration, device);
+            var predictor = await Load(prediction, acceleration, device);
             cache.Add(prediction.tag, predictor);
             // Return
-            return inputs != null ? Predict(tag, await predictor, inputs) : prediction;
+            return inputs != null ? Predict(tag, predictor, inputs) : prediction;
         }
 
         /// <summary>
@@ -101,8 +101,8 @@ namespace Function.Services {
             string? configuration = default
         ) {
             // Check cache
-            if (cache.TryGetValue(tag, out var predictorTask) && !rawOutputs) {
-                yield return Predict(tag, await predictorTask, inputs!);
+            if (cache.TryGetValue(tag, out var p) && !rawOutputs) {
+                yield return Predict(tag, p, inputs!);
                 yield break;
             }
             // Collect inputs
@@ -129,10 +129,10 @@ namespace Function.Services {
                     continue;
                 }
                 // Load
-                var predictor = Load(prediction, acceleration, device);
+                var predictor = await Load(prediction, acceleration, device);
                 cache.Add(prediction.tag, predictor);
                 // Yield
-                yield return inputs != null ? Predict(tag, await predictor, inputs) : prediction;
+                yield return inputs != null ? Predict(tag, predictor, inputs) : prediction;
             }
         }
 
@@ -141,17 +141,16 @@ namespace Function.Services {
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
         /// <returns>Whether the edge predictor was successfully deleted from memory.</returns>
-        public async Task<bool> Delete (string tag) {
+        public Task<bool> Delete (string tag) {
             // Check
-            if (!cache.TryGetValue(tag, out var predictorTask))
-                return false;
+            if (!cache.TryGetValue(tag, out var predictor))
+                return Task.FromResult(false);
             // Release
-            var predictor = await predictorTask;
             predictor.ReleasePredictor().Throw();
             // Pop
             cache.Remove(tag);
             // Return
-            return true;
+            return Task.FromResult(true);
         }
 
         /// <summary>
@@ -252,7 +251,7 @@ namespace Function.Services {
         private readonly FunctionClient fxn;
         private readonly StorageService storage;
         private readonly string cachePath;
-        private readonly Dictionary<string, Task<IntPtr>> cache;
+        private readonly Dictionary<string, IntPtr> cache;
         private readonly List<string> ResourceTypes = new () { @"bin", @"dso" };
 
         private static string ConfigurationId {
@@ -283,7 +282,7 @@ namespace Function.Services {
                 ".fxn",
                 "cache"
             );
-            this.cache = new Dictionary<string, Task<IntPtr>>();
+            this.cache = new Dictionary<string, IntPtr>();
         }
 
         private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
