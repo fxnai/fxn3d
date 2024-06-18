@@ -6,7 +6,6 @@
 namespace Function.Tests {
 
     using UnityEngine;
-    using UnityEngine.UI;
     using Types;
 
     internal sealed class ImageTest : MonoBehaviour {
@@ -15,7 +14,7 @@ namespace Function.Tests {
         [SerializeField] private Texture2D image;
 
         [Header(@"UI")]
-        [SerializeField] private RawImage rawImage;
+        [SerializeField] private UnityEngine.UI.RawImage rawImage;
 
         private async void Start () {
             // Predict
@@ -27,8 +26,8 @@ namespace Function.Tests {
                 }
             );
             // Display
-            var result = prediction.results[0] as Value;
-            rawImage.texture = await result.ToTexture();
+            var result = (Image)prediction.results[0];
+            rawImage.texture = result.ToTexture();
         }
     }
 }

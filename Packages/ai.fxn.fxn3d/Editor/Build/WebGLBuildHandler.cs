@@ -8,6 +8,7 @@
 namespace Function.Editor.Build {
 
     using System.Collections.Generic;
+    using System.IO;
     using System.Text.RegularExpressions;
     using UnityEditor;
     using UnityEditor.Build.Reporting;
@@ -23,6 +24,11 @@ namespace Function.Editor.Build {
         };
 
         protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
+            // Patch config
+            var configPath = Path.Combine(GetEmscriptenPath(), @"tools", @"config.py");
+            var config = File.ReadAllText(configPath).TrimEnd();
+            if (!Regex.IsMatch(config, @"FROZEN_CACHE\s*=\s*False\s*$", RegexOptions.Multiline))
+                File.WriteAllText(configPath, config + "\nFROZEN_CACHE = False");
             // Set Emscripten args
             PlayerSettings.WebGL.emscriptenArgs = GetEmscriptenArgs();
             // Create settings
@@ -44,6 +50,19 @@ namespace Function.Editor.Build {
             args.AddRange(EM_ARGS);
             args.Add(@"-Wl,-uFXN_WEBGL_POP");
             return string.Join(@" ", args);
+        }
+
+        private static string GetEmscriptenPath () { // INCOMPLETE // Windows
+            var rootDir = Path.GetDirectoryName(EditorApplication.applicationPath);
+            var emccDir = Path.Combine(
+                rootDir,
+                @"PlaybackEngines",
+                @"WebGLSupport",
+                @"BuildTools",
+                @"Emscripten",
+                @"emscripten"
+            );
+            return emccDir;
         }
     }
 }

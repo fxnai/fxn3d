@@ -1,5 +1,5 @@
 ## 0.0.22
-*INCOMPLETE*
++ Fixed WebGL build errors on Unity 2023.
 
 ## 0.0.21
 + Fixed edge prediction support on WebGL.
