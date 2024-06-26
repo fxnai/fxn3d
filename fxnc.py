@@ -60,11 +60,7 @@ def main (): # CHECK # Linux
             "path": LIB_PATH_BASE / "macOS" / "Function.dylib"
         },
         {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function.wasm",
-            "path": LIB_PATH_BASE / "Web" / "libFunction.so"
-        },
-        {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-win64.dll",
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-x64.dll",
             "path": LIB_PATH_BASE / "Windows" / "Function.dll"
         },
     ]

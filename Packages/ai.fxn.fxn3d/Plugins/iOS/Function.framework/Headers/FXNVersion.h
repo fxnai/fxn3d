@@ -12,7 +12,7 @@
 
 #define FXN_VERSION_MAJOR 0
 #define FXN_VERSION_MINOR 0
-#define FXN_VERSION_PATCH 23
+#define FXN_VERSION_PATCH 25
 
 /*!
  @function FXNGetVersion

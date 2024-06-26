@@ -29,11 +29,8 @@
 		</dict>
 	</array>
 	<key>NSPrivacyTrackingDomains</key>
-	<array>
-		<string>api.fxn.ai</string>
-		<string>fxn.ai</string>
-	</array>
+	<array/>
 	<key>NSPrivacyTracking</key>
-	<true/>
+	<false/>
 </dict>
 </plist>

@@ -1,4 +1,5 @@
 ## 0.0.22
++ Fixed Function API web requests failing due to internet unreachability errors on iOS.
 + Fixed WebGL build errors on Unity 2023.
 
 ## 0.0.21
