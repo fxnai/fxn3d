@@ -49,7 +49,12 @@ namespace Function.Editor.Build {
                     .Select((pair) => {
                         var (platform, tag) = pair;
                         try {
-                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: platform)).Result;
+                            var prediction = Task.Run(() => fxn.Predictions.Create(
+                                tag,
+                                rawOutputs: true,
+                                client: platform,
+                                configuration: @""
+                            )).Result;
                             return prediction.type == PredictorType.Edge ?
                                 new CachedPrediction { platform = platform, prediction = prediction } :
                                 null;

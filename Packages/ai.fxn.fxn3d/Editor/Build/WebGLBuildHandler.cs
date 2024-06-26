@@ -26,9 +26,11 @@ namespace Function.Editor.Build {
         protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
             // Patch config
             var configPath = Path.Combine(GetEmscriptenPath(), @"tools", @"config.py");
-            var config = File.ReadAllText(configPath).TrimEnd();
-            if (!Regex.IsMatch(config, @"FROZEN_CACHE\s*=\s*False\s*$", RegexOptions.Multiline))
-                File.WriteAllText(configPath, config + "\nFROZEN_CACHE = False");
+            if (File.Exists(configPath)) {
+                var config = File.ReadAllText(configPath).TrimEnd();
+                if (!Regex.IsMatch(config, @"FROZEN_CACHE\s*=\s*False\s*$", RegexOptions.Multiline))
+                    File.WriteAllText(configPath, config + "\nFROZEN_CACHE = False");
+            }
             // Set Emscripten args
             PlayerSettings.WebGL.emscriptenArgs = GetEmscriptenArgs();
             // Create settings

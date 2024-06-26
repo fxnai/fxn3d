@@ -30,13 +30,11 @@ namespace Function {
         /// </summary>
         /// <param name="accessKey">Function access key. This defaults to your access key in Project Settings.</param>
         /// <param name="url">Function API URL.</param>
-        /// <param name="clientId">Client identifier.</param>
         /// <param name="cachePath">Predictor cache path.</param>
         /// <returns>Function client.</returns>
         public static Function Create (
             string? accessKey = null,
             string? url = null,
-            string? clientId = null,
             string? cachePath = null
         ) {
             var settings = FunctionSettings.Instance!;
@@ -243,7 +241,7 @@ namespace Function {
 
             public DownloadUrlCreator (string url) {
                 this.url = url;
-                this.path = $"{Path.GetTempPath()}{Guid.NewGuid().ToString()}";
+                this.path = $"{Path.GetTempPath()}{Guid.NewGuid()}";
             }
 
             public async Task<string> URL () => url.StartsWith("data:") ? await CreateFileURL() : url;

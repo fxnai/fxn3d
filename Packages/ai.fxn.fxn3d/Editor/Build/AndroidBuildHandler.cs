@@ -46,7 +46,12 @@ namespace Function.Editor.Build {
                         var (platform, tag) = pair;
                         try {
                             // Create prediction
-                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: platform)).Result;
+                            var prediction = Task.Run(() => fxn.Predictions.Create(
+                                tag,
+                                rawOutputs: true,
+                                client: platform,
+                                configuration: @""
+                            )).Result;
                             if (prediction.type != PredictorType.Edge)
                                 return null;
                             // Populate names

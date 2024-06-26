@@ -43,7 +43,12 @@ namespace Function.Editor.Build {
                 var fxn = new Function(client);
                 var predictions = embed.tags.Select(tag => {
                     try {
-                        var prediction = Task.Run(() => fxn.Predictions.Create(tag, rawOutputs: true, client: Platform)).Result;
+                        var prediction = Task.Run(() => fxn.Predictions.Create(
+                            tag,
+                            rawOutputs: true,
+                            client: Platform,
+                            configuration: @""
+                        )).Result;
                         return prediction.type == PredictorType.Edge ?
                             new CachedPrediction { platform = Platform, prediction = prediction } :
                             null;
