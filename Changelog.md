@@ -1,3 +1,6 @@
+## 0.0.23
+*INCOMPLETE*
+
 ## 0.0.22
 + Fixed Function API web requests failing due to internet unreachability errors on iOS (#3).
 + Fixed edge predictions being consistently recreated instead of being cached at runtime (#2).
