@@ -54,7 +54,7 @@ namespace Function.Editor.Build {
             return string.Join(@" ", args);
         }
 
-        private static string GetEmscriptenPath () { // INCOMPLETE // Windows
+        private static string GetEmscriptenPath () {
             var rootDir = Path.GetDirectoryName(EditorApplication.applicationPath);
             var emccDir = Path.Combine(
                 rootDir,
