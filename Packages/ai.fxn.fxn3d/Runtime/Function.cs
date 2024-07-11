@@ -23,19 +23,13 @@ namespace Function {
         /// </summary>
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
         public sealed class EmbedAttribute : Attribute {
+
+            internal readonly string[] tags;
             
-            #region --Client API--
             /// <summary>
             /// Embed predictors at build time.
             /// </summary>
             public EmbedAttribute (params string[] tags) => this.tags = tags;
-            #endregion
-
-
-            #region --Operations--
-            internal readonly string[] tags;
-            internal Func<Function>? getFunction;
-            #endregion
         }
         #endregion
 

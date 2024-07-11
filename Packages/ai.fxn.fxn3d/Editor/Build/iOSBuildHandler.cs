@@ -38,8 +38,7 @@ namespace Function.Editor.Build {
             var embeds = GetEmbeds();
             var cache = new List<CachedPrediction>();
             foreach (var embed in embeds) {
-                var embedFxn = embed.getFunction();
-                var client = new DotNetClient(embedFxn.client.url, embedFxn.client.accessKey);
+                var client = new DotNetClient(embed.url, embed.accessKey);
                 var fxn = new Function(client);
                 var predictions = embed.tags.Select(tag => {
                     try {

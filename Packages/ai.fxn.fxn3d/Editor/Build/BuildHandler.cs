@@ -23,26 +23,41 @@ namespace Function.Editor.Build {
     internal abstract class BuildHandler : IPreprocessBuildWithReport {
     
         #region --Client API--
+        internal struct Embed {
+            public string url;
+            public string? accessKey;
+            public string[] tags;
+        }
+
         protected abstract BuildTarget target { get; }
         public virtual int callbackOrder => -1_000_000; // run very early, but not too early ;)
 
         protected abstract FunctionSettings CreateSettings (BuildReport report);
 
-        internal static EmbedAttribute[] GetEmbeds () {
+        internal static Embed[] GetEmbeds () {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var types = assemblies.SelectMany(assembly => assembly.GetTypes()).ToArray();
-            var fxn = FunctionUnity.Create();
-            Func<FunctionClient> getDefaultFunction = () => fxn;
-            var defaultEmbeds = types.SelectMany(type => Attribute.GetCustomAttributes(type, typeof(EmbedAttribute)))
+            var defaultEmbeds = types
+                .SelectMany(type => Attribute.GetCustomAttributes(type, typeof(EmbedAttribute)))
                 .Cast<EmbedAttribute>()
-                .Select(embed => { embed.getFunction = getDefaultFunction; return embed; })
+                .Select(embed => new Embed {
+                    url = FunctionClient.URL,
+                    accessKey = FunctionProjectSettings.instance.AccessKey,
+                    tags = embed.tags
+                })
                 .ToArray();
-            var customEmbeds = types.SelectMany(type => type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+            var customEmbeds = types
+                .SelectMany(type => type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
                 .Where(property => Attribute.IsDefined(property, typeof(EmbedAttribute)) && property.PropertyType == typeof(FunctionClient))
                 .Select(property  => {
-                    var embed = property.GetCustomAttribute<EmbedAttribute>();
-                    embed.getFunction = CreateDelegateForProperty<FunctionClient>(property);
-                    return embed;
+                    var attribute = property.GetCustomAttribute<EmbedAttribute>();
+                    var getter = CreateDelegateForProperty<FunctionClient>(property);
+                    var fxn = getter!();
+                    return new Embed {
+                        url = fxn.client.url,
+                        accessKey = fxn.client.accessKey,
+                        tags = attribute.tags
+                    };
                 })
                 .ToArray();
             return Enumerable.Concat(defaultEmbeds, customEmbeds).ToArray();
