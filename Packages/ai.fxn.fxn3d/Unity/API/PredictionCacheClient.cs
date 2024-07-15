@@ -63,18 +63,24 @@ namespace Function.API {
             // Get cached prediction
             var tag = match.Groups[1].Value;
             var platform = headers != null && headers.TryGetValue(@"fxn-client", out var p) ? p : null;
-            var prediction = Retrieve(tag, platform!);
-            if (prediction == null)
-                return await base.Request<T>(method, path, payload: payload, headers: headers);
-            // Generate token
-            if (string.IsNullOrEmpty(prediction.configuration)) {
-                var qs = $"partialPrediction={prediction.id}";
-                var prefix = path.Contains("?") ? "&" : "?";
-                path = $"{path}{prefix}{qs}";
-                var pred = await base.Request<Prediction>(method, path, payload: payload, headers: headers);
-                prediction.configuration = pred!.configuration;
-                Cache(prediction);
-            }
+            var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.platform == platform);
+            if (cachedPrediction == null)
+                return null;
+            // Predict
+            var cachedToken = GetPredictionToken(cachedPrediction.prediction);
+            if (cachedToken != null)
+                headers?.Remove(@"fxn-configuration-token");
+            var prediction = await base.Request<Prediction>(
+                method,
+                $"{path}{(path.Contains('?') ? '&' : '?')}partialPrediction={cachedPrediction.prediction.id}",
+                payload: payload,
+                headers: headers
+            );
+            // Save to cache
+            if (prediction!.configuration != null)
+                SavePredictionToken(cachedPrediction.prediction, prediction.configuration);
+            else
+                prediction.configuration = cachedToken;
             // Return
             return prediction as T;
         }
@@ -84,26 +90,15 @@ namespace Function.API {
         #region --Operations--
         private readonly List<CachedPrediction> cache;
 
-        private Prediction? Retrieve (string tag, string platform) {
-            var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.platform == platform);
-            if (cachedPrediction == null)
-                return null;
-            var prediction = cachedPrediction.prediction;
-            var cacheKey = GetCacheKey(prediction);
-            prediction.configuration = !string.IsNullOrEmpty(prediction.configuration) ?
-                prediction.configuration :
-                PlayerPrefs.HasKey(cacheKey) ? PlayerPrefs.GetString(cacheKey) : null;
-            return prediction;
+        private string? GetPredictionToken (Prediction prediction) {
+            var key = GetCacheKey(prediction);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null;
         }
 
-        private void Cache (Prediction prediction) {
-            // Check
-            if (string.IsNullOrEmpty(prediction.configuration))
-                throw new InvalidOperationException(@"Cannot cache prediction because prediction does not contain a configuration token");
-            // Cache
-            var cacheKey = GetCacheKey(prediction);
-            PlayerPrefs.SetString(cacheKey, prediction.configuration);
-        }
+        private void SavePredictionToken (Prediction prediction, string token) => PlayerPrefs.SetString(
+            GetCacheKey(prediction),
+            token
+        );
 
         private string GetCacheKey (Prediction prediction) => $"ai.fxn.fxn3d.predictions.{prediction.id}";
         #endregion

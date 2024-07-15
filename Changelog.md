@@ -1,5 +1,5 @@
 ## 0.0.23
-*INCOMPLETE*
++ Fixed HTTP `403 Forbidden` errors when making some edge predictions.
 
 ## 0.0.22
 + Fixed Function API web requests failing due to internet unreachability errors on iOS (#3).
