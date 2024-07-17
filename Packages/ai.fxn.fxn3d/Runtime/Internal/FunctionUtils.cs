@@ -10,13 +10,59 @@ namespace Function.Internal {
     using System;
     using System.IO;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using System.Text;
+    using System.Threading.Tasks;
     using Status = Function.Status;
 
     /// <summary>
     /// Helpful extension methods.
     /// </summary>
     internal static class FunctionUtils {
+
+        #region --Client API--
+        public static Task Initialization {
+            get {
+                #if UNITY_WEBGL && !UNITY_EDITOR
+                var tcs = new TaskCompletionSource<bool>();
+                var context = GCHandle.Alloc(tcs, GCHandleType.Normal);
+                SetInitializationHandler(OnFunctionInitialized, (IntPtr)context);
+                return tcs.Task;
+                [DllImport(Function.Assembly, EntryPoint = @"FXNSetInitializationHandler")]
+                static extern Status SetInitializationHandler (Action<IntPtr> handler, IntPtr context);
+                #else
+                return Task.CompletedTask;
+                #endif
+            }
+        }
+
+        public static Task AddConfigurationResourceAsync (
+            this IntPtr configuration,
+            string type,
+            string path
+        ) {
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            var tcs = new TaskCompletionSource<bool>();
+            var context = GCHandle.Alloc(tcs, GCHandleType.Normal);
+            AddConfigurationResource(configuration, type, path, OnAddConfigurationResource, (IntPtr)context);
+            return tcs.Task;
+            [DllImport(Function.Assembly, EntryPoint = @"FXNConfigurationAddResourceAsync")]
+            static extern Status AddConfigurationResource (
+                IntPtr configuration,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+                [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
+                Action<IntPtr, Status> handler,
+                IntPtr context
+            );
+            #else
+            try {
+                configuration.AddConfigurationResource(type, path).Throw();
+                return Task.CompletedTask;
+            } catch (Exception ex) {
+                return Task.FromException(ex);
+            }
+            #endif
+        }
 
         public static Status Throw (this Status status) {
             switch (status) {
@@ -62,6 +108,32 @@ namespace Function.Internal {
             Buffer.BlockCopy(rawData, 0, data, 0, rawData.Length);
             return data;
         }
+        #endregion
+
+
+        #region --Operations--
+
+        [MonoPInvokeCallback(typeof(Action<IntPtr>))]
+        private static void OnFunctionInitialized (IntPtr context) {
+            var handle = (GCHandle)context;
+            var tcs = handle.Target as TaskCompletionSource<bool>;
+            handle.Free();
+            tcs?.SetResult(true);
+        }
+
+        [MonoPInvokeCallback(typeof(Action<IntPtr, Status>))]
+        private static void OnAddConfigurationResource (IntPtr context, Status status) {
+            var handle = (GCHandle)context;
+            var tcs = handle.Target as TaskCompletionSource<bool>;
+            handle.Free();
+            try {
+                status.Throw();
+                tcs?.SetResult(true);
+            } catch (Exception ex) {
+                tcs?.SetException(ex);
+            }
+        }
+        #endregion
     }
 
     [AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]

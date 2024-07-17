@@ -65,7 +65,7 @@ namespace Function.API {
             var platform = headers != null && headers.TryGetValue(@"fxn-client", out var p) ? p : null;
             var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.platform == platform);
             if (cachedPrediction == null)
-                return null;
+                return await base.Request<T>(method, path, payload: payload, headers: headers);
             // Predict
             var cachedToken = GetPredictionToken(cachedPrediction.prediction);
             if (cachedToken != null)

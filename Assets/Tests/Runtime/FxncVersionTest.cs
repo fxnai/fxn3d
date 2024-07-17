@@ -12,7 +12,9 @@ namespace Function.Tests {
 
     internal sealed class FxncVersionTest : MonoBehaviour {
 
-        private void Start () {
+        private async void Start () {
+            await FunctionUtils.Initialization;
+            Debug.Log("Initialized Function!");
             // Version
             var version = Marshal.PtrToStringAuto(Function.GetVersion());
             Debug.Log($"Function {version}");

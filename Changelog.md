@@ -1,3 +1,7 @@
+## 0.0.24
++ Fixed `fxn.Predictions.Create` returning `null` for cloud predictors.
++ Fixed sporadic `InvalidOperationException` being thrown when making predictions on WebGL.
+
 ## 0.0.23
 + Fixed HTTP `403 Forbidden` errors when making some edge predictions.
 

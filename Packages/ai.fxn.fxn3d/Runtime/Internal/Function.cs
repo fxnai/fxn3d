@@ -25,10 +25,6 @@ namespace Function.Internal {
         @"Function";
         #endif
 
-        #region --Delegates--
-        public delegate void ResourceAddHandler (IntPtr context, Status status);
-        #endregion
-
 
         #region --Enumerations--
         /// <summary>
@@ -286,32 +282,6 @@ namespace Function.Internal {
         #region --FXNVersion--
         [DllImport(Assembly, EntryPoint = @"FXNGetVersion")]
         public static extern IntPtr GetVersion ();
-        #endregion
-
-
-        #region --Experimental--
-        #if UNITY_WEBGL && !UNITY_EDITOR
-        [DllImport(Assembly, EntryPoint = @"FXNConfigurationAddResourceAsync")]
-        public static extern Status AddConfigurationResourceAsync (
-            this IntPtr configuration,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
-            ResourceAddHandler? handler,
-            IntPtr context
-        );
-        #else
-        public static Status AddConfigurationResourceAsync (
-            this IntPtr configuration,
-            string type,
-            string path,
-            ResourceAddHandler? handler,
-            IntPtr context
-        ) {
-            var status = AddConfigurationResource(configuration, type, path);
-            handler?.Invoke(context, status);
-            return Status.Ok;
-        }
-        #endif
         #endregion
     }
 }
