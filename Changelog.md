@@ -1,3 +1,6 @@
+## 0.0.25
++ Minor stability improvements.
+
 ## 0.0.24
 + Fixed `fxn.Predictions.Create` returning `null` for cloud predictors.
 + Fixed sporadic `InvalidOperationException` being thrown when making predictions on WebGL.

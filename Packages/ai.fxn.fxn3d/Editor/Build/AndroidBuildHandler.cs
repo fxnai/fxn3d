@@ -44,21 +44,15 @@ namespace Function.Editor.Build {
                     .Select((pair) => {
                         var (platform, tag) = pair;
                         try {
-                            // Create prediction
                             var prediction = Task.Run(() => fxn.Predictions.Create(
                                 tag,
                                 rawOutputs: true,
                                 client: platform,
                                 configuration: @""
                             )).Result;
-                            if (prediction.type != PredictorType.Edge)
-                                return null;
-                            // Populate names
-                            foreach (var resource in prediction.resources)
-                                if (resource.type == @"dso")
-                                    resource.name ??= PredictionService.GetResourceName(resource.url) + @".so";
-                            // Return
-                            return new CachedPrediction { platform = platform, prediction = prediction };
+                            return prediction.type == PredictorType.Edge ?
+                                new CachedPrediction { platform = platform, prediction = prediction } :
+                                null;
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
