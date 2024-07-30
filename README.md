@@ -23,9 +23,6 @@ Add the following items to your Unity project's `Packages/manifest.json`:
 }
 ```
 
-> [!IMPORTANT]  
-> When building for WebGL, make sure that the `Enable Exceptions` setting in Player Settings > Publishing Settings is set to `Full With Stacktrace`. Other exception modes will currently raise errors.
-
 ## Retrieving your Access Key
 Head over to [fxn.ai](https://fxn.ai) to create an account by logging in. Once you do, generate an access key:
 
