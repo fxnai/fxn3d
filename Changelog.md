@@ -1,3 +1,6 @@
+## 0.0.26
++ Fixed `WebException: The request was aborted: The request was canceled` when building for Android (#4).
+
 ## 0.0.25
 + Minor stability improvements.
 

@@ -33,7 +33,11 @@ namespace Function.API {
         public DotNetClient (
             string url,
             string? accessKey = default
-        ) : base(url.TrimEnd('/'), accessKey) { }
+        ) : base(url.TrimEnd('/'), accessKey) {
+            client = new();
+            var ua = new ProductInfoHeaderValue(@"FunctionDotNet", Function.Version);
+            client.DefaultRequestHeaders.UserAgent.Add(ua);
+        }
 
         /// <summary>
         /// Make a request to a REST endpoint.
@@ -51,16 +55,14 @@ namespace Function.API {
             Dictionary<string, string>? headers = default
         ) where T : class {
             path = path.TrimStart('/');
-            // Create client and message
-            using var client = new HttpClient();
-            using var message = new HttpRequestMessage(new HttpMethod(method), $"{this.url}/{path}");
-            // Add headers
+            using var message = new HttpRequestMessage(new HttpMethod(method), $"{url}/{path}");       
+            // Populate headers
             if (!string.IsNullOrEmpty(accessKey))
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
+                message.Headers.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
             if (headers != null)
                 foreach (var header in headers)
-                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
-            // Add payload
+                    message.Headers.Add(header.Key, header.Value);
+            // Populate payload
             if (payload != null) {
                 var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
                 var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
@@ -94,16 +96,14 @@ namespace Function.API {
             Dictionary<string, string>? headers = default
         ) where T : class {
             path = path.TrimStart('/');
-            // Create client and message
-            using var client = new HttpClient();
-            using var message = new HttpRequestMessage(new HttpMethod(method), $"{this.url}/{path}");
-            // Add headers
+            using var message = new HttpRequestMessage(new HttpMethod(method), $"{url}/{path}");
+            // Populate headers
             if (!string.IsNullOrEmpty(accessKey))
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
+                message.Headers.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
             if (headers != null)
                 foreach (var header in headers)
-                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
-            // Add payload
+                    message.Headers.Add(header.Key, header.Value);
+            // Populate payload
             if (payload != null) {
                 var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
                 var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
@@ -149,15 +149,7 @@ namespace Function.API {
         /// Download a file.
         /// </summary>
         /// <param name="url">Data URL.</param>
-        public override async Task<Stream> Download (string url) {
-            // Create client
-            using var client = new HttpClient();
-            var ua = new ProductInfoHeaderValue(@"FunctionDotNet", Function.Version);
-            client.DefaultRequestHeaders.UserAgent.Add(ua);
-            // Download
-            var stream = await client.GetStreamAsync(url);
-            return stream;
-        }
+        public override Task<Stream> Download (string url) => client.GetStreamAsync(url);
 
         /// <summary>
         /// Upload a data stream.
@@ -166,12 +158,16 @@ namespace Function.API {
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
         public override async Task Upload (Stream stream, string url, string? mime = null) {
-            using var client = new HttpClient();
             using var content = new StreamContent(stream);
             content.Headers.ContentType = new MediaTypeHeaderValue(mime ?? @"application/octet-stream");
             using var response = await client.PutAsync(url, content);
             response.EnsureSuccessStatusCode();
         }
+        #endregion
+
+
+        #region --Operations--
+        private readonly HttpClient client;
         #endregion
     }
 }
