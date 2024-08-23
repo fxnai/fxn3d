@@ -59,7 +59,7 @@ namespace Function.Services {
         /// <param name="inputs">Input values.</param>
         /// <param name="acceleration">Prediction acceleration.</param>
         /// <param name="device">Prediction device. Do not set this unless you know what you are doing.</param>
-        public async IAsyncEnumerable<Prediction> Stream (
+        public async IAsyncEnumerable<Prediction> Stream ( // DEPLOY
             string tag,
             Dictionary<string, object?> inputs,
             Acceleration acceleration = default,
@@ -70,7 +70,8 @@ namespace Function.Services {
             using var inputMap = ToValueMap(inputs);
             using var stream = predictor.StreamPrediction(inputMap);
             foreach (var prediction in stream)
-                yield return ToPrediction(tag, prediction);
+                using (prediction)
+                    yield return ToPrediction(tag, prediction);
         }
 
         /// <summary>
