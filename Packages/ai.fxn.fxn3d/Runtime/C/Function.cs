@@ -105,19 +105,6 @@ namespace Function.C {
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateNull")]
         public static extern Status CreateNullValue (out IntPtr value);
-        [DllImport(Assembly, EntryPoint = @"FXNValueCreateBySerializingValue")]
-        public static extern Status CreateSerializedValue (
-            this IntPtr value,
-            Value.Flags flags,
-            out IntPtr result
-        );
-        [DllImport(Assembly, EntryPoint = @"FXNValueCreateByDeserializingValue")]
-        public static extern Status CreateDeserializedValue (
-            this IntPtr value,
-            Dtype type,
-            Value.Flags flags,
-            out IntPtr result
-        );
         #endregion
 
 

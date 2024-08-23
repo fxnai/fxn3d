@@ -27,6 +27,7 @@ namespace Function.C {
         }
         #endregion
 
+
         #region --Client API--
 
         public void* data {
@@ -175,7 +176,7 @@ namespace Function.C {
             return result;
         }
 
-        private static Dtype ToDtype<T> () => default(T) switch { // DEPLOY
+        private static Dtype ToDtype<T> () where T : unmanaged => default(T) switch { // don't use this for reference types
             float   _ => Dtype.Float32,
             double  _ => Dtype.Float64,
             sbyte   _ => Dtype.Int8,

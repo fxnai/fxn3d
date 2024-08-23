@@ -59,7 +59,7 @@ namespace Function.Services {
         /// <param name="inputs">Input values.</param>
         /// <param name="acceleration">Prediction acceleration.</param>
         /// <param name="device">Prediction device. Do not set this unless you know what you are doing.</param>
-        public async IAsyncEnumerable<Prediction> Stream ( // DEPLOY
+        public async IAsyncEnumerable<Prediction> Stream (
             string tag,
             Dictionary<string, object?> inputs,
             Acceleration acceleration = default,
@@ -141,8 +141,11 @@ namespace Function.Services {
                     resource.type,
                     await GetResourcePath(resource)
                 );
-            // Load predictor
-            return new C.Predictor(configuration);
+            // Cache
+            var predictor = new C.Predictor(configuration);
+            cache.Add(tag, predictor);
+            // Return
+            return predictor;
         }
 
         private async Task<string> GetResourcePath (PredictionResource resource) {
