@@ -4,7 +4,7 @@
 
 [![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2Fy5vwgXkz2f%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&label=Function%20community)](https://fxn.ai/community)
 
-Run AI prediction functions (a.k.a "predictors") in your Unity apps and games. With Function, you can build AI-powered apps by creating and composing GPU-accelerated predictors that run in the cloud. In a few steps:
+Run Python functions (a.k.a "predictors") locally in your Unity apps and games, with full GPU acceleration and zero dependencies. In a few steps:
 
 ## Installing Function
 Add the following items to your Unity project's `Packages/manifest.json`:
@@ -48,10 +48,8 @@ Then make a prediction:
 ```csharp
 // Make a prediction
 var prediction = await fxn.Predictions.Create(
-    tag: "@samples/greeting",
-    inputs: new () {
-        ["name"] = "Roberta"
-    }
+    tag: "@fxn/greeting",
+    inputs: new () { ["name"] = "Roberta" }
 );
 // Log the result
 Debug.Log(prediction.results[0]);
