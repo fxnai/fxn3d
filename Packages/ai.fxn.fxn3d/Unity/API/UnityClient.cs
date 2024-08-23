@@ -10,12 +10,10 @@ namespace Function.API {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using UnityEngine.Networking;
     using Newtonsoft.Json;
-    using Internal;
 
     /// <summary>
     /// Function API client for Unity Engine.
