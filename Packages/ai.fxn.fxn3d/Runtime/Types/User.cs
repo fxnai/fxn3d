@@ -9,17 +9,47 @@
 namespace Function.Types {
 
     using System;
-    using Internal;
+    using C;
 
     /// <summary>
     /// Function user.
     /// </summary>
     [Preserve, Serializable]
-    public class User : Profile {
+    public sealed class User {
 
         /// <summary>
-        /// User email address.
+        /// Username.
         /// </summary>
-        public string email;
+        public string username;
+
+        /// <summary>
+        /// Date created.
+        /// </summary>
+        public string created;
+
+        /// <summary>
+        /// User display name.
+        /// </summary>
+        public string? name;
+
+        /// <summary>
+        /// User avatar.
+        /// </summary>
+        public string? avatar;
+
+        /// <summary>
+        /// User bio.
+        /// </summary>
+        public string? bio;
+
+        /// <summary>
+        /// User website.
+        /// </summary>
+        public string? website;
+
+        /// <summary>
+        /// User GitHub handle.
+        /// </summary>
+        public string? github;
     }
 }

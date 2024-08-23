@@ -5,6 +5,18 @@
 
 #nullable enable
 
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+[assembly: AssemblyCompany(@"NatML Inc.")]
+[assembly: AssemblyTitle(@"Function.Runtime")]
+[assembly: AssemblyVersion(Function.Function.Version)]
+[assembly: AssemblyCopyright(@"Copyright © 2024 NatML Inc. All Rights Reserved.")]
+[assembly: InternalsVisibleTo(@"Function.Unity")]
+[assembly: InternalsVisibleTo(@"Function.Editor")]
+[assembly: InternalsVisibleTo(@"Function.Tests.Editor")]
+[assembly: InternalsVisibleTo(@"Function.Tests.Runtime")]
+
 namespace Function {
 
     using System;
@@ -46,19 +58,9 @@ namespace Function {
         public readonly PredictorService Predictors;
 
         /// <summary>
-        /// Manage predictor environment variables.
-        /// </summary>
-        public readonly EnvironmentVariableService EnvironmentVariables;
-
-        /// <summary>
         /// Make predictions.
         /// </summary>
         public readonly PredictionService Predictions;
-
-        /// <summary>
-        /// Upload and download files.
-        /// </summary>
-        public readonly StorageService Storage;
 
         /// <summary>
         /// Create a Function client.
@@ -82,19 +84,25 @@ namespace Function {
             string? cachePath = null
         ) {
             this.client = client;
-            this.Storage = new StorageService(client);
             this.Users = new UserService(client);
             this.Predictors = new PredictorService(client);
-            this.EnvironmentVariables = new EnvironmentVariableService(client);
-            this.Predictions = new PredictionService(client, Storage, cachePath);
+            this.Predictions = new PredictionService(client, cachePath);
         }
         #endregion
 
 
         #region --Operations--
         public readonly FunctionClient client;
-        public const string Version = @"0.0.26";
+        public const string Version = @"0.0.27";
         internal const string URL = @"https://api.fxn.ai";
         #endregion
+    }
+
+    [AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
+    internal sealed class PreserveAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    internal sealed class MonoPInvokeCallbackAttribute : Attribute {
+        public MonoPInvokeCallbackAttribute (Type type) {}
     }
 }

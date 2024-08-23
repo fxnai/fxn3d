@@ -10,7 +10,6 @@ namespace Function {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Text;
     using System.Threading.Tasks;
     using UnityEngine;
     using UnityEngine.Networking;
@@ -134,67 +133,6 @@ namespace Function {
         }
 
         /// <summary>
-        /// Convert an audio clip to a prediction value.
-        /// </summary>
-        /// <param name="clip">Input audio clip.</param>
-        /// <param name="minUploadSize">Audio clips larger than this size in bytes will be uploaded.</param>
-        /// <returns>Prediction value.</returns>
-        public static async Task<Value> ToValue (this AudioClip clip, int minUploadSize = 4096) {
-            using var stream = new MemoryStream();
-            var sampleCount = clip.samples * clip.channels;
-            var dataLength = 44 + sampleCount * sizeof(short) - 8;
-            var sampleBuffer = new float[sampleCount];
-            clip.GetData(sampleBuffer, 0);
-            stream.Write(Encoding.UTF8.GetBytes(@"RIFF"), 0, 4);
-            stream.Write(BitConverter.GetBytes(dataLength), 0, 4);
-            stream.Write(Encoding.UTF8.GetBytes(@"WAVE"), 0, 4);
-            stream.Write(Encoding.UTF8.GetBytes(@"fmt "), 0, 4);
-            stream.Write(BitConverter.GetBytes(16), 0, 4);
-            stream.Write(BitConverter.GetBytes((ushort)1), 0, 2);
-            stream.Write(BitConverter.GetBytes(clip.channels), 0, 2);
-            stream.Write(BitConverter.GetBytes(clip.frequency), 0, 4);
-            stream.Write(BitConverter.GetBytes(clip.frequency * clip.channels * sizeof(short)), 0, 4);
-            stream.Write(BitConverter.GetBytes((ushort)(clip.channels * 2)), 0, 2);
-            stream.Write(BitConverter.GetBytes((ushort)16), 0, 2);
-            stream.Write(Encoding.UTF8.GetBytes(@"data"), 0, 4);
-            stream.Write(BitConverter.GetBytes(sampleCount * sizeof(ushort)), 0, 4);
-            unsafe {
-                fixed (float* srcData = sampleBuffer)
-                    fixed (short* dstData = new short[sampleCount]) {
-                        for (var i = 0; i < sampleCount; ++i)
-                            dstData[i] = (short)(srcData[i] * short.MaxValue);
-                        using var dataStream = new UnmanagedMemoryStream((byte*)dstData, sampleCount * sizeof(short));
-                        dataStream.CopyTo(stream);
-                    }
-            }
-            // Upload
-            stream.Seek(0, SeekOrigin.Begin);
-            var client = Create();
-            var value = await client.Predictions.ToValue(stream, @"audio.wav", Dtype.Audio, minUploadSize: minUploadSize);
-            // Return
-            return value;
-        }
-
-        /// <summary>
-        /// Convert an audio value to an AudioClip.
-        /// </summary>
-        /// <param name="value">Prediction value.</param>
-        /// <returns>Audio clip.</returns>
-        public static async Task<AudioClip> ToAudioClip (this Value value) {
-            // Create download URL
-            using var urlCreator = new DownloadUrlCreator(value.data!);
-            var url = await urlCreator.URL();
-            // Download
-            using var www = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.WAV);
-            www.SendWebRequest();
-            while (!www.isDone)
-                await Task.Yield();
-            // Create clip
-            var clip = DownloadHandlerAudioClip.GetContent(www);
-            return clip;
-        }
-
-        /// <summary>
         /// Convert a `StreamingAssets` path to an absolute path accessible on the file system.
         /// This function will perform any necessary copying to ensure that the file is accessible.
         /// </summary>
@@ -233,28 +171,6 @@ namespace Function {
         /// Predictor cache path.
         /// </summary>
         internal static string CachePath => Path.Combine(Application.persistentDataPath, @"fxn", @"cache");
-
-        private sealed class DownloadUrlCreator : IDisposable {
-
-            private readonly string url;
-            private readonly string path;
-
-            public DownloadUrlCreator (string url) {
-                this.url = url;
-                this.path = $"{Path.GetTempPath()}{Guid.NewGuid()}";
-            }
-
-            public async Task<string> URL () => url.StartsWith("data:") ? await CreateFileURL() : url;
-
-            public void Dispose () => File.Delete(path);
-
-            private async Task<string> CreateFileURL () {
-                using var dataStream = await FunctionUnity.Create().Storage.Download(url);
-                using var fileStream = new FileStream(path, FileMode.OpenOrCreate);
-                dataStream.CopyTo(fileStream);
-                return $"file://{path}";
-            }
-        }
         #endregion
     }
 }

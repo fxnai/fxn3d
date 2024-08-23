@@ -1,3 +1,27 @@
+## 0.0.27
++ Updated to Function C 0.0.27.
++ Removed `fxn.EnvironmentVariables` field.
++ Removed `fxn.Storage` field.
++ Removed `fxn.Users.Update` method.
++ Removed `fxn.Predictors.List` method.
++ Removed `fxn.Predictors.Search` method.
++ Removed `fxn.Predictors.Create` method.
++ Removed `fxn.Predictors.Delete` method.
++ Removed `fxn.Predictors.Archive` method.
++ Removed `fxn.Predictions.ToObject` method.
++ Removed `fxn.Predictions.ToValue` method.
++ Removed `Predictor.type` field.
++ Removed `Predictor.acceleration` field.
++ Removed `Prediction.type` field.
++ Removed `EnvironmentVariable` class.
++ Removed `Profile` class.
++ Removed `Tag` class.
++ Removed `Value` class.
++ Removed `UploadType` enumeration.
++ Removed `PredictorType` enumeration.
++ Removed `Acceleration.A40` enumeration member.
++ Removed `Acceleration.A100` enumeration member.
+
 ## 0.0.26
 + Fixed `WebException: The request was aborted: The request was canceled` when building for Android (#4).
 

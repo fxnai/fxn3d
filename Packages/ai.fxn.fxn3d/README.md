@@ -16,7 +16,7 @@ Add the following items to your Unity project's `Packages/manifest.json`:
     }
   ],
   "dependencies": {
-    "ai.fxn.fxn3d": "0.0.26"
+    "ai.fxn.fxn3d": "0.0.27"
   }
 }
 ```
@@ -43,7 +43,7 @@ Then make a prediction:
 ```csharp
 // Make a prediction
 var prediction = await fxn.Predictions.Create(
-    tag: "@samples/greeting",
+    tag: "@fxn/greeting",
     inputs: new () {
         ["name"] = "Roberta"
     }

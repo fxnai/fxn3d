@@ -82,52 +82,6 @@ namespace Function.API {
         }
 
         /// <summary>
-        /// Make a request to a REST endpoint and consume the response as a stream.
-        /// </summary>
-        /// <typeparam name="T">Deserialized response type.</typeparam>
-        /// <param name="path">Endpoint path.</param>
-        /// <param name="payload">Request body.</param>
-        /// <param name="headers">Request headers.</param>
-        /// <returns>Stream of deserialized responses.</returns>
-        public override async IAsyncEnumerable<T?> Stream<T> (
-            string method,
-            string path,
-            object? payload = default,
-            Dictionary<string, string>? headers = default
-        ) where T : class {
-            path = path.TrimStart('/');
-            using var message = new HttpRequestMessage(new HttpMethod(method), $"{url}/{path}");
-            // Populate headers
-            if (!string.IsNullOrEmpty(accessKey))
-                message.Headers.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
-            if (headers != null)
-                foreach (var header in headers)
-                    message.Headers.Add(header.Key, header.Value);
-            // Populate payload
-            if (payload != null) {
-                var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
-                var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
-                message.Content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
-            }
-            // Stream
-            using var response = await client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
-            using var stream = await response.Content.ReadAsStreamAsync();
-            var buffer = new byte[65536]; // CHECK // Could be problematic with `dataUrlLimit`
-            while (true) {
-                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                if (bytesRead == 0)
-                    break;
-                var responseStr = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                if ((int)response.StatusCode >= 400) {
-                    var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
-                    var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
-                    throw new InvalidOperationException(error);
-                }
-                yield return JsonConvert.DeserializeObject<T>(responseStr)!;
-            }
-        }
-
-        /// <summary>
         /// Query the Function graph API.
         /// </summary>
         /// <param name="query">Graph query.</param>

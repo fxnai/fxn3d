@@ -5,7 +5,7 @@
 
 #nullable enable
 
-namespace Function.Internal {
+namespace Function.C {
 
     using System;
     using System.Runtime.InteropServices;
@@ -16,7 +16,7 @@ namespace Function.Internal {
     /// <summary>
     /// Function C API.
     /// </summary>
-    public static unsafe class Function {
+    internal static unsafe class Function {
 
         public const string Assembly =
         #if (UNITY_IOS || UNITY_WEBGL) && !UNITY_EDITOR
@@ -35,15 +35,6 @@ namespace Function.Internal {
             InvalidArgument     = 1,
             InvalidOperation    = 2,
             NotImplemented      = 3,
-        }
-
-        /// <summary>
-        /// Value flags.
-        /// </summary>
-        [Flags]
-        public enum ValueFlags : int {
-            None = 0,
-            CopyData = 1,
         }
         #endregion
 
@@ -78,7 +69,7 @@ namespace Function.Internal {
             [In] int[]? shape,
             int dims,
             Dtype dtype,
-            ValueFlags flags,
+            Value.Flags flags,
             out IntPtr value
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateString")]
@@ -102,14 +93,14 @@ namespace Function.Internal {
             int width,
             int height,
             int channels,
-            ValueFlags flags,
+            Value.Flags flags,
             out IntPtr value
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateBinary")]
         public static extern Status CreateBinaryValue (
             [In] byte[] buffer,
             int bufferLen,
-            ValueFlags flags,
+            Value.Flags flags,
             out IntPtr value
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateNull")]
@@ -117,14 +108,14 @@ namespace Function.Internal {
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateBySerializingValue")]
         public static extern Status CreateSerializedValue (
             this IntPtr value,
-            ValueFlags flags,
+            Value.Flags flags,
             out IntPtr result
         );
         [DllImport(Assembly, EntryPoint = @"FXNValueCreateByDeserializingValue")]
         public static extern Status CreateDeserializedValue (
             this IntPtr value,
             Dtype type,
-            ValueFlags flags,
+            Value.Flags flags,
             out IntPtr result
         );
         #endregion
@@ -177,21 +168,32 @@ namespace Function.Internal {
         public static extern Status CreateConfiguration (out IntPtr configuration);
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationRelease")]
         public static extern Status ReleaseConfiguration (this IntPtr configuration);
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetTag")]
+        public static extern Status GetConfigurationTag (
+            this IntPtr configuration,
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder tag,
+            int size
+        );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetTag")]
         public static extern Status SetConfigurationTag (
             this IntPtr configuration,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string? tag
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetToken")]
+        public static extern Status GetConfigurationToken (
+            this IntPtr configuration,
+            [MarshalAs(UnmanagedType.LPUTF8Str), Out] StringBuilder token,
+            int size
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetToken")]
         public static extern Status SetConfigurationToken (
             this IntPtr configuration,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string? token
         );
-        [DllImport(Assembly, EntryPoint = @"FXNConfigurationAddResource")]
-        public static extern Status AddConfigurationResource (
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetAcceleration")]
+        public static extern Status GetConfigurationAcceleration (
             this IntPtr configuration,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string path
+            out Acceleration acceleration
         );
         [DllImport(Assembly, EntryPoint = @"FXNConfigurationSetAcceleration")]
         public static extern Status SetConfigurationAcceleration (
@@ -202,6 +204,17 @@ namespace Function.Internal {
         public static extern Status SetConfigurationDevice (
             this IntPtr configuration,
             IntPtr device
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationGetDevice")]
+        public static extern Status GetConfigurationDevice (
+            this IntPtr configuration,
+            out IntPtr device
+        );
+        [DllImport(Assembly, EntryPoint = @"FXNConfigurationAddResource")]
+        public static extern Status AddConfigurationResource (
+            this IntPtr configuration,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string path
         );
         #endregion
 
@@ -282,6 +295,18 @@ namespace Function.Internal {
         #region --FXNVersion--
         [DllImport(Assembly, EntryPoint = @"FXNGetVersion")]
         public static extern IntPtr GetVersion ();
+        #endregion
+
+
+        #region --Utilities--
+
+        public static Status Throw (this Status status) => status switch {
+            Status.Ok               => status,
+            Status.InvalidArgument  => throw new ArgumentException(),
+            Status.InvalidOperation => throw new InvalidOperationException(),
+            Status.NotImplemented   => throw new NotImplementedException(),
+            _                       => throw new InvalidOperationException(),
+        };
         #endregion
     }
 }

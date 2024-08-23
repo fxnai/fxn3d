@@ -4,13 +4,11 @@
 */
 
 #nullable enable
-#pragma warning disable 8618
 
 namespace Function.Services {
 
     using System.Threading.Tasks;
     using API;
-    using Internal;
     using Types;
 
     /// <summary>
@@ -22,19 +20,22 @@ namespace Function.Services {
         /// <summary>
         /// Retrieve the current user.
         /// </summary>
-        public Task<User?> Retrieve () => Retrieve<User>();
-
-        /// <summary>
-        /// Retrieve a user.
-        /// </summary>
-        /// <param name="username">Username.</param>
-        public Task<Profile?> Retrieve (string username) => Retrieve<Profile>(username);
+        public async Task<User?> Retrieve () {
+            var response = await client.Query<UserResponse>(
+                @$"query ($input: UserInput) {{
+                    user (input: $input) {{
+                        {ProfileFields}
+                    }}
+                }}"
+            );
+            return response!.user;
+        }
         #endregion
 
 
         #region --Operations--
         private readonly FunctionClient client;
-        public const string ProfileFields = @"
+        private const string ProfileFields = @"
         username
         created
         name
@@ -43,39 +44,15 @@ namespace Function.Services {
         website
         github
         ";
-        public const string UserFields = @"
-        ... on User {
-            email
-        }
-        ";
 
         internal UserService (FunctionClient client) => this.client = client;
-        
-        private async Task<T?> Retrieve<T> (string? username = null) where T : Profile {
-            var response = await client.Query<UserResponse<T>>(
-                @$"query ($input: UserInput) {{
-                    user (input: $input) {{
-                        {ProfileFields}
-                        {(string.IsNullOrEmpty(username) ? UserFields : string.Empty)}
-                    }}
-                }}",
-                new () {
-                    [@"input"] = !string.IsNullOrEmpty(username) ? new UserInput { username = username } : null
-                }
-            );
-            return response!.user;
-        }
         #endregion
 
 
         #region --Types--
 
-        internal sealed class UserInput {
-            public string username;
-        }
-
-        private sealed class UserResponse<T> where T : Profile {
-            public T? user;
+        private sealed class UserResponse {
+            public User? user;
             [Preserve] public UserResponse () { }
         }
         #endregion

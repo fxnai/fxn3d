@@ -12,7 +12,6 @@ namespace Function.Types {
     using System.Runtime.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
-    using Internal;
 
     /// <summary>
     /// Prediction function.
@@ -28,17 +27,12 @@ namespace Function.Types {
         /// <summary>
         /// Predictor owner.
         /// </summary>
-        public Profile owner;
+        public User owner;
 
         /// <summary>
         /// Predictor name.
         /// </summary>
         public string name;
-
-        /// <summary>
-        /// Predictor type.
-        /// </summary>
-        public PredictorType type;
         
         /// <summary>
         /// Predictor status.
@@ -71,12 +65,6 @@ namespace Function.Types {
         /// We encourage animated GIFs where possible.
         /// </summary>
         public string? media;
-
-        /// <summary>
-        /// Predictor acceleration.
-        /// This only applies to `CLOUD` predictors.
-        /// </summary>
-        public Acceleration? acceleration;
 
         /// <summary>
         /// Predictor signature.
@@ -151,7 +139,7 @@ namespace Function.Types {
         /// <summary>
         /// Parameter default value.
         /// </summary>
-        public Value? defaultValue;
+        public object? defaultValue;
     }
 
     /// <summary>
@@ -212,22 +200,5 @@ namespace Function.Types {
         /// </summary>
         [EnumMember(Value = @"ARCHIVED")]
         Archived = 3,
-    }
-
-    /// <summary>
-    /// Predictor type.
-    /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum PredictorType : int {
-        /// <summary>
-        /// Predictions are run in the cloud.
-        /// </summary>
-        [EnumMember(Value = @"CLOUD")]
-        Cloud = 0,
-        /// <summary>
-        /// Predictions are run on-device.
-        /// </summary>
-        [EnumMember(Value = @"EDGE")]
-        Edge = 1,
     }
 }

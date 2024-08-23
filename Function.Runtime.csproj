@@ -59,34 +59,31 @@
     <UnityVersion>2022.3.23f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.2/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.3/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Storage.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Function.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Internal/FunctionInfo.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/API/DotNetClient.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Acceleration.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Environment.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Internal/Function.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Tensor.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Image.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Internal/FunctionUtils.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/C/Predictor.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Dtype.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/User.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Profile.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Value.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/C/Configuration.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/C/PredictionStream.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/C/ValueMap.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/C/Prediction.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/C/Value.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Predictor.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Tag.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/API/FunctionClient.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Services/User.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Services/Prediction.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Services/Predictor.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Services/Environment.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/C/Function.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Types/Prediction.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Runtime/Services/Storage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Packages/ai.fxn.fxn3d/Runtime/Function.Runtime.asmdef" />

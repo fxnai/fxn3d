@@ -40,24 +40,18 @@ namespace Function.Editor.Build {
             foreach (var embed in embeds) {
                 var client = new DotNetClient(embed.url, embed.accessKey);
                 var fxn = new Function(client);
-                var predictions = embed.tags.Select(tag => {
-                    try {
-                        var prediction = Task.Run(() => fxn.Predictions.Create(
-                            tag,
-                            rawOutputs: true,
-                            client: Platform,
-                            configuration: @""
-                        )).Result;
-                        return prediction.type == PredictorType.Edge ?
-                            new CachedPrediction { platform = Platform, prediction = prediction } :
-                            null;
-                    } catch (Exception ex) {
-                        Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
-                        return null;
-                    }
-                })
-                .Where(pred => pred != null)
-                .ToArray();
+                var predictions = embed.tags
+                    .Select(tag => {
+                        try {
+                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: Platform, configurationId: @"")).Result;
+                            return new CachedPrediction { platform = Platform, prediction = prediction };
+                        } catch (Exception ex) {
+                            Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
+                            return null;
+                        }
+                    })
+                    .Where(pred => pred != null)
+                    .ToArray();
                 cache.AddRange(predictions);
             }
             // Cache

@@ -87,55 +87,6 @@ namespace Function.API {
         }
 
         /// <summary>
-        /// Make a request to a REST endpoint and consume the response as a stream.
-        /// </summary>
-        /// <typeparam name="T">Deserialized response type.</typeparam>
-        /// <param name="path">Endpoint path.</param>
-        /// <param name="payload">Request body.</param>
-        /// <param name="headers">Request headers.</param>
-        /// <returns>Stream of deserialized responses.</returns>
-        public override async IAsyncEnumerable<T> Stream<T> (
-            string method,
-            string path,
-            object? payload = default,
-            Dictionary<string, string>? headers = default
-        ) {
-            path = path.TrimStart('/');
-            // Create client
-            using var downloadHandler = new DownloadHandlerAsyncIterable();
-            using var client = new UnityWebRequest($"{this.url}/{path}", method) {
-                downloadHandler = downloadHandler,
-                disposeDownloadHandlerOnDispose = false,
-                disposeUploadHandlerOnDispose = true,
-                timeout = 20,
-            };
-            // Add headers
-            if (!string.IsNullOrEmpty(accessKey))
-                client.SetRequestHeader(@"Authorization", $"Bearer {accessKey}");
-            if (headers != null)
-                foreach (var header in headers)
-                    client.SetRequestHeader(header.Key, header.Value);
-            // Add payload
-            if (payload != null) {
-                var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
-                var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
-                client.SetRequestHeader(@"Content-Type",  @"application/json");
-                client.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payloadStr));
-            }
-            // Request
-            client.SendWebRequest();
-            // Stream
-            await foreach (var responseStr in downloadHandler.Stream()) {
-                if (client.responseCode >= 400) {
-                    var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
-                    var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
-                    throw new InvalidOperationException(error);
-                }
-                yield return JsonConvert.DeserializeObject<T>(responseStr)!;
-            }
-        }
-
-        /// <summary>
         /// Query the Function graph API.
         /// </summary>
         /// <param name="query">Graph query.</param>
@@ -179,7 +130,7 @@ namespace Function.API {
         public override async Task Upload (Stream stream, string url, string? mime = null) {
             // Create client
             using var client = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT) {
-                uploadHandler = new UploadHandlerRaw(stream.ToArray()),
+                uploadHandler = new UploadHandlerRaw(ToArray(stream)),
                 downloadHandler = new DownloadHandlerBuffer(),
                 disposeDownloadHandlerOnDispose = true,
                 disposeUploadHandlerOnDispose = true,
@@ -193,6 +144,20 @@ namespace Function.API {
             // Check
             if (client.error != null)
                 throw new InvalidOperationException($"Failed to upload stream with error: {client.error}");
+        }
+        #endregion
+
+
+        #region --Operations--
+
+        private static byte[] ToArray (Stream stream) {
+            // Shortcut
+            if (stream is MemoryStream memoryStream)
+                return memoryStream.ToArray();
+            // Copy
+            using var dstStream = new MemoryStream();
+            stream.CopyTo(dstStream);
+            return dstStream.ToArray();
         }
         #endregion
     }

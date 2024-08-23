@@ -16,14 +16,12 @@ namespace Function.Editor.Build {
     using UnityEditor.Build.Reporting;
     using API;
     using Services;
-    using Types;
     using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
     #if UNITY_STANDALONE_OSX
     using UnityEditor.iOS.Xcode;
     using UnityEditor.iOS.Xcode.Extensions;
     #endif
-    
 
     internal sealed class macOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
@@ -48,15 +46,8 @@ namespace Function.Editor.Build {
                     .Select((pair) => {
                         var (platform, tag) = pair;
                         try {
-                            var prediction = Task.Run(() => fxn.Predictions.Create(
-                                tag,
-                                rawOutputs: true,
-                                client: platform,
-                                configuration: @""
-                            )).Result;
-                            return prediction.type == PredictorType.Edge ?
-                                new CachedPrediction { platform = platform, prediction = prediction } :
-                                null;
+                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: platform, configurationId: @"")).Result;
+                            return new CachedPrediction { platform = platform, prediction = prediction };
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;

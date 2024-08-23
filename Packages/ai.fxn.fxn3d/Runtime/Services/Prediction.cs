@@ -12,19 +12,13 @@ namespace Function.Services {
     using System.Collections.Generic;
     using System.Linq;
     using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
     using System.Runtime.Serialization;
-    using System.Text;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using API;
-    using Internal;
     using Types;
-    using Dtype = Types.Dtype;
-    using Status = Internal.Function.Status;
-    using ValueFlags = Internal.Function.ValueFlags;
+    using Configuration = C.Configuration;
+    using Value = C.Value;
+    using ValueMap = C.ValueMap;
 
     /// <summary>
     /// Make predictions.
@@ -36,334 +30,121 @@ namespace Function.Services {
         /// Create a prediction.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
-        /// <param name="inputs">Input values. This only applies to `CLOUD` predictions.</param>
-        /// <param name="rawOutputs">Skip parsing output values into plain values. This only applies to `CLOUD` predictions.</param>
-        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size. This only applies to `CLOUD` predictions.</param>
-        /// <param name="acceleration">Prediction acceleration. This only applies to `EDGE` predictions.</param>
-        /// <param name="device">Prediction device. Do not set this unless you know what you are doing. This only applies to `EDGE` predictions.</param>
-        /// <param name="client">Function client identifier. Specify this to override the current client identifier.</param>
-        /// <param name="configuration">Configuration identifier. Specify this to override the current client configuration token.</param>
+        /// <param name="inputs">Input values.</param>
+        /// <param name="acceleration">Prediction acceleration.</param>
+        /// <param name="device">Prediction device. Do not set this unless you know what you are doing.</param>
+        /// <param name="clientId">Function client identifier. Specify this to override the current client identifier.</param>
+        /// <param name="configurationId">Configuration identifier. Specify this to override the current client configuration token.</param>
         public async Task<Prediction> Create (
             string tag,
             Dictionary<string, object?>? inputs = null,
-            bool rawOutputs = false,
-            int? dataUrlLimit = null,
             Acceleration acceleration = default,
             IntPtr device = default,
-            string? client = default,
-            string? configuration = default
+            string? clientId = default,
+            string? configurationId = default
         ) {
-            await FunctionUtils.Initialization;
-            // Check cache
-            if (cache.TryGetValue(tag, out var p) && !rawOutputs)
-                return Predict(tag, p, inputs!);
-            // Collect inputs
-            var key = Guid.NewGuid().ToString();
-            var values = inputs != null ?
-                (await Task.WhenAll(inputs.Select(async pair => (name: pair.Key, value: await ToValue(pair.Value, pair.Key, key: key))))).ToDictionary(pair => pair.name, pair => pair.value as object) :
-                null;
-            // Query
-            var prediction = await fxn.Request<Prediction>(
-                @"POST",
-                $"/predict/{tag}?dataUrlLimit={dataUrlLimit}&rawOutputs=true",
-                values,
-                new () {
-                    [@"fxn-client"] = client ?? ClientId,
-                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId,
-                }
-            );
-            // Parse
-            prediction!.results = await ParseResults(prediction.results, rawOutputs);
-            // Check
-            if (rawOutputs || prediction.type != PredictorType.Edge)
-                return prediction;
-            // Load
-            var predictor = await Load(prediction, acceleration, device);
-            cache.Add(prediction.tag, predictor);
-            // Return
-            return inputs != null ? Predict(tag, predictor, inputs) : prediction;
+            await Configuration.InitializationTask;
+            if (inputs == null)
+                return await CreateRawPrediction(tag, clientId, configurationId);
+            var predictor = await GetPredictor(tag, acceleration, device, clientId, configurationId);
+            using var inputMap = ToValueMap(inputs);
+            using var prediction = predictor.CreatePrediction(inputMap);
+            return ToPrediction(tag, prediction);
         }
 
         /// <summary>
-        /// Create a streaming prediction.
+        /// Stream a prediction.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
         /// <param name="inputs">Input values.</param>
-        /// <param name="rawOutputs">Skip parsing output values into plain values.</param>
-        /// <param name="dataUrlLimit">Return a data URL if a given output value is smaller than this size.</param>
-        public async IAsyncEnumerable<Prediction> Stream ( // INCOMPLETE // Edge support
+        /// <param name="acceleration">Prediction acceleration.</param>
+        /// <param name="device">Prediction device. Do not set this unless you know what you are doing.</param>
+        public async IAsyncEnumerable<Prediction> Stream (
             string tag,
-            Dictionary<string, object?>? inputs = null,
-            bool rawOutputs = false,
-            int? dataUrlLimit = null,
+            Dictionary<string, object?> inputs,
             Acceleration acceleration = default,
-            IntPtr device = default,
-            string? client = default,
-            string? configuration = default
+            IntPtr device = default
         ) {
-            await FunctionUtils.Initialization;
-            // Check cache
-            if (cache.TryGetValue(tag, out var p) && !rawOutputs) {
-                yield return Predict(tag, p, inputs!);
-                yield break;
-            }
-            // Collect inputs
-            var key = Guid.NewGuid().ToString();
-            var values = inputs != null ?
-                (await Task.WhenAll(inputs.Select(async pair => (name: pair.Key, value: await ToValue(pair.Value, pair.Key, key: key))))).ToDictionary(pair => pair.name, pair => pair.value as object) :
-                null;
-            // Stream
-            var stream = fxn.Stream<Prediction>(
-                @"POST",
-                $"/predict/{tag}?stream=true&rawOutputs=true&dataUrlLimit={dataUrlLimit}",
-                values,
-                new () {
-                    [@"fxn-client"] = client ?? ClientId,
-                    [@"fxn-configuration-token"] = configuration ?? ConfigurationId,
-                }
-            );
-            await foreach (var prediction in stream) {
-                // Parse
-                prediction!.results = await ParseResults(prediction.results, rawOutputs);
-                // Check
-                if (rawOutputs || prediction.type != PredictorType.Edge) {
-                    yield return prediction;
-                    continue;
-                }
-                // Load
-                var predictor = await Load(prediction, acceleration, device);
-                cache.Add(prediction.tag, predictor);
-                // Yield
-                yield return inputs != null ? Predict(tag, predictor, inputs) : prediction;
-            }
+            await Configuration.InitializationTask;
+            var predictor = await GetPredictor(tag, acceleration, device);
+            using var inputMap = ToValueMap(inputs);
+            using var stream = predictor.StreamPrediction(inputMap);
+            foreach (var prediction in stream)
+                yield return ToPrediction(tag, prediction);
         }
 
         /// <summary>
-        /// Delete an edge predictor that is loaded in memory.
+        /// Delete a predictor that is loaded in memory.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
-        /// <returns>Whether the edge predictor was successfully deleted from memory.</returns>
+        /// <returns>Whether the predictor was successfully deleted from memory.</returns>
         public async Task<bool> Delete (string tag) {
-            await FunctionUtils.Initialization;
-            // Check
+            await Configuration.InitializationTask;
             if (!cache.TryGetValue(tag, out var predictor))
                 return false;
-            // Release
-            predictor.ReleasePredictor().Throw();
-            // Pop
+            predictor.Dispose();
             cache.Remove(tag);
-            // Return
             return true;
         }
-
-        /// <summary>
-        /// Convert a Function value to a plain object.
-        /// </summary>
-        /// <param name="value">Function value.</param>
-        /// <returns>Plain object or `Value` if the value cannot be converted to a plain object.</returns>
-        public async Task<object?> ToObject (Value value) {
-            // Null
-            if (value.type == Dtype.Null)
-                return null;
-            // Download
-            var stream = await storage.Download(value.data!);
-            // Switch
-            switch (value.type) {
-                case Dtype.Float32: return ToObject<float>(stream, value.shape!);
-                case Dtype.Float64: return ToObject<double>(stream, value.shape!);
-                case Dtype.Int8:    return ToObject<sbyte>(stream, value.shape!);
-                case Dtype.Int16:   return ToObject<short>(stream, value.shape!);
-                case Dtype.Int32:   return ToObject<int>(stream, value.shape!);
-                case Dtype.Int64:   return ToObject<long>(stream, value.shape!);
-                case Dtype.Uint8:   return ToObject<byte>(stream, value.shape!);
-                case Dtype.Uint16:  return ToObject<ushort>(stream, value.shape!);
-                case Dtype.Uint32:  return ToObject<uint>(stream, value.shape!);
-                case Dtype.Uint64:  return ToObject<ulong>(stream, value.shape!);
-                case Dtype.Bool:    return ToObject<bool>(stream, value.shape!);
-                case Dtype.String:  return new StreamReader(stream).ReadToEnd();
-                case Dtype.Binary:  return stream;
-                case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(new StreamReader(stream).ReadToEnd());
-                case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(new StreamReader(stream).ReadToEnd());
-                case Dtype.Image:   return ToImage(stream);
-                default:            return value;
-            }
-        }
-
-        /// <summary>
-        /// Create a Function prediction value from an input object.
-        /// </summary>
-        /// <param name="value">Input object.</param>
-        /// <param name="name">Value name.</param>
-        /// <param name="type">Value type. This only applies to `Stream` input objects.</param>
-        /// <param name="minUploadSize">Values larger than this size in bytes will be uploaded.</param>
-        /// <returns>Function value.</returns>
-        public async Task<Value> ToValue (
-            object? value,
-            string name,
-            Dtype? type = null,
-            int minUploadSize = 4096,
-            string? mime = null,
-            string? key = null
-        ) => value switch {
-            Value           x => x,
-            null              => new Value { type = Dtype.Null },
-            float           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new int[0] },
-            double          x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new int[0] },
-            sbyte           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new int[0] },
-            short           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new int[0] },
-            int             x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new int[0] },
-            long            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new int[0] },
-            byte            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new int[0] },
-            ushort          x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new int[0] },
-            uint            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new int[0] },
-            ulong           x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new int[0] },
-            bool            x => new Value { data = await storage.Upload(name, new [] { x }.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new int[0] },
-            float[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = new [] { x.Length } },
-            double[]        x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = new [] { x.Length } },
-            sbyte[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = new [] { x.Length } },
-            short[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = new [] { x.Length } },
-            int[]           x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = new [] { x.Length } },
-            long[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = new [] { x.Length } },
-            byte[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = new [] { x.Length } },
-            ushort[]        x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = new [] { x.Length } },
-            uint[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = new [] { x.Length } },
-            ulong[]         x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = new [] { x.Length } },
-            bool[]          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Bool, shape = new [] { x.Length } },
-            Tensor<float>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float32, shape = x.shape },
-            Tensor<double>  x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Float64, shape = x.shape },
-            Tensor<sbyte>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int8, shape = x.shape },
-            Tensor<short>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int16, shape = x.shape },
-            Tensor<int>     x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int32, shape = x.shape },
-            Tensor<long>    x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Int64, shape = x.shape },
-            Tensor<byte>    x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint8, shape = x.shape },
-            Tensor<ushort>  x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint16, shape = x.shape },
-            Tensor<uint>    x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint32, shape = x.shape },
-            Tensor<ulong>   x => new Value { data = await storage.Upload(name, x.data.ToStream(), UploadType.Value, dataUrlLimit: minUploadSize, key: key), type = Dtype.Uint64, shape = x.shape },
-            string          x => new Value { data = await storage.Upload(name, x.ToStream(), UploadType.Value, mime: @"text/plain", dataUrlLimit: minUploadSize, key: key), type = Dtype.String },
-            IList           x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, mime: @"application/json", dataUrlLimit: minUploadSize, key: key), type = Dtype.List },
-            IDictionary     x => new Value { data = await storage.Upload(name, JsonConvert.SerializeObject(x).ToStream(), UploadType.Value, mime: @"application/json", dataUrlLimit: minUploadSize, key: key), type = Dtype.Dict },
-            Image           x => await ToValue(x, name, minUploadSize: minUploadSize, key: key),
-            Stream          x => new Value { data = await storage.Upload(name, x, UploadType.Value, mime: mime, dataUrlLimit: minUploadSize, key: key), type = type ?? Dtype.Binary },
-            Enum            x => await ToValue(SerializeEnum(x), name, minUploadSize: minUploadSize, mime: mime, key: key),
-            _                 => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type `{value.GetType()}`"),
-        };
         #endregion
 
 
         #region --Operations--
         private readonly FunctionClient fxn;
-        private readonly StorageService storage;
         private readonly string cachePath;
-        private readonly Dictionary<string, IntPtr> cache;
-        private readonly List<string> ResourceTypes = new () { @"bin", @"dso" };
+        private readonly Dictionary<string, C.Predictor> cache = new();
 
-        private static string ConfigurationId {
-            get {
-                var sb = new StringBuilder(2048);
-                Function.GetConfigurationUniqueID(sb, sb.Capacity).Throw();
-                return sb.ToString();
-            }
-        }
-
-        private static string ClientId {
-            get {
-                var sb = new StringBuilder(64);
-                Function.GetConfigurationClientID(sb, sb.Capacity).Throw();
-                return sb.ToString();
-            }
-        }
-
-        internal PredictionService (
-            FunctionClient client,
-            StorageService storage,
-            string? cachePath
-        ) {
+        internal PredictionService (FunctionClient client, string? cachePath) {
             this.fxn = client;
-            this.storage = storage;
             this.cachePath = cachePath ?? Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 ".fxn",
                 "cache"
             );
-            this.cache = new Dictionary<string, IntPtr>();
         }
 
-        private async Task<IntPtr> Load (Prediction prediction, Acceleration acceleration, IntPtr device) {
-            // Create configuration
-            Function.CreateConfiguration(out var configuration).Throw();
-            configuration.SetConfigurationTag(prediction.tag).Throw();
-            configuration.SetConfigurationToken(prediction.configuration).Throw();
-            configuration.SetConfigurationAcceleration(acceleration).Throw();
-            configuration.SetConfigurationDevice(device).Throw();
-            // Add resources
-            foreach (var resource in prediction.resources!)
-                if (ResourceTypes.Contains(resource.type))
-                    await configuration.AddConfigurationResourceAsync(
-                        resource.type,
-                        await Retrieve(resource)
-                    );
-            // Create predictor
-            Function.CreatePredictor(configuration, out var predictor).Throw();
-            configuration.ReleaseConfiguration().Throw();            
-            // Return
-            return predictor;
-        }
-
-        private Prediction Predict (
+        private Task<Prediction> CreateRawPrediction (
             string tag,
-            IntPtr predictor,
-            Dictionary<string, object?> inputs
-        ) {
-            IntPtr inputMap = default;
-            IntPtr prediction = default;
-            try {
-                // Marshal inputs
-                Function.CreateValueMap(out inputMap).Throw();
-                foreach (var pair in inputs)
-                    inputMap.SetValueMapValue(pair.Key, ToValue(pair.Value)).Throw();
-                // Predict
-                predictor.CreatePrediction(inputMap, out prediction).Throw();
-                // Get prediction id
-                var idBuffer = new StringBuilder(2048);
-                prediction.GetPredictionID(idBuffer, idBuffer.Capacity).Throw();
-                var id = idBuffer.ToString();
-                // Get prediction error
-                var errorBuffer = new StringBuilder(2048);
-                var error = prediction.GetPredictionError(errorBuffer, errorBuffer.Capacity) == Status.Ok ? errorBuffer.ToString() : null;
-                // Get latency and logs
-                prediction.GetPredictionLatency(out var latency);
-                prediction.GetPredictionLogLength(out var logsLength);
-                var logBuffer = new StringBuilder(logsLength + 1);
-                var logs = prediction.GetPredictionLogs(logBuffer, logBuffer.Capacity) == Status.Ok ? logBuffer.ToString() : null;  
-                // Marshal outputs
-                prediction.GetPredictionResults(out var outputMap).Throw();
-                outputMap.GetValueMapSize(out var count).Throw();
-                var results = new List<object?>();
-                var name = new StringBuilder(2048);
-                for (var idx = 0; idx < count; ++idx) {
-                    name.Clear();
-                    outputMap.GetValueMapKey(idx, name, name.Capacity).Throw();
-                    outputMap.GetValueMapValue(name.ToString(), out var value).Throw();
-                    results.Add(ToObject(value));
-                }                              
-                // Create prediction
-                return new Prediction {
-                    id = id.ToString(),
-                    tag = tag,
-                    type = PredictorType.Edge,
-                    created = DateTime.UtcNow,
-                    results = results.ToArray(),
-                    latency = latency, 
-                    error = error,
-                    logs = logs,
-                };
-            } finally {
-                inputMap.ReleaseValueMap();
-                prediction.ReleasePrediction();
+            string? clientId = default,
+            string? configurationId = default
+        ) => fxn.Request<Prediction>(
+            @"POST",
+            $"/predict/{tag}",
+            null,
+            new () {
+                [@"fxn-client"] = clientId ?? Configuration.ClientId,
+                [@"fxn-configuration-token"] = configurationId ?? Configuration.ConfigurationId,
             }
+        )!;
+
+        private async Task<C.Predictor> GetPredictor (
+            string tag,
+            Acceleration acceleration = default,
+            IntPtr device = default,
+            string? clientId = default,
+            string? configurationId = default
+        ) {
+            // Check cache
+            if (cache.TryGetValue(tag, out var p))
+                return p;
+            // Create configuration
+            var prediction = await CreateRawPrediction(tag, clientId, configurationId);
+            using var configuration = new Configuration() {
+                tag = prediction.tag,
+                token = prediction.configuration!,
+                acceleration = acceleration,
+                device = device
+            };
+            foreach (var resource in prediction.resources!)
+                await configuration.AddResource(
+                    resource.type,
+                    await GetResourcePath(resource)
+                );
+            // Load predictor
+            return new C.Predictor(configuration);
         }
 
-        private async Task<string> Retrieve (PredictionResource resource) {
+        private async Task<string> GetResourcePath (PredictionResource resource) {
             // Check cache
             Directory.CreateDirectory(cachePath);
             var name = !string.IsNullOrEmpty(resource.name) ? resource.name : GetResourceName(resource.url);
@@ -378,195 +159,81 @@ namespace Function.Services {
             return path;
         }
 
-        private async Task<object?[]?> ParseResults (object?[]? values, bool raw) {
-            // Check
-            if (values == null)
-                return null;
-            // Convert
-            var results = await Task.WhenAll(values.Select(async r => {
-                var value = (r as JObject)!.ToObject<Value>();
-                return raw ? value : await ToObject(value!);
-            }));
-            // Return
-            return results;
-        }
-        #endregion
-
-
-        #region --Utilities--
-
-        internal static unsafe IntPtr ToValue (object? value) {
-            switch (value) {
-                case IntPtr x:          return x;
-                case float x:           return ToValue(&x);
-                case double x:          return ToValue(&x);
-                case sbyte x:           return ToValue(&x);
-                case short x:           return ToValue(&x);   
-                case int x:             return ToValue(&x);
-                case long x:            return ToValue(&x);
-                case byte x:            return ToValue(&x);
-                case ushort x:          return ToValue(&x);
-                case uint x:            return ToValue(&x);
-                case ulong x:           return ToValue(&x);
-                case bool x:            return ToValue(&x);
-                case float[] x:         return ToValue(x);
-                case double[] x:        return ToValue(x);
-                case sbyte[] x:         return ToValue(x);
-                case short[] x:         return ToValue(x);   
-                case int[] x:           return ToValue(x);
-                case long[] x:          return ToValue(x);
-                case byte[] x:          return ToValue(x);
-                case ushort[] x:        return ToValue(x);
-                case uint[] x:          return ToValue(x);
-                case ulong[] x:         return ToValue(x);
-                case bool[] x:          return ToValue(x);
-                case Tensor<float> x:   return ToValue(x);
-                case Tensor<double> x:  return ToValue(x);
-                case Tensor<sbyte> x:   return ToValue(x);
-                case Tensor<short> x:   return ToValue(x);
-                case Tensor<int> x:     return ToValue(x);
-                case Tensor<long> x:    return ToValue(x);
-                case Tensor<byte> x:    return ToValue(x);
-                case Tensor<ushort> x:  return ToValue(x);
-                case Tensor<uint> x:    return ToValue(x);
-                case Tensor<ulong> x:   return ToValue(x);
-                case Tensor<bool> x:    return ToValue(x);
-                case Image x:           return ToValue(x);
-                case string x:          return Function.CreateStringValue(x, out var str).Throw() == Status.Ok ? str : default;
-                case IList x:           return Function.CreateListValue(JsonConvert.SerializeObject(x), out var list).Throw() == Status.Ok ? list : default;
-                case IDictionary x:     return Function.CreateDictValue(JsonConvert.SerializeObject(x), out var dict).Throw() == Status.Ok ? dict : default;
-                case Stream stream:     return Function.CreateBinaryValue(stream.ToArray(), (int)stream.Length, ValueFlags.CopyData, out var binary).Throw() == Status.Ok ? binary : default;
-                case null:              return Function.CreateNullValue(out var nullptr).Throw() == Status.Ok ? nullptr : default; 
-                default:                throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}");
-            }
-        }
-
-        internal static unsafe object? ToObject (IntPtr value) {
-            // Null
-            value.GetValueType(out var dtype).Throw();
-            if (dtype == Dtype.Null)
-                return null;
-            // Get data and shape
-            value.GetValueData(out var data).Throw();
-            value.GetValueDimensions(out var dims).Throw();
-            var shape = new int[dims];
-            value.GetValueShape(shape, dims).Throw();
-            // Deserialize
-            switch (dtype) {
-                case Dtype.Float32: return ToObject<float>(data, shape);
-                case Dtype.Float64: return ToObject<double>(data, shape);
-                case Dtype.Int8:    return ToObject<sbyte>(data, shape);
-                case Dtype.Int16:   return ToObject<short>(data, shape);
-                case Dtype.Int32:   return ToObject<int>(data, shape);
-                case Dtype.Int64:   return ToObject<long>(data, shape);
-                case Dtype.Uint8:   return ToObject<byte>(data, shape);
-                case Dtype.Uint16:  return ToObject<ushort>(data, shape);
-                case Dtype.Uint32:  return ToObject<uint>(data, shape);
-                case Dtype.Uint64:  return ToObject<ulong>(data, shape);
-                case Dtype.Bool:    return ToObject<bool>(data, shape);
-                case Dtype.String:  return Marshal.PtrToStringUTF8(data);
-                case Dtype.List:    return JsonConvert.DeserializeObject<JArray>(Marshal.PtrToStringUTF8(data));
-                case Dtype.Dict:    return JsonConvert.DeserializeObject<JObject>(Marshal.PtrToStringUTF8(data));
-                case Dtype.Image:   return new Image(ToArray<byte>(data, shape), shape[1], shape[0], shape[2]);
-                case Dtype.Binary:  return new MemoryStream(ToArray<byte>(data, shape));
-                default:            throw new InvalidOperationException($"Cannot convert Function value to object because value type is unsupported: {dtype}");
-            }
-        }
-
-        private static Image ToImage (MemoryStream stream) { // DEPLOY
-            var data = stream.ToArray();
-            Function.CreateBinaryValue(data, data.Length, default, out var binaryValue);
-            Function.CreateDeserializedValue(binaryValue, Dtype.Image, default, out var imageValue);
-            var image = (Image)ToObject(imageValue)!;
-            binaryValue.ReleaseValue();
-            imageValue.ReleaseValue();
-            return image;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue<T> (
-            T* data,
-            int[]? shape = null,
-            ValueFlags flags = ValueFlags.CopyData
-        ) where T : unmanaged => Function.CreateArrayValue(
-            data,
-            shape,
-            shape?.Length ?? 0,
-            typeof(T).ToDtype(),
-            flags,
-            out var result
-        ).Throw() == Status.Ok ? result : default;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue<T> (T[] array) where T : unmanaged {
-            fixed (T* data = array)
-                return ToValue(data, new [] { array.Length });
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue<T> (Tensor<T> tensor) where T : unmanaged {
-            fixed (T* data = tensor)
-                return ToValue(data, tensor.shape, ValueFlags.None);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe IntPtr ToValue (Image image, bool forcePin = false) {
-            fixed (byte* data = image)
-                return Function.CreateImageValue(
-                    data,
-                    image.width,
-                    image.height,
-                    image.channels,
-                    !forcePin && image.data != null ? ValueFlags.CopyData : ValueFlags.None,
-                    out var value
-                ).Throw() == Status.Ok ? value : default;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private unsafe Task<Value> ToValue (
-            Image image,
-            string name,
-            int minUploadSize,
-            string? key
-        ) {
-            fixed (byte* data = image) {
-                var imageValue = ToValue(image, forcePin: true); // zero copy even for managed arrays
-                imageValue.CreateSerializedValue(default, out var serializedValue).Throw();
-                var stream = ToObject(serializedValue) as Stream;
-                imageValue.ReleaseValue();
-                serializedValue.ReleaseValue();
-                return ToValue(stream, name, type: Dtype.Image, minUploadSize: minUploadSize, mime: @"image/png", key: key);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static object ToObject<T> (MemoryStream stream, int[] shape) where T : unmanaged {
-            var data = stream.ToArray<T>();
-            return shape.Length > 0 ? new Tensor<T>(data, shape) : data[0];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe object ToObject<T> (IntPtr data, int[] shape) where T : unmanaged {
-            if (shape.Length == 0)
-                return *(T*)data;
-            var array = ToArray<T>(data, shape);
-            return new Tensor<T>(array, shape);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe T[] ToArray<T> (IntPtr data, int[] shape) where T : unmanaged {
-            var count = shape.Aggregate(1, (a, b) => a * b);
-            var result = new T[count];
-            fixed (void* dst = result)
-                Buffer.MemoryCopy((void*)data, dst, count * sizeof(T), count * sizeof(T));
-            return result;
-        }
-
         internal static string GetResourceName (string url) {
             var uri = new Uri(url);
             var path = uri.AbsolutePath.TrimEnd('/');            
             var name = path.Substring(path.LastIndexOf('/') + 1);
             return name;
+        }
+
+        internal static unsafe Value ToValue (object? value) => value switch {
+            Value           x => x,
+            IntPtr          x => new Value(x),
+            float           x => Value.CreateArray(x),
+            double          x => Value.CreateArray(x),
+            sbyte           x => Value.CreateArray(x),
+            short           x => Value.CreateArray(x),
+            int             x => Value.CreateArray(x),
+            long            x => Value.CreateArray(x),
+            byte            x => Value.CreateArray(x),
+            ushort          x => Value.CreateArray(x),
+            uint            x => Value.CreateArray(x),
+            ulong           x => Value.CreateArray(x),
+            bool            x => Value.CreateArray(x),
+            float[]         x => Value.CreateArray(x),
+            double[]        x => Value.CreateArray(x),
+            sbyte[]         x => Value.CreateArray(x),
+            short[]         x => Value.CreateArray(x),
+            int[]           x => Value.CreateArray(x),
+            long[]          x => Value.CreateArray(x),
+            byte[]          x => Value.CreateArray(x),
+            ushort[]        x => Value.CreateArray(x),
+            uint[]          x => Value.CreateArray(x),
+            ulong[]         x => Value.CreateArray(x),
+            bool[]          x => Value.CreateArray(x),
+            Tensor<float>   x => Value.CreateArray(x),
+            Tensor<double>  x => Value.CreateArray(x),
+            Tensor<sbyte>   x => Value.CreateArray(x),
+            Tensor<short>   x => Value.CreateArray(x),
+            Tensor<int>     x => Value.CreateArray(x),
+            Tensor<long>    x => Value.CreateArray(x),
+            Tensor<byte>    x => Value.CreateArray(x),
+            Tensor<ushort>  x => Value.CreateArray(x),
+            Tensor<uint>    x => Value.CreateArray(x),
+            Tensor<ulong>   x => Value.CreateArray(x),
+            Tensor<bool>    x => Value.CreateArray(x),
+            string          x => Value.CreateString(x),
+            Enum            x => ToValue(SerializeEnum(x)),
+            IList           x => Value.CreateList(x),
+            IDictionary     x => Value.CreateDict(x),
+            Image           x => Value.CreateImage(x),
+            Stream          x => Value.CreateBinary(x),          
+            null              => Value.CreateNull(),
+            _                 => throw new InvalidOperationException($"Cannot create a Function value from value '{value}' of type {value.GetType()}"),
+        };
+
+        private static ValueMap ToValueMap (Dictionary<string, object?> inputs) {
+            var map = new ValueMap();
+            foreach (var pair in inputs)
+                map[pair.Key] = ToValue(pair.Value);
+            return map;
+        }
+
+        private static Prediction ToPrediction (string tag, C.Prediction prediction) {
+            var outputMap = prediction.results;
+            return new Prediction {
+                id = prediction.id,
+                tag = tag,
+                created = DateTime.UtcNow,
+                results = outputMap != null ? Enumerable.Range(0, outputMap.size)
+                    .Select(outputMap.GetKey)
+                    .Select(outputMap.GetValue)
+                    .Select(value => value.ToObject())
+                    .ToArray() : null,
+                latency = prediction.latency,
+                error = prediction.error,
+                logs = prediction.logs,
+            };
         }
 
         private static object SerializeEnum (Enum value) {

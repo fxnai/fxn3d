@@ -6,14 +6,11 @@
 namespace Function.Types {
 
     using System;
-    using System.Runtime.Serialization;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
 
     /// <summary>
     /// Predictor acceleration.
     /// </summary>
-    [Flags, JsonConverter(typeof(StringEnumConverter))]
+    [Flags]
     public enum Acceleration : int {
         /// <summary>
         /// Use the default acceleration for the given platform.
@@ -35,15 +32,5 @@ namespace Function.Types {
         /// This is only valid for `EDGE` predictors.
         /// </summary>
         NPU = 1 << 2,
-        /// <summary>
-        /// Predictions run on an Nvidia A40 GPU.
-        /// This is only valid for `CLOUD` predictors.
-        /// </summary>
-        A40 = 1 << 12,
-        /// <summary>
-        /// Predictions run on an Nvidia A100 GPU.
-        /// This is only valid for `CLOUD` predictors.
-        /// </summary>
-        A100 = 1 << 13,
     }
 }

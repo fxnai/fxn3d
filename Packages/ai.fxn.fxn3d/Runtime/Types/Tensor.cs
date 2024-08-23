@@ -7,8 +7,6 @@
 
 namespace Function.Types {
 
-    using Internal;
-
     /// <summary>
     /// Tensor.
     /// </summary>

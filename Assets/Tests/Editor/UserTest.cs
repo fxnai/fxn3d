@@ -8,7 +8,6 @@ namespace Function.Tests {
     using System.Threading.Tasks;
     using NUnit.Framework;
     using UnityEngine.TestTools;
-    using Types;
 
     internal sealed class UserTest {
 
@@ -22,14 +21,6 @@ namespace Function.Tests {
             var username = "natml";
             var user = await fxn.Users.Retrieve();
             Assert.AreEqual(username, user?.username);
-            Assert.IsNotNull(user?.email);
-        }
-
-        [Test(Description = @"Should retrieve a user profile")]
-        public async Task ViewProfile () {
-            var username = "natsuite";
-            var profile = await fxn.Users.Retrieve(username);
-            Assert.AreEqual(username, profile?.username);
         }
     }
 }

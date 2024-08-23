@@ -1,6 +1,6 @@
 {
     "name": "ai.fxn.fxn3d",
-    "version": "0.0.26",
+    "version": "0.0.27",
     "displayName": "Function",
     "description": "Run AI prediction functions in Unity Engine.",
     "unity": "2022.3",
@@ -26,8 +26,7 @@
         "tensorflow",
         "pytorch",
         "torch",
-        "natdevice",
-        "natcorder"
+        "llm"
     ],
     "author": {
         "name": "NatML Inc",

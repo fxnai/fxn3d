@@ -11,7 +11,6 @@ namespace Function.API {
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using Internal;
 
     /// <summary>
     /// Function API client.
@@ -34,21 +33,6 @@ namespace Function.API {
         /// <param name="headers">Request headers.</param>
         /// <returns>Deserialized response.</returns>
         public abstract Task<T?> Request<T> (
-            string method,
-            string path,
-            object? payload = default,
-            Dictionary<string, string>? headers = default
-        ) where T : class;
-
-        /// <summary>
-        /// Make a request to a REST endpoint and consume the response as a stream.
-        /// </summary>
-        /// <typeparam name="T">Deserialized response type.</typeparam>
-        /// <param name="path">Endpoint path.</param>
-        /// <param name="payload">Request body.</param>
-        /// <param name="headers">Request headers.</param>
-        /// <returns>Stream of deserialized responses.</returns>
-        public abstract IAsyncEnumerable<T?> Stream<T> (
             string method,
             string path,
             object? payload = default,
