@@ -30,38 +30,30 @@ def _get_latest_version () -> str:
     release = response.json()
     return release["tag_name"]
 
-def main (): # CHECK # Linux
+def main (): # CHECK # Linux # Android AAR
     args = parser.parse_args()
     version = args.version if args.version else _get_latest_version()
     LIB_PATH_BASE = Path("Packages") / "ai.fxn.fxn3d" / "Plugins"
     LIBS = [
         {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/libFunction-android-arm64-v8a.so",
-            "path": LIB_PATH_BASE / "Android" / "arm64-v8a" / "libFunction.so"
-        },
-        {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/libFunction-android-armeabi-v7a.so",
-            "path": LIB_PATH_BASE / "Android" / "armeabi-v7a" / "libFunction.so"
-        },
-        {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/libFunction-android-x86.so",
-            "path": LIB_PATH_BASE / "Android" / "x86" / "libFunction.so"
-        },
-        {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/libFunction-android-x86_64.so",
-            "path": LIB_PATH_BASE / "Android" / "x86_64" / "libFunction.so"
-        },
-        {
             "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-ios-iphoneos.framework.zip",
             "path": LIB_PATH_BASE / "iOS" / "Function.framework.zip"
         },
         {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-macos.dylib",
-            "path": LIB_PATH_BASE / "macOS" / "Function.dylib"
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-macos-x86_64.dylib",
+            "path": LIB_PATH_BASE / "macOS" / "x86_64" / "Function.dylib"
         },
         {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-x64.dll",
-            "path": LIB_PATH_BASE / "Windows" / "Function.dll"
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-macos-arm64.dylib",
+            "path": LIB_PATH_BASE / "macOS" / "arm64" / "Function.dylib"
+        },
+        {
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-win-x86_64.dll",
+            "path": LIB_PATH_BASE / "Windows" / "x86_64" / "Function.dll"
+        },
+        {
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-win-arm64.dll",
+            "path": LIB_PATH_BASE / "Windows" / "arm64" / "Function.dll"
         },
     ]
     for lib in LIBS:
