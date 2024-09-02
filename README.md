@@ -4,7 +4,10 @@
 
 [![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2Fy5vwgXkz2f%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&label=Function%20community)](https://fxn.ai/community)
 
-Run Python functions (a.k.a "predictors") locally in your Unity apps and games, with full GPU acceleration and zero dependencies. In a few steps:
+Run Python functions (a.k.a "predictors") locally in your Unity apps and games, with full GPU acceleration and zero dependencies.
+
+> [!TIP]
+> [Join our waitlist](https://fxn.ai/waitlist) to bring your custom Python functions and run them on-device across Android, iOS, macOS, Linux, web, and Windows.
 
 ## Installing Function
 Add the following items to your Unity project's `Packages/manifest.json`:
@@ -54,9 +57,6 @@ var prediction = await fxn.Predictions.Create(
 // Log the result
 Debug.Log(prediction.results[0]);
 ```
-
-> [!TIP]
-> Explore public predictors [on Function](https://fxn.ai/explore) or [create your own](https://fxn.ai/waitlist).
 
 ___
 
