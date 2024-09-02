@@ -1,5 +1,5 @@
 ## 0.0.28
-*INCOMPLETE*
++ Fixed predictions failing on Android due to predictor embedding error at build time.
 
 ## 0.0.27
 + Updated to Function C 0.0.27.

@@ -77,7 +77,7 @@ namespace Function.Editor.Build {
                 var resources = cachedPrediction.prediction.resources.Where(res => res.type == @"dso");
                 foreach (var resource in resources) {
                     var libName = !string.IsNullOrEmpty(resource.name) ? resource.name : PredictionService.GetResourceName(resource.url);
-                    var path = Path.Combine(libDir, libName);
+                    var path = Path.ChangeExtension(Path.Combine(libDir, libName), @".so");
                     using var dsoStream = Task.Run(async () => await client.Download(resource.url)).Result;
                     using var fileStream = File.Create(path);
                     dsoStream.CopyTo(fileStream);
