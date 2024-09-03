@@ -1,3 +1,6 @@
+## 0.0.29
+*INCOMPLETE*
+
 ## 0.0.28
 + Fixed predictions failing on Android due to predictor embedding error at build time.
 
