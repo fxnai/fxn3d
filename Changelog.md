@@ -1,3 +1,6 @@
+## 0.0.30
+*INCOMPLETE*
+
 ## 0.0.29
 + Fixed Android build errors caused by C++ STL in Unity 2023 and Unity 6 (#5).
 
