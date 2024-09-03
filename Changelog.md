@@ -1,5 +1,5 @@
 ## 0.0.29
-*INCOMPLETE*
++ Fixed Android build errors caused by C++ STL in Unity 2023 and Unity 6 (#5).
 
 ## 0.0.28
 + Fixed predictions failing on Android due to predictor embedding error at build time.

@@ -3,6 +3,7 @@ Library/
 Temp/
 obj/
 Logs/
+.utmp/
 
 # Function
 ProjectSettings/Function.asset
