@@ -1,5 +1,5 @@
 ## 0.0.30
-*INCOMPLETE*
++ Function now requires Unity 2022.3+
 
 ## 0.0.29
 + Fixed Android build errors caused by C++ STL in Unity 2023 and Unity 6 (#5).
