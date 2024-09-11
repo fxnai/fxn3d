@@ -66,7 +66,7 @@ ___
 ## Supported Platforms
 - Android API Level 24+
 - iOS 14+
-- macOS 10.15+ (Apple Silicon and Intel)
+- macOS 12+ (Apple Silicon and Intel)
 - Windows 10+ (64-bit only)
 - WebGL:
   - Chrome 91+
