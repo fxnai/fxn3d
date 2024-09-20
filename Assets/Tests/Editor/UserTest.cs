@@ -14,13 +14,12 @@ namespace Function.Tests {
         private Function fxn;
 
         [SetUp]
-        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
+        public void Before () => fxn = FunctionUnity.Create();
 
         [Test(Description = @"Should retrieve the current user")]
         public async Task RetrieveUser () {
-            var username = "natml";
             var user = await fxn.Users.Retrieve();
-            Assert.AreEqual(username, user?.username);
+            Assert.AreEqual(@"yusuf", user?.username);
         }
     }
 }

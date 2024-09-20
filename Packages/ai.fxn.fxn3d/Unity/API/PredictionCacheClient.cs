@@ -7,12 +7,9 @@
 
 namespace Function.API {
 
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-    using UnityEngine;
     using Types;
     using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
@@ -45,42 +42,26 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request body.</param>
         /// <returns>Deserialized response.</returns>
-        public override async Task<T?> Request<T> (
+        public override async Task<T?> Request<T> ( // DEPLOY
             string method,
             string path,
-            object? payload = default,
+            Dictionary<string, object?>? payload = default,
             Dictionary<string, string>? headers = default
         ) where T : class {
-            path = path.TrimStart('/');
             // Check prediction
-            if (!path.StartsWith(@"predict"))
-                return await base.Request<T>(method, path, payload: payload, headers: headers);
-            // Check tag
-            var uri = new Uri($"{url}/{path}");
-            var match = Regex.Match(uri.AbsolutePath, @".*(@[a-z1-9-]+\/[a-z1-9-]+).*");
-            if (!match.Success)
-                return await base.Request<T>(method, path, payload: payload, headers: headers);
-            // Get cached prediction
-            var tag = match.Groups[1].Value;
-            var platform = headers != null && headers.TryGetValue(@"fxn-client", out var p) ? p : null;
-            var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.platform == platform);
+            if (path != @"/predictions" || payload == null)
+                return await base.Request<T>(method, path, payload, headers);
+            // Check for cached prediction
+            var tag = payload.TryGetValue(@"tag", out var t)  ? t as string : null;
+            var clientId = payload.TryGetValue(@"clientId", out var id) ? id as string : null; 
+            var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.platform == clientId);
             if (cachedPrediction == null)
-                return await base.Request<T>(method, path, payload: payload, headers: headers);
+                return await base.Request<T>(method, path, payload, headers);
             // Predict
-            var cachedToken = GetPredictionToken(cachedPrediction.prediction);
-            if (cachedToken != null)
-                headers?.Remove(@"fxn-configuration-token");
-            var prediction = await base.Request<Prediction>(
-                method,
-                $"{path}{(path.Contains('?') ? '&' : '?')}partialPrediction={cachedPrediction.prediction.id}",
-                payload: payload,
-                headers: headers
-            );
-            // Save to cache
-            if (prediction!.configuration != null)
-                SavePredictionToken(cachedPrediction.prediction, prediction.configuration);
-            else
-                prediction.configuration = cachedToken;
+            payload = new Dictionary<string, object?>(payload) {
+                [@"predictionId"] = cachedPrediction.prediction.id
+            };
+            var prediction = await base.Request<Prediction>(method, path, payload, headers);
             // Return
             return prediction as T;
         }
@@ -89,18 +70,6 @@ namespace Function.API {
 
         #region --Operations--
         private readonly List<CachedPrediction> cache;
-
-        private string? GetPredictionToken (Prediction prediction) {
-            var key = GetCacheKey(prediction);
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null;
-        }
-
-        private void SavePredictionToken (Prediction prediction, string token) => PlayerPrefs.SetString(
-            GetCacheKey(prediction),
-            token
-        );
-
-        private string GetCacheKey (Prediction prediction) => $"ai.fxn.fxn3d.predictions.{prediction.id}";
         #endregion
     }
 }

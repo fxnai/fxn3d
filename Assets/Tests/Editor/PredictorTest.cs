@@ -15,11 +15,11 @@ namespace Function.Tests {
         private Function fxn;
 
         [SetUp]
-        public void Before () => fxn = FunctionUnity.Create(url: @"https://api.fxn.dev");
+        public void Before () => fxn = FunctionUnity.Create();
 
         [Test(Description = @"Should retrieve a valid predictor")]
         public async Task RetrievePredictor () {
-            var tag = "@natml/identity";
+            var tag = "@fxn/greeting";
             var predictor = await fxn.Predictors.Retrieve(tag);
             Assert.AreEqual(tag, predictor?.tag);
             Assert.AreEqual(PredictorStatus.Active, predictor?.status);

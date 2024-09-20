@@ -35,20 +35,8 @@ namespace Function.API {
         public abstract Task<T?> Request<T> (
             string method,
             string path,
-            object? payload = default,
+            Dictionary<string, object?>? payload = default,
             Dictionary<string, string>? headers = default
-        ) where T : class;
-
-        /// <summary>
-        /// Query the Function graph API.
-        /// </summary>
-        /// <typeparam name="T">Deserialized response type.</typeparam>
-        /// <param name="query">Graph query.</param>
-        /// <param name="input">Query inputs.</param>
-        /// <returns>Deserialized query result.</returns>
-        public abstract Task<T?> Query<T> (
-            string query,
-            Dictionary<string, object?>? variables = default
         ) where T : class;
 
         /// <summary>
@@ -78,23 +66,6 @@ namespace Function.API {
             this.accessKey = accessKey;
         }
         #endregion
-    }
-
-    /// <summary>
-    /// Function graph API request.
-    /// </summary>
-    [Preserve]
-    public sealed class GraphRequest {
-        public string query = string.Empty;
-        public Dictionary<string, object?>? variables;
-    }
-
-    /// <summary>
-    /// Function graph API response.
-    /// </summary>
-    [Preserve]
-    public sealed class GraphResponse<T> {
-        public T? data;
     }
 
     /// <summary>

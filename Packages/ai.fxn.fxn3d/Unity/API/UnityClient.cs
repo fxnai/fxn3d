@@ -45,12 +45,11 @@ namespace Function.API {
         public override async Task<T?> Request<T> (
             string method,
             string path,
-            object? payload = default,
+            Dictionary<string, object?>? payload = default,
             Dictionary<string, string>? headers = default
         ) where T : class {
-            path = path.TrimStart('/');
             // Create client
-            using var client = new UnityWebRequest($"{this.url}/{path}", method) {
+            using var client = new UnityWebRequest($"{this.url}{path}", method) {
                 downloadHandler = new DownloadHandlerBuffer(),
                 disposeDownloadHandlerOnDispose = true,
                 disposeUploadHandlerOnDispose = true,
@@ -78,28 +77,10 @@ namespace Function.API {
             if (client.responseCode >= 400) {
                 var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
                 var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
-                throw new InvalidOperationException(error);
+                throw new FunctionAPIException(error, (int)client.responseCode);
             }
             // Return
             return JsonConvert.DeserializeObject<T>(responseStr)!;
-        }
-
-        /// <summary>
-        /// Query the Function graph API.
-        /// </summary>
-        /// <param name="query">Graph query.</param>
-        /// <param name="key">Query result key.</param>
-        /// <param name="input">Query inputs.</param>
-        public override async Task<T?> Query<T> (
-            string query,
-            Dictionary<string, object?>? variables = default
-        ) where T : class {
-            var response = await Request<GraphResponse<T>>(
-                @"POST",
-                @"/graph",
-                new GraphRequest { query = query, variables = variables }
-            );
-            return response?.data;
         }
 
         /// <summary>

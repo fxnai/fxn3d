@@ -40,11 +40,6 @@ namespace Function.Types {
         public PredictorStatus status;
 
         /// <summary>
-        /// Number of predictions made with this predictor.
-        /// </summary>
-        public int predictions;
-
-        /// <summary>
         /// Date created.
         /// </summary>
         [JsonConverter(typeof(IsoDateTimeConverter))]

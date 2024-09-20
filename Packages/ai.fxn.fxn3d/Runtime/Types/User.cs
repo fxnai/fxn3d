@@ -9,7 +9,6 @@
 namespace Function.Types {
 
     using System;
-    using C;
 
     /// <summary>
     /// Function user.

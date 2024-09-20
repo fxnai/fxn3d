@@ -14,47 +14,31 @@ namespace Function.Services {
     /// <summary>
     /// Manage users.
     /// </summary>
-    public sealed class UserService {
+    public sealed class UserService { // DEPLOY
 
         #region --Client API--
         /// <summary>
         /// Retrieve the current user.
         /// </summary>
         public async Task<User?> Retrieve () {
-            var response = await client.Query<UserResponse>(
-                @$"query ($input: UserInput) {{
-                    user (input: $input) {{
-                        {ProfileFields}
-                    }}
-                }}"
-            );
-            return response!.user;
+            try {
+                return await client.Request<User>(
+                    method: @"GET",
+                    path: @"/users"
+                );
+            } catch (FunctionAPIException ex) {
+                if (ex.status == 401)
+                    return null;
+                throw;
+            }
         }
         #endregion
 
 
         #region --Operations--
         private readonly FunctionClient client;
-        private const string ProfileFields = @"
-        username
-        created
-        name
-        avatar
-        bio
-        website
-        github
-        ";
 
         internal UserService (FunctionClient client) => this.client = client;
-        #endregion
-
-
-        #region --Types--
-
-        private sealed class UserResponse {
-            public User? user;
-            [Preserve] public UserResponse () { }
-        }
         #endregion
     }
 }

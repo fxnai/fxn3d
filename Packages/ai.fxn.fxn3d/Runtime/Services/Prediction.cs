@@ -109,12 +109,12 @@ namespace Function.Services {
             string? clientId = default,
             string? configurationId = default
         ) => fxn.Request<Prediction>(
-            @"POST",
-            $"/predict/{tag}",
-            null,
-            new () {
-                [@"fxn-client"] = clientId ?? Configuration.ClientId,
-                [@"fxn-configuration-token"] = configurationId ?? Configuration.ConfigurationId,
+            method: @"POST",
+            path: $"/predictions",
+            payload: new () {
+                [@"tag"] = tag,
+                [@"clientId"] = clientId ?? Configuration.ClientId,
+                [@"configurationId"] = configurationId ?? Configuration.ConfigurationId,
             }
         )!;
 
