@@ -53,7 +53,7 @@ Debug.Log(prediction.results[0]);
 ___
 
 ## Requirements
-- Unity 2021.3+
+- Unity 2022.3+
 
 ## Supported Platforms
 - Android API Level 24+

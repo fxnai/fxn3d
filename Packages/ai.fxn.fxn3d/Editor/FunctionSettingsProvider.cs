@@ -14,8 +14,12 @@ namespace Function.Editor {
         public static SettingsProvider CreateProvider () => new SettingsProvider(@"Project/Function", SettingsScope.Project) {
             label = @"Function",
             guiHandler = searchContext => {
+                var settings = FunctionProjectSettings.instance;
+                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.LabelField(@"Function Account", EditorStyles.boldLabel);
-                FunctionProjectSettings.instance.AccessKey = EditorGUILayout.TextField(@"Access Key", FunctionProjectSettings.instance.AccessKey);
+                settings.accessKey = EditorGUILayout.TextField(@"Access Key", settings.accessKey);
+                if (EditorGUI.EndChangeCheck())
+                    settings.Save();
             },
             keywords = new HashSet<string>(new[] { @"Function", @"NatML" }),
         };

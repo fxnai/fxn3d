@@ -1,12 +1,10 @@
 # Unity
 Library/
 Temp/
+UserSettings/
 obj/
 Logs/
 .utmp/
-
-# Function
-ProjectSettings/Function.asset
 
 # IDE
 .vscode/

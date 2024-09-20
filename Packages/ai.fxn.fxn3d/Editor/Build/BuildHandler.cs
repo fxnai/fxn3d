@@ -42,7 +42,7 @@ namespace Function.Editor.Build {
                 .Cast<EmbedAttribute>()
                 .Select(embed => new Embed {
                     url = FunctionClient.URL,
-                    accessKey = FunctionProjectSettings.instance.AccessKey,
+                    accessKey = FunctionProjectSettings.instance.accessKey,
                     tags = embed.tags
                 })
                 .ToArray();

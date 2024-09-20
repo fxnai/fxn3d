@@ -13,36 +13,16 @@ namespace Function.Editor {
     /// Function settings for the current Unity project.
     /// </summary>
     [FilePath(@"UserSettings/Function.asset", FilePathAttribute.Location.ProjectFolder)]
-    public sealed class FunctionProjectSettings : ScriptableSingleton<FunctionProjectSettings> {
-
-        #region --Data--
-        [SerializeField]
-        private string accessKey;
-        #endregion
-
+    internal sealed class FunctionProjectSettings : ScriptableSingleton<FunctionProjectSettings> {
 
         #region --Client API--
-        /// <summary>
-        /// Function access key.
-        /// </summary>
-        internal string AccessKey {
-            get => accessKey;
-            set {
-                // Check
-                if (value == accessKey)
-                    return;
-                // Update
-                accessKey = value;
-                Save(false);
-            }
-        }
+        public string accessKey;
+        
+        public void Save () => Save(false);
 
-        /// <summary>
-        /// Create Function settings from the current project settings.
-        /// </summary>
-        internal static FunctionSettings CreateSettings () {
+        public static FunctionSettings CreateSettings () {
             var settings = ScriptableObject.CreateInstance<FunctionSettings>();
-            settings.accessKey = instance.AccessKey;
+            settings.accessKey = instance.accessKey;
             return settings;
         }
         #endregion

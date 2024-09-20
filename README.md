@@ -36,7 +36,7 @@ Then add it to your Unity project in `Project Settings > Function`:
 ![add access key to Unity](settings.gif)
 
 > [!CAUTION]
-> If your Unity project is open-source, make sure to add `ProjectSettings/Function.asset` to your `.gitignore` file to keep your Function access key private.
+> If your Unity project is open-source, make sure to add `UserSettings/` to your `.gitignore` file to keep your Function access key private.
 
 ## Making a Prediction
 First, create a Function client:
