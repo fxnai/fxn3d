@@ -58,8 +58,6 @@ var prediction = await fxn.Predictions.Create(
 Debug.Log(prediction.results[0]);
 ```
 
-___
-
 ## Requirements
 - Unity 2022.3+
 
