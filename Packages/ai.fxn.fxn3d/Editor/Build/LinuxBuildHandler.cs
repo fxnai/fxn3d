@@ -14,10 +14,8 @@ namespace Function.Editor.Build {
         protected override BuildTarget target => BuildTarget.StandaloneLinux64;
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
-            // Create settings
             var projectSettings = FunctionProjectSettings.instance;
             var settings = FunctionSettings.Create(projectSettings.accessKey);
-            // Return
             return settings;
         }
     }

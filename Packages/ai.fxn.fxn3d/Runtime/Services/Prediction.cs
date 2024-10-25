@@ -125,10 +125,8 @@ namespace Function.Services {
             string? clientId = default,
             string? configurationId = default
         ) {
-            // Check cache
             if (cache.TryGetValue(tag, out var p))
                 return p;
-            // Create configuration
             var prediction = await CreateRawPrediction(tag, clientId, configurationId);
             using var configuration = new Configuration() {
                 tag = prediction.tag,
@@ -139,35 +137,34 @@ namespace Function.Services {
             foreach (var resource in prediction.resources!)
                 await configuration.AddResource(
                     resource.type,
-                    await GetResourcePath(resource)
+                    await DownloadResource(resource)
                 );
-            // Cache
             var predictor = new C.Predictor(configuration);
             cache.Add(tag, predictor);
-            // Return
             return predictor;
         }
 
-        private async Task<string> GetResourcePath (PredictionResource resource) {
-            // Check cache
-            Directory.CreateDirectory(cachePath);
-            var name = !string.IsNullOrEmpty(resource.name) ? resource.name : GetResourceName(resource.url);
-            var path = Path.Combine(cachePath, name);
+        private async Task<string> DownloadResource (PredictionResource resource) {
+            var uri = new Uri(resource.url);
+            if (uri.IsFile)
+                return uri.LocalPath;
+            var path = GetResourcePath(resource, cachePath);
             if (File.Exists(path))
                 return path;
-            // Download
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
             using var dataStream = await fxn.Download(resource.url);
             using var fileStream = File.Create(path);
             dataStream.CopyTo(fileStream); // CHECK // Async usage
-            // Return
             return path;
         }
 
-        internal static string GetResourceName (string url) {
-            var uri = new Uri(url);
-            var path = uri.AbsolutePath.TrimEnd('/');            
-            var name = path.Substring(path.LastIndexOf('/') + 1);
-            return name;
+        internal static string GetResourcePath (PredictionResource resource, string cacheDir) {
+            var uri = new Uri(resource.url);
+            var stem = Path.GetFileName(uri.AbsolutePath);
+            var path = string.IsNullOrEmpty(resource.name) ?
+                Path.Combine(cacheDir, stem) :
+                Path.Combine(cacheDir, stem, resource.name);
+            return path;
         }
 
         internal static unsafe Value ToValue (object? value) => value switch {

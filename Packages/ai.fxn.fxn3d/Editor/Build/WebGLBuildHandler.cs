@@ -25,19 +25,15 @@ namespace Function.Editor.Build {
         };
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
-            // Patch config
             var configPath = Path.Combine(GetEmscriptenPath(), @"tools", @"config.py");
             if (File.Exists(configPath)) {
                 var config = File.ReadAllText(configPath).TrimEnd();
                 if (!Regex.IsMatch(config, @"FROZEN_CACHE\s*=\s*False\s*$", RegexOptions.Multiline))
                     File.WriteAllText(configPath, config + "\nFROZEN_CACHE = False");
             }
-            // Set Emscripten args
             PlayerSettings.WebGL.emscriptenArgs = GetEmscriptenArgs();
-            // Create settings
             var projectSettings = FunctionProjectSettings.instance;
             var settings = FunctionSettings.Create(projectSettings.accessKey);
-            // Return
             return settings;
         }
 

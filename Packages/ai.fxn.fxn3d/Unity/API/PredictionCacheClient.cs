@@ -7,11 +7,14 @@
 
 namespace Function.API {
 
+    using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Services;
     using Types;
-    using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
+    using UnityEngine;
 
     /// <summary>
     /// Function API client for Unity Engine.
@@ -19,6 +22,20 @@ namespace Function.API {
     /// Furthermore, this handles partial prediction caching for edge predictors.
     /// </summary>
     internal sealed class PredictionCacheClient : UnityClient {
+
+        #region --Types--
+        /// <summary>
+        /// Cached prediction.
+        /// </summary>
+        [Serializable, Preserve]
+        public sealed class CachedPrediction {
+            #pragma warning disable 8618
+            public string clientId;
+            public Prediction prediction;
+            #pragma warning restore 8618
+        }
+        #endregion
+
 
         #region --Client API--
         /// <summary>
@@ -48,28 +65,63 @@ namespace Function.API {
             Dictionary<string, object?>? payload = default,
             Dictionary<string, string>? headers = default
         ) where T : class {
-            // Check prediction
             if (path != @"/predictions" || payload == null)
                 return await base.Request<T>(method, path, payload, headers);
-            // Check for cached prediction
-            var tag = payload.TryGetValue(@"tag", out var t)  ? t as string : null;
-            var clientId = payload.TryGetValue(@"clientId", out var id) ? id as string : null; 
-            var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.platform == clientId);
-            if (cachedPrediction == null)
-                return await base.Request<T>(method, path, payload, headers);
-            // Predict
-            payload = new Dictionary<string, object?>(payload) {
-                [@"predictionId"] = cachedPrediction.prediction.id
-            };
-            var prediction = await base.Request<Prediction>(method, path, payload, headers);
-            // Return
-            return prediction as T;
+            if (TryLoadPredictionFromCache(payload, out var pred))
+                return pred as T;
+            return await CreatePredictionAndCache(payload) as T;
         }
         #endregion
 
 
         #region --Operations--
         private readonly List<CachedPrediction> cache;
+
+        private bool TryLoadPredictionFromCache (
+            Dictionary<string, object?> payload,
+            out Prediction? prediction
+        ) {
+            prediction = null;
+            var tag = payload.TryGetValue(@"tag", out var t) ? t as string : null;
+            var clientId = payload.TryGetValue(@"clientId", out var id) ? id as string : null; 
+            var entry = cache.FirstOrDefault(p => p.prediction.tag == tag && p.clientId == clientId);
+            if (entry == null)
+                return false;
+            var @partial = entry.prediction;
+            var configuration = PlayerPrefs.GetString(@partial.id, @"");
+            if (string.IsNullOrEmpty(configuration))
+                return false;
+            var resources = @partial.resources.Select(res => new PredictionResource {
+                type = res.type,
+                url = $"file://{PredictionService.GetResourcePath(res, FunctionUnity.CachePath)}"
+            }).ToArray();
+            if (resources.Any(res => !File.Exists(new Uri(res.url).LocalPath)))
+                return false;
+            prediction = new Prediction {
+                id = @partial.id,
+                tag = @partial.tag,
+                created = @partial.created,
+                resources = resources,
+                configuration = configuration
+            };
+            return true;
+        }
+
+        private async Task<Prediction> CreatePredictionAndCache (Dictionary<string, object?> payload) { // INCOMPLETE
+            return null;
+
+
+            /*
+            var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.clientId == clientId);
+            if (cachedPrediction == null)
+                return await base.Request<T>(method, path, payload, headers);
+            payload = new Dictionary<string, object?>(payload) {
+                [@"predictionId"] = cachedPrediction.prediction.id
+            };
+            var prediction = await base.Request<Prediction>(method, path, payload, headers);
+            return prediction as T;
+            */
+        }
         #endregion
     }
 }

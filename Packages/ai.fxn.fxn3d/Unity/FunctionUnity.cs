@@ -53,14 +53,14 @@ namespace Function {
         /// <param name="texture">Input texture.</param>
         /// <param name="pixelBuffer">Pixel buffer to store image data. Use this to prevent allocations.</param>
         /// <returns>Image.</returns>
-        public static unsafe Image ToImage (this Texture2D texture, byte[]? pixelBuffer = null) {
-            // Check texture
+        public static unsafe Image ToImage (
+            this Texture2D texture,
+            byte[]? pixelBuffer = null
+        ) {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
-            // Check
             if (!texture.isReadable)
                 throw new InvalidOperationException(@"Texture cannot be converted to a Function image because it is not readable");
-            // Check format
             var FormatChannelMap = new Dictionary<TextureFormat, int> {
                 [TextureFormat.R8] = 1,
                 [TextureFormat.Alpha8] = 1,
@@ -69,13 +69,11 @@ namespace Function {
             };
             if (!FormatChannelMap.TryGetValue(texture.format, out var channels))
                 throw new InvalidOperationException($"Texture cannot be converted to a Function image because it has unsupported format: {texture.format}");
-            // Check buffer
             var rowStride = texture.width * channels;
             var bufferSize = rowStride * texture.height;
             pixelBuffer ??= new byte[bufferSize];
             if (pixelBuffer.Length != bufferSize)
                 throw new InvalidOperationException($"Texture cannot be converted to a Function image because pixel buffer length was expected to be {bufferSize} but got {pixelBuffer.Length}");
-            // Flip vertical
             fixed (void* dst = pixelBuffer)
                 UnsafeUtility.MemCpyStride(
                     dst,
@@ -85,14 +83,7 @@ namespace Function {
                     rowStride,
                     texture.height
                 );
-            // Create image
-            var image = new Image(
-                pixelBuffer,
-                texture.width,
-                texture.height,
-                channels
-            );
-            // Return
+            var image = new Image(pixelBuffer, texture.width, texture.height, channels);
             return image;
         }
 
@@ -102,8 +93,10 @@ namespace Function {
         /// <param name="value">Image.</param>
         /// <param name="texture">Optional destination texture.</param>
         /// <returns>Texture.</returns>
-        public static unsafe Texture2D ToTexture (this Image image, Texture2D? texture = null) {
-            // Check channels
+        public static unsafe Texture2D ToTexture (
+            this Image image,
+            Texture2D? texture = null
+        ) {
             var ChannelFormatMap = new Dictionary<int, TextureFormat> {
                 [1] = TextureFormat.Alpha8,
                 [3] = TextureFormat.RGB24,
@@ -111,11 +104,9 @@ namespace Function {
             };
             if (!ChannelFormatMap.TryGetValue(image.channels, out var format))
                 throw new InvalidOperationException($"Image cannot be converted to a Texture2D because it has unsupported channel count: {image.channels}");
-            // Create texture
             texture = texture != null ? texture : new Texture2D(image.width, image.height, format, false);
             if (texture.width != image.width || texture.height != image.height || texture.format != format)
                 texture.Reinitialize(image.width, image.height, format, false);
-            // Copy data
             var rowStride = image.width * image.channels;
             fixed (byte* srcData = image)
                 UnsafeUtility.MemCpyStride(
@@ -126,9 +117,7 @@ namespace Function {
                     rowStride,
                     image.height
                 );
-            // Apply
             texture.Apply();
-            // Return
             return texture;
         }
 
@@ -139,28 +128,21 @@ namespace Function {
         /// <param name="relativePath">Relative path to target file in `StreamingAssets` folder.</param>
         /// <returns>Absolute path to file or `null` if the file cannot be found.</returns>
         public static async Task<string?> StreamingAssetsToAbsolutePath (string relativePath) {
-            // Check persistent
             var fullPath = Path.Combine(Application.streamingAssetsPath, relativePath);
-            // Handle other platform
             if (Application.platform != RuntimePlatform.Android)
                 return File.Exists(fullPath) ? fullPath : null;
-            // Check persistent
             var persistentPath = Path.Combine(Application.persistentDataPath, relativePath);
             if (File.Exists(persistentPath))
                 return persistentPath;
-            // Create directories
             var directory = Path.GetDirectoryName(persistentPath);
             Directory.CreateDirectory(directory);
-            // Download from APK/AAB
             using var request = UnityWebRequest.Get(fullPath);
             request.SendWebRequest();
             while (!request.isDone)
                 await Task.Yield();
             if (request.result != UnityWebRequest.Result.Success)
                 return null;
-            // Copy
             File.WriteAllBytes(persistentPath, request.downloadHandler.data);
-            // Return
             return persistentPath;
         }
         #endregion

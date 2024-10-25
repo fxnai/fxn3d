@@ -7,30 +7,15 @@
 
 namespace Function.Internal {
 
-    using System;
     using System.Collections.Generic;
     using UnityEngine;
-    using Types;
+    using CachedPrediction = API.PredictionCacheClient.CachedPrediction;
 
     /// <summary>
     /// Function settings for the current Unity project.
     /// </summary>
     [DefaultExecutionOrder(int.MinValue)]
     internal sealed class FunctionSettings : ScriptableObject {
-
-        #region --Types--
-        /// <summary>
-        /// Cached prediction.
-        /// </summary>
-        [Serializable, Preserve]
-        public sealed class CachedPrediction {
-            #pragma warning disable 8618
-            public string platform;
-            public Prediction prediction;
-            #pragma warning restore 8618
-        }
-        #endregion
-
 
         #region --Client API--
         /// <summary>

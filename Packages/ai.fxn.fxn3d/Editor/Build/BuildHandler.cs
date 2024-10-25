@@ -69,26 +69,18 @@ namespace Function.Editor.Build {
         protected const string CachePath = @"Assets/__FXN_DELETE_THIS__";
 
         void IPreprocessBuildWithReport.OnPreprocessBuild (BuildReport report) {
-            // Check target
             if (report.summary.platform != target)
                 return;
-            // Create settings
             var settings = CreateSettings(report);
-            // Register failure listener
             EditorApplication.update += FailureListener;
-            // Clear settings
             ClearSettings();
-            // Embed settings
             EmbedSettings(settings);
         }
 
         private void FailureListener () {
-            // Check that we're done building
             if (BuildPipeline.isBuildingPlayer)
                 return;
-            // Clear
             ClearSettings();
-            // Stop listening
             EditorApplication.update -= FailureListener;
         }
         #endregion
@@ -97,10 +89,8 @@ namespace Function.Editor.Build {
         #region --Utilities--
 
         private static void EmbedSettings (FunctionSettings settings) {
-            // Create asset
             Directory.CreateDirectory(CachePath);
             AssetDatabase.CreateAsset(settings, $"{CachePath}/Function.asset");
-            // Add to build
             var assets = PlayerSettings.GetPreloadedAssets()?.ToList() ?? new List<UnityEngine.Object>();
             assets.Add(settings);
             PlayerSettings.SetPreloadedAssets(assets.ToArray());

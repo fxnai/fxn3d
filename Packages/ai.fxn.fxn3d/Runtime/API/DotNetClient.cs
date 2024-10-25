@@ -54,28 +54,23 @@ namespace Function.API {
             Dictionary<string, string>? headers = default
         ) where T : class {
             using var message = new HttpRequestMessage(new HttpMethod(method), $"{url}{path}");       
-            // Populate headers
             if (!string.IsNullOrEmpty(accessKey))
                 message.Headers.Authorization = new AuthenticationHeaderValue(@"Bearer", accessKey);
             if (headers != null)
                 foreach (var header in headers)
                     message.Headers.Add(header.Key, header.Value);
-            // Populate payload
             if (payload != null) {
                 var serializationSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
                 var payloadStr = JsonConvert.SerializeObject(payload, serializationSettings);
                 message.Content = new StringContent(payloadStr, Encoding.UTF8, @"application/json");
             }
-            // Request
             using var response = await client.SendAsync(message);
             var responseStr = await response.Content.ReadAsStringAsync();
-            // Check error
             if ((int)response.StatusCode >= 400) {
                 var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
                 var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";
                 throw new FunctionAPIException(error, (int)response.StatusCode);
             }
-            // Return
             return JsonConvert.DeserializeObject<T>(responseStr)!;
         }
 

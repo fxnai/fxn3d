@@ -107,7 +107,6 @@ namespace Function.API {
         /// <param name="url">Upload URL.</param>
         /// <param name="mime">MIME type.</param>
         public override async Task Upload (Stream stream, string url, string? mime = null) {
-            // Create client
             using var client = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT) {
                 uploadHandler = new UploadHandlerRaw(ToArray(stream)),
                 downloadHandler = new DownloadHandlerBuffer(),
@@ -116,11 +115,9 @@ namespace Function.API {
                 timeout = 20,
             };
             client.SetRequestHeader(@"Content-Type", mime ?? @"application/octet-stream");
-            // Put
             client.SendWebRequest();
             while (!client.isDone)
                 await Task.Yield();
-            // Check
             if (client.error != null)
                 throw new InvalidOperationException($"Failed to upload stream with error: {client.error}");
         }
@@ -130,10 +127,8 @@ namespace Function.API {
         #region --Operations--
 
         private static byte[] ToArray (Stream stream) {
-            // Shortcut
             if (stream is MemoryStream memoryStream)
                 return memoryStream.ToArray();
-            // Copy
             using var dstStream = new MemoryStream();
             stream.CopyTo(dstStream);
             return dstStream.ToArray();

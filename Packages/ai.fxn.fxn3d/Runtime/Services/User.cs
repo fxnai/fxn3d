@@ -14,7 +14,7 @@ namespace Function.Services {
     /// <summary>
     /// Manage users.
     /// </summary>
-    public sealed class UserService { // DEPLOY
+    public sealed class UserService {
 
         #region --Client API--
         /// <summary>

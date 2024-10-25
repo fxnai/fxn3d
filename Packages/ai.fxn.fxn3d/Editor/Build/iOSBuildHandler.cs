@@ -16,8 +16,8 @@ namespace Function.Editor.Build {
     using UnityEditor.Build;
     using UnityEditor.Build.Reporting;
     using API;
+    using CachedPrediction = API.PredictionCacheClient.CachedPrediction;
     using FunctionSettings = Internal.FunctionSettings;
-    using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
 #if UNITY_IOS
     using UnityEditor.iOS.Xcode;
@@ -27,15 +27,13 @@ namespace Function.Editor.Build {
     internal sealed class iOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
         private List<CachedPrediction> cache;
-        private const string Platform = @"ios-arm64";
+        private const string ClientId = @"ios-arm64";
 
         protected override BuildTarget target => BuildTarget.iOS;
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
-            // Create settings
             var projectSettings = FunctionProjectSettings.instance;
             var settings = FunctionSettings.Create(projectSettings.accessKey);
-            // Embed predictors
             var embeds = GetEmbeds();
             var cache = new List<CachedPrediction>();
             foreach (var embed in embeds) {
@@ -44,8 +42,8 @@ namespace Function.Editor.Build {
                 var predictions = embed.tags
                     .Select(tag => {
                         try {
-                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: Platform, configurationId: @"")).Result;
-                            return new CachedPrediction { platform = Platform, prediction = prediction };
+                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: ClientId, configurationId: @"")).Result;
+                            return new CachedPrediction { clientId = ClientId, prediction = prediction };
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
@@ -55,32 +53,24 @@ namespace Function.Editor.Build {
                     .ToArray();
                 cache.AddRange(predictions);
             }
-            // Cache
             settings.cache = cache;
             this.cache = cache;
-            // Return
             return settings;
         }
 
         void IPostprocessBuildWithReport.OnPostprocessBuild (BuildReport report) {
-            // Check platform
             if (report.summary.platform != target)
                 return;
-            // Check cache
             if (cache == null)
                 return;
-            // Get frameworks path
             var frameworkDir = Path.Combine(report.summary.outputPath, @"Frameworks", @"Function");
             Directory.CreateDirectory(frameworkDir);
-            // Copy dsos
             var client = new DotNetClient(Function.URL);
             var frameworks = new List<string>();
             foreach (var cachedPrediction in cache) {
                 foreach (var resource in cachedPrediction.prediction.resources) {
-                    // Check
                     if (resource.type != @"dso")
                         continue;
-                    // Download
                     var dsoPath = Path.GetTempFileName();
                     {
                         using var dsoStream = Task.Run(async () => await client.Download(resource.url)).Result;
@@ -92,11 +82,9 @@ namespace Function.Editor.Build {
                 }
             }
         #if UNITY_IOS
-            // Load Xcode project
             var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);
             var project = new PBXProject();
             project.ReadFromFile(pbxPath);
-            // Add frameworks
             var targetGuid = project.GetUnityMainTargetGuid();
             foreach (var framework in frameworks) {
                 var frameworkGuid = project.AddFile(
@@ -106,10 +94,8 @@ namespace Function.Editor.Build {
                 );
                 project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
             }
-            // Write
             project.WriteToFile(pbxPath);
         #endif
-            // Empty cache
             cache = null;
         }
     }

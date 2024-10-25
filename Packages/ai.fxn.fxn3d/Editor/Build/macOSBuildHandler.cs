@@ -16,8 +16,8 @@ namespace Function.Editor.Build {
     using UnityEditor.Build.Reporting;
     using API;
     using Services;
+    using CachedPrediction = API.PredictionCacheClient.CachedPrediction;
     using FunctionSettings = Internal.FunctionSettings;
-    using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
     #if UNITY_STANDALONE_OSX
     using UnityEditor.iOS.Xcode;
@@ -27,7 +27,7 @@ namespace Function.Editor.Build {
     internal sealed class macOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
         private List<CachedPrediction> cache;
-        private static readonly string[] Platforms = new [] {
+        private static readonly string[] ClientIds = new [] {
             "macos-arm64",
             "macos-x86_64"
         };
@@ -44,12 +44,12 @@ namespace Function.Editor.Build {
             foreach (var embed in embeds) {
                 var client = new DotNetClient(embed.url, embed.accessKey);
                 var fxn = new Function(client);
-                var predictions = (from tag in embed.tags from platform in Platforms select (platform, tag))
+                var predictions = (from tag in embed.tags from clientId in ClientIds select (clientId, tag))
                     .Select((pair) => {
-                        var (platform, tag) = pair;
+                        var (clientId, tag) = pair;
                         try {
-                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: platform, configurationId: @"")).Result;
-                            return new CachedPrediction { platform = platform, prediction = prediction };
+                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: clientId, configurationId: @"")).Result;
+                            return new CachedPrediction { clientId = clientId, prediction = prediction };
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
@@ -85,7 +85,7 @@ namespace Function.Editor.Build {
             var client = new DotNetClient(Function.URL);
             foreach (var cachedPrediction in cache) {
                 var dso = cachedPrediction.prediction.resources.First(res => res.type == @"dso");
-                var dsoName = PredictionService.GetResourceName(dso.url);
+                var dsoName = Path.GetFileName(PredictionService.GetResourcePath(dso, outputPath));
                 var dsoPath = Path.Combine(frameworkDir, dsoName);
                 using var dsoStream = Task.Run(async () => await client.Download(dso.url)).Result;
                 using var fileStream = File.Create(dsoPath);
