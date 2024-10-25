@@ -12,6 +12,7 @@ namespace Function.Editor.Build {
     using System.Text.RegularExpressions;
     using UnityEditor;
     using UnityEditor.Build.Reporting;
+    using FunctionSettings = Internal.FunctionSettings;
 
     internal sealed class WebGLBuildHandler : BuildHandler {
 
@@ -23,7 +24,7 @@ namespace Function.Editor.Build {
             @"-sEXTRA_EXPORTED_RUNTIME_METHODS=FS",
         };
 
-        protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
+        protected override FunctionSettings CreateSettings (BuildReport report) {
             // Patch config
             var configPath = Path.Combine(GetEmscriptenPath(), @"tools", @"config.py");
             if (File.Exists(configPath)) {
@@ -34,7 +35,8 @@ namespace Function.Editor.Build {
             // Set Emscripten args
             PlayerSettings.WebGL.emscriptenArgs = GetEmscriptenArgs();
             // Create settings
-            var settings = FunctionProjectSettings.CreateSettings();
+            var projectSettings = FunctionProjectSettings.instance;
+            var settings = FunctionSettings.Create(projectSettings.accessKey);
             // Return
             return settings;
         }

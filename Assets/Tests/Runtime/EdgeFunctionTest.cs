@@ -13,7 +13,7 @@ namespace Function.Tests {
     internal sealed class EdgeFunctionTest : MonoBehaviour {
 
         private Function fxn;
-        private const string Tag = "@yusuf/circle-area";
+        private const string Tag = "@yusuf/area";
 
         private void Awake () => fxn = FunctionUnity.Create();
 

@@ -57,13 +57,11 @@ namespace Function.Types {
 
         /// <summary>
         /// Predictor resources.
-        /// This is only populated for `EDGE` predictions.
         /// </summary>
         public PredictionResource[]? resources;
 
         /// <summary>
         /// Prediction configuration token.
-        /// This is only populated for `EDGE` predictions.
         /// </summary>
         public string? configuration;
     }
@@ -88,5 +86,28 @@ namespace Function.Types {
         /// Resource name.
         /// </summary>
         public string? name;
+    }
+
+    /// <summary>
+    /// Prediction acceleration.
+    /// </summary>
+    [Flags]
+    public enum Acceleration : int {
+        /// <summary>
+        /// Automatically choose the best acceleration for the current device.
+        /// </summary>
+        Auto = 0,
+        /// <summary>
+        /// Predictions run on the CPU.
+        /// </summary>
+        CPU = 1 << 0,
+        /// <summary>
+        /// Predictions run on the GPU.
+        /// </summary>
+        GPU = 1 << 1,
+        /// <summary>
+        /// Predictions run on the neural processor.
+        /// </summary>
+        NPU = 1 << 2,
     }
 }

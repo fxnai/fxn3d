@@ -3,6 +3,8 @@
 *   Copyright © 2024 NatML Inc. All rights reserved.
 */
 
+#nullable enable
+
 namespace Function.Internal {
 
     using System;
@@ -22,8 +24,10 @@ namespace Function.Internal {
         /// </summary>
         [Serializable, Preserve]
         public sealed class CachedPrediction {
+            #pragma warning disable 8618
             public string platform;
             public Prediction prediction;
+            #pragma warning restore 8618
         }
         #endregion
 
@@ -32,19 +36,29 @@ namespace Function.Internal {
         /// <summary>
         /// Project-wide access key.
         /// </summary>
-        [SerializeField, HideInInspector]
-        internal string accessKey = string.Empty;
+        [field: SerializeField, HideInInspector]
+        public string accessKey { get; private set; } = string.Empty;
 
         /// <summary>
         /// Predictor cache.
         /// </summary>
-        [SerializeField, HideInInspector]
-        internal List<CachedPrediction> cache = new();
+        [field: SerializeField, HideInInspector]
+        public List<CachedPrediction> cache { get; internal set; } = new();
 
         /// <summary>
         /// Settings instance for this project.
         /// </summary>
-        internal static FunctionSettings Instance;
+        public static FunctionSettings Instance;
+
+        /// <summary>
+        /// Create Function settings.
+        /// </summary>
+        /// <param name="accessKey">Function access key.</param>
+        public static FunctionSettings Create (string accessKey) {
+            var settings = CreateInstance<FunctionSettings>();
+            settings.accessKey = accessKey;
+            return settings;
+        }
         #endregion
 
 

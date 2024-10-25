@@ -7,15 +7,15 @@ namespace Function.Editor.Build {
 
     using UnityEditor;
     using UnityEditor.Build.Reporting;
+    using FunctionSettings = Internal.FunctionSettings;
 
     internal sealed class WindowsBuildHandler : BuildHandler {
 
         protected override BuildTarget target => BuildTarget.StandaloneWindows64;
 
-        protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
-            // Create settings
-            var settings = FunctionProjectSettings.CreateSettings();
-            // Return
+        protected override FunctionSettings CreateSettings (BuildReport report) {
+            var projectSettings = FunctionProjectSettings.instance;
+            var settings = FunctionSettings.Create(projectSettings.accessKey);
             return settings;
         }
     }

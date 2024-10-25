@@ -17,24 +17,18 @@ namespace Function.Editor {
 
         #region --Client API--
         public string accessKey;
-        
-        public void Save () => Save(false);
 
-        public static FunctionSettings CreateSettings () {
-            var settings = ScriptableObject.CreateInstance<FunctionSettings>();
-            settings.accessKey = instance.accessKey;
-            return settings;
-        }
+        public void Save () => Save(false);
         #endregion
 
 
         #region --Operations--
 
         [InitializeOnLoadMethod]
-        private static void OnLoad () => FunctionSettings.Instance = CreateSettings();
+        private static void OnLoad () => FunctionSettings.Instance = FunctionSettings.Create(instance.accessKey);
 
         [InitializeOnEnterPlayMode]
-        private static void OnEnterPlaymodeInEditor (EnterPlayModeOptions options) => FunctionSettings.Instance = CreateSettings();
+        private static void OnEnterPlaymodeInEditor (EnterPlayModeOptions options) => FunctionSettings.Instance = FunctionSettings.Create(instance.accessKey);
         #endregion
     }
 }

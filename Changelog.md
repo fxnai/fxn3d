@@ -1,5 +1,6 @@
 ## 0.0.30
 + Added `FunctionAPIException` exception class for explicitly catching API errors.
++ Refactored `Acceleration.Default` enumeration member to `Acceleration.Auto`.
 + Removed `Predictor.predictions` field.
 + Function now requires Unity 2022.3+
 

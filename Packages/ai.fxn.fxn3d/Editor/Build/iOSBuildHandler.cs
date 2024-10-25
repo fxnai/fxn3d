@@ -16,7 +16,7 @@ namespace Function.Editor.Build {
     using UnityEditor.Build;
     using UnityEditor.Build.Reporting;
     using API;
-    using Types;
+    using FunctionSettings = Internal.FunctionSettings;
     using CachedPrediction = Internal.FunctionSettings.CachedPrediction;
 
 #if UNITY_IOS
@@ -31,9 +31,10 @@ namespace Function.Editor.Build {
 
         protected override BuildTarget target => BuildTarget.iOS;
 
-        protected override Internal.FunctionSettings CreateSettings (BuildReport report) {
+        protected override FunctionSettings CreateSettings (BuildReport report) {
             // Create settings
-            var settings =  FunctionProjectSettings.CreateSettings();
+            var projectSettings = FunctionProjectSettings.instance;
+            var settings = FunctionSettings.Create(projectSettings.accessKey);
             // Embed predictors
             var embeds = GetEmbeds();
             var cache = new List<CachedPrediction>();
