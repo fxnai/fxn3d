@@ -2,6 +2,7 @@
 + Added `FunctionAPIException` exception class for explicitly catching API errors.
 + Refactored `Acceleration.Default` enumeration member to `Acceleration.Auto`.
 + Removed `Predictor.predictions` field.
++ Upgraded to Function C 0.0.30.
 + Function now requires Unity 2022.3+
 
 ## 0.0.29
@@ -11,7 +12,7 @@
 + Fixed predictions failing on Android due to predictor embedding error at build time.
 
 ## 0.0.27
-+ Updated to Function C 0.0.27.
++ Upgraded to Function C 0.0.27.
 + Removed `fxn.EnvironmentVariables` field.
 + Removed `fxn.Storage` field.
 + Removed `fxn.Users.Update` method.

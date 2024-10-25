@@ -17,8 +17,8 @@
 
  @abstract Hardware acceleration used for predictions.
 
- @constant FXN_ACCELERATION_DEFAULT
- Use the default acceleration for the given platform.
+ @constant FXN_ACCELERATION_AUTO
+ Use the optimal acceleration for the current device.
 
  @constant FXN_ACCELERATION_CPU
  Use the CPU.
@@ -30,10 +30,10 @@
  Use the neural processing unit.
 */
 enum FXNAcceleration {
-    FXN_ACCELERATION_DEFAULT  = 0,
-    FXN_ACCELERATION_CPU      = 1 << 0,
-    FXN_ACCELERATION_GPU      = 1 << 1,
-    FXN_ACCELERATION_NPU      = 1 << 2,
+    FXN_ACCELERATION_AUTO   = 0,
+    FXN_ACCELERATION_CPU    = 1 << 0,
+    FXN_ACCELERATION_GPU    = 1 << 1,
+    FXN_ACCELERATION_NPU    = 1 << 2,
 };
 typedef enum FXNAcceleration FXNAcceleration;
 #pragma endregion
