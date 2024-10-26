@@ -1,5 +1,6 @@
 ## 0.0.30
 + Added `FunctionAPIException` exception class for explicitly catching API errors.
++ Fixed predictions not being properly cached and requiring an internet connection on every run (#8).
 + Refactored `Acceleration.Default` enumeration member to `Acceleration.Auto`.
 + Removed `Predictor.predictions` field.
 + Upgraded to Function C 0.0.30.
