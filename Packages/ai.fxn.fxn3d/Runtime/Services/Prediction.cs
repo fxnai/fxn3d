@@ -91,13 +91,13 @@ namespace Function.Services {
 
 
         #region --Operations--
-        private readonly FunctionClient fxn;
+        private readonly FunctionClient client;
         private readonly string cachePath;
         private readonly Dictionary<string, C.Predictor> cache = new();
 
-        internal PredictionService (FunctionClient client, string? cachePath) {
-            this.fxn = client;
-            this.cachePath = cachePath ?? Path.Combine(
+        internal PredictionService (FunctionClient client) {
+            this.client = client;
+            this.cachePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 ".fxn",
                 "cache"
@@ -108,7 +108,7 @@ namespace Function.Services {
             string tag,
             string? clientId = default,
             string? configurationId = default
-        ) => fxn.Request<Prediction>(
+        ) => client.Request<Prediction>(
             method: @"POST",
             path: $"/predictions",
             payload: new () {
@@ -152,7 +152,7 @@ namespace Function.Services {
             if (File.Exists(path))
                 return path;
             Directory.CreateDirectory(Path.GetDirectoryName(path));
-            using var dataStream = await fxn.Download(resource.url);
+            using var dataStream = await client.Download(resource.url);
             using var fileStream = File.Create(path);
             dataStream.CopyTo(fileStream); // CHECK // Async usage
             return path;

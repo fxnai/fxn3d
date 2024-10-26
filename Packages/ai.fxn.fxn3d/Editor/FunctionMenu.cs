@@ -30,11 +30,5 @@ namespace Function.Editor {
 
         [MenuItem(@"Function/Report an Issue", false, BasePriority + 4)]
         private static void ReportIssue () => Help.BrowseURL(@"https://github.com/fxnai/fxn3d");
-
-        [MenuItem(@"Function/Clear Predictor Cache", false, BasePriority + 5)]
-        private static void ClearCache () {
-            Directory.Delete(FunctionUnity.CachePath, true);
-            Debug.Log("Function: Cleared predictor cache");
-        }
     }
 }

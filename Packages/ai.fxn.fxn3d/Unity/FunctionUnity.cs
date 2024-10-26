@@ -33,8 +33,7 @@ namespace Function {
         /// <returns>Function client.</returns>
         public static Function Create (
             string? accessKey = null,
-            string? url = null,
-            string? cachePath = null
+            string? url = null
         ) {
             var settings = FunctionSettings.Instance!;
             var client = new PredictionCacheClient(
@@ -42,7 +41,7 @@ namespace Function {
                 accessKey: accessKey ?? settings?.accessKey,
                 cache: settings?.cache
             );
-            var fxn = new Function(client, cachePath: cachePath ?? CachePath);
+            var fxn = new Function(client);
             return fxn;
         }
 
@@ -145,14 +144,6 @@ namespace Function {
             File.WriteAllBytes(persistentPath, request.downloadHandler.data);
             return persistentPath;
         }
-        #endregion
-
-
-        #region --Operations--
-        /// <summary>
-        /// Predictor cache path.
-        /// </summary>
-        internal static string CachePath => Path.Combine(Application.persistentDataPath, @"fxn", @"cache");
         #endregion
     }
 }

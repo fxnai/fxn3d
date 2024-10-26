@@ -70,23 +70,19 @@ namespace Function {
         /// <param name="cachePath">Predictor cache path.</param>
         public Function (
             string? accessKey = null,
-            string? url = null,
-            string? cachePath = null
-        ) : this(new DotNetClient(url ?? URL, accessKey: accessKey), cachePath) { }
+            string? url = null
+        ) : this(new DotNetClient(url ?? URL, accessKey: accessKey)) { }
 
         /// <summary>
         /// Create a Function client.
         /// </summary>
         /// <param name="client">Function API client.</param>
         /// <param name="cachePath">Predictor cache path.</param>
-        public Function (
-            FunctionClient client,
-            string? cachePath = null
-        ) {
+        public Function (FunctionClient client) {
             this.client = client;
             this.Users = new UserService(client);
             this.Predictors = new PredictorService(client);
-            this.Predictions = new PredictionService(client, cachePath);
+            this.Predictions = new PredictionService(client);
         }
         #endregion
 

@@ -59,32 +59,31 @@ namespace Function.API {
         /// <param name="payload">Request body.</param>
         /// <param name="headers">Request body.</param>
         /// <returns>Deserialized response.</returns>
-        public override async Task<T?> Request<T> ( // DEPLOY
+        public override async Task<T?> Request<T> (
             string method,
             string path,
             Dictionary<string, object?>? payload = default,
             Dictionary<string, string>? headers = default
         ) where T : class {
-            if (path != @"/predictions" || payload == null)
+            if (method != @"POST" || path != @"/predictions" || payload == null)
                 return await base.Request<T>(method, path, payload, headers);
             if (TryLoadPredictionFromCache(payload, out var pred))
                 return pred as T;
-            return await CreatePredictionAndCache(payload) as T;
+            return await CreateAndCachePrediction(payload, headers) as T;
         }
         #endregion
 
 
         #region --Operations--
         private readonly List<CachedPrediction> cache;
+        private static string CachePath => Path.Combine(Application.persistentDataPath, @"fxn", @"cache");
 
         private bool TryLoadPredictionFromCache (
             Dictionary<string, object?> payload,
             out Prediction? prediction
         ) {
             prediction = null;
-            var tag = payload.TryGetValue(@"tag", out var t) ? t as string : null;
-            var clientId = payload.TryGetValue(@"clientId", out var id) ? id as string : null; 
-            var entry = cache.FirstOrDefault(p => p.prediction.tag == tag && p.clientId == clientId);
+            var entry = GetCachedPrediction(payload);
             if (entry == null)
                 return false;
             var @partial = entry.prediction;
@@ -93,7 +92,7 @@ namespace Function.API {
                 return false;
             var resources = @partial.resources.Select(res => new PredictionResource {
                 type = res.type,
-                url = $"file://{PredictionService.GetResourcePath(res, FunctionUnity.CachePath)}"
+                url = $"file://{PredictionService.GetResourcePath(res, CachePath)}"
             }).ToArray();
             if (resources.Any(res => !File.Exists(new Uri(res.url).LocalPath)))
                 return false;
@@ -107,20 +106,41 @@ namespace Function.API {
             return true;
         }
 
-        private async Task<Prediction> CreatePredictionAndCache (Dictionary<string, object?> payload) { // INCOMPLETE
-            return null;
+        private async Task<Prediction?> CreateAndCachePrediction (
+            Dictionary<string, object?> payload,
+            Dictionary<string, string>? headers
+        ) {
+            payload = new Dictionary<string, object?>(payload);
+            var entry = GetCachedPrediction(payload);
+            if (entry != null)
+                payload.Add(@"predictionId", entry.prediction.id);
+            var prediction = await base.Request<Prediction>(@"POST", @"/predictions", payload, headers);
+            if (prediction != null) {
+                prediction.resources = await Task.WhenAll(prediction.resources.Select(GetCachedResource));
+                if (entry != null) {
+                    PlayerPrefs.SetString(entry.prediction.id, prediction.configuration);
+                    PlayerPrefs.Save();
+                }
+            }
+            return prediction;
+        }
 
+        private CachedPrediction? GetCachedPrediction (Dictionary<string, object?> payload) {
+            var tag = payload.TryGetValue(@"tag", out var t) ? t as string : null;
+            var clientId = payload.TryGetValue(@"clientId", out var id) ? id as string : null; 
+            var entry = cache.FirstOrDefault(p => p.prediction.tag == tag && p.clientId == clientId);
+            return entry;
+        }
 
-            /*
-            var cachedPrediction = cache.FirstOrDefault(p => p.prediction.tag == tag && p.clientId == clientId);
-            if (cachedPrediction == null)
-                return await base.Request<T>(method, path, payload, headers);
-            payload = new Dictionary<string, object?>(payload) {
-                [@"predictionId"] = cachedPrediction.prediction.id
-            };
-            var prediction = await base.Request<Prediction>(method, path, payload, headers);
-            return prediction as T;
-            */
+        private async Task<PredictionResource> GetCachedResource (PredictionResource resource) {
+            var path = PredictionService.GetResourcePath(resource, CachePath);
+            if (!File.Exists(path)) {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                using var dataStream = await Download(resource.url);
+                using var fileStream = File.Create(path);
+                dataStream.CopyTo(fileStream);
+            }
+            return new PredictionResource { type = resource.type, url = $"file://{path}" };
         }
         #endregion
     }
