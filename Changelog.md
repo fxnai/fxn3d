@@ -1,3 +1,6 @@
+## 0.0.31
+*INCOMPLETE*
+
 ## 0.0.30
 + Added `FunctionAPIException` exception class for explicitly catching API errors.
 + Fixed predictions not being properly cached and requiring an internet connection on every run (#8).
