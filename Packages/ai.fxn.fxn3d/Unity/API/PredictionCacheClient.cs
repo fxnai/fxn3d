@@ -76,7 +76,9 @@ namespace Function.API {
 
         #region --Operations--
         private readonly List<CachedPrediction> cache;
-        private static string CachePath => Path.Combine(Application.persistentDataPath, @"fxn", @"cache");
+        private static string CachePath => Application.isEditor ?
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @".fxn", @"cache") :
+            Path.Combine(Application.persistentDataPath, @"fxn", @"cache");
 
         private bool TryLoadPredictionFromCache (
             Dictionary<string, object?> payload,
