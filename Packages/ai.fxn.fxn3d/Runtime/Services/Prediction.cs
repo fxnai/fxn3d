@@ -27,6 +27,13 @@ namespace Function.Services {
 
         #region --Client API--
         /// <summary>
+        /// Check whether a predictor is preloaded and ready to make predictions.
+        /// </summary>
+        /// <param name="tag">Predictor tag.</param>
+        /// <returns>Whether the predictor is preloaded.</returns>
+        public bool Ready (string tag) => cache.ContainsKey(tag);
+
+        /// <summary>
         /// Create a prediction.
         /// </summary>
         /// <param name="tag">Predictor tag.</param>

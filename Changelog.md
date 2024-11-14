@@ -1,5 +1,6 @@
 ## 0.0.31
-*INCOMPLETE*
++ Fixed `Function.dylib` macOS plugin missing when building universal macOS apps from Unity.
++ Upgraded to Function C 0.0.31.
 
 ## 0.0.30
 + Added `FunctionAPIException` exception class for explicitly catching API errors.
