@@ -34,7 +34,7 @@ typedef struct FXNPredictionStream FXNPredictionStream;
  @param stream
  Prediction stream.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionStreamRelease (FXNPredictionStream* stream);
+FXN_API FXNStatus FXNPredictionStreamRelease (FXNPredictionStream* stream);
 #pragma endregion
 
 
@@ -56,7 +56,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionStreamRelease (FXNPredictio
  @returns `FXN_OK` a prediction was successfully read from the stream.
  `FXN_ERROR_INVALID_OPERATION` if the stream has no more predictions.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionStreamReadNext (
+FXN_API FXNStatus FXNPredictionStreamReadNext (
     FXNPredictionStream* stream,
     FXNPrediction** prediction
 );

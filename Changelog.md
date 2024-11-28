@@ -1,6 +1,7 @@
 ## 0.0.31
++ Added support for Linux `x86_64`.
 + Fixed `Function.dylib` macOS plugin missing when building universal macOS apps from Unity.
-+ Upgraded to Function C 0.0.31.
++ Upgraded to Function C 0.0.32.
 
 ## 0.0.30
 + Added `FunctionAPIException` exception class for explicitly catching API errors.

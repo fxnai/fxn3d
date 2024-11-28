@@ -64,17 +64,17 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/LinuxBuildHandler.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionProjectSettings.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/BuildHandler.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionMenu.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/macOSBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/AndroidBuildHandler.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/WebGLBuildHandler.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/iOSBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/WindowsBuildHandler.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionInfo.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionSettingsProvider.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/LinuxBuildHandler.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionProjectSettings.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Editor/FunctionMenu.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/WebGLBuildHandler.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Editor/Build/iOSBuildHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Packages/ai.fxn.fxn3d/Editor/Function.Editor.asmdef" />
@@ -436,10 +436,6 @@
       <HintPath>/Applications/Unity/Hub/Editor/2022.3.23f1/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.VisualScripting.YamlDotNet">
-      <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Editor/VisualScripting.Core/Dependencies/YamlDotNet/Unity.VisualScripting.YamlDotNet.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>Library/PackageCache/com.unity.ext.nunit@2.0.3/net40/unity-custom/nunit.framework.dll</HintPath>
       <Private>False</Private>
@@ -448,20 +444,8 @@
       <HintPath>Library/PackageCache/com.unity.testtools.codecoverage@1.2.5/lib/ReportGenerator/ReportGeneratorMerged.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.VisualScripting.IonicZip">
-      <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Editor/VisualScripting.Core/Dependencies/DotNetZip/Unity.VisualScripting.IonicZip.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
-      <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Runtime/VisualScripting.Flow/Dependencies/NCalc/Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library/PackageCache/com.unity.nuget.newtonsoft-json@3.2.1/Runtime/Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.TextureAssets">
-      <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Editor/VisualScripting.Core/EditorAssetResources/Unity.VisualScripting.TextureAssets.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">

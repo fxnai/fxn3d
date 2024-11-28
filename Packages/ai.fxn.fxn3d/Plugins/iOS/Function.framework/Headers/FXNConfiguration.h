@@ -80,7 +80,7 @@ typedef void (*FXNConfigurationAddResourceHandler) (
  @param size
  Identifier size.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetUniqueID (
+FXN_API FXNStatus FXNConfigurationGetUniqueID (
     char* identifier,
     int32_t size
 );
@@ -98,7 +98,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetUniqueID (
  @param size
  Identifier size.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetClientID (
+FXN_API FXNStatus FXNConfigurationGetClientID (
     char* identifier,
     int32_t size
 );
@@ -113,7 +113,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetClientID (
  @param configuration
  Created configuration. MUST NOT be `NULL`.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationCreate (FXNConfiguration** configuration);
+FXN_API FXNStatus FXNConfigurationCreate (FXNConfiguration** configuration);
 
 /*!
  @function FXNConfigurationRelease
@@ -125,7 +125,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationCreate (FXNConfiguration
  @param configuration
  Predictor configuration.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationRelease (FXNConfiguration* configuration);
+FXN_API FXNStatus FXNConfigurationRelease (FXNConfiguration* configuration);
 #pragma endregion
 
 
@@ -146,7 +146,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationRelease (FXNConfiguratio
  @param size
  Size of destination buffer.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetTag (
+FXN_API FXNStatus FXNConfigurationGetTag (
     FXNConfiguration* configuration,
     char* tag,
     int32_t size
@@ -166,7 +166,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetTag (
  @param tag
  Predictor tag.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetTag (
+FXN_API FXNStatus FXNConfigurationSetTag (
     FXNConfiguration* configuration,
     const char* tag
 );
@@ -187,7 +187,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetTag (
  @param size
  Size of destination buffer.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetToken (
+FXN_API FXNStatus FXNConfigurationGetToken (
     FXNConfiguration* configuration,
     char* token,
     int32_t size
@@ -207,7 +207,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetToken (
  @param token
  Configuration token.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetToken (
+FXN_API FXNStatus FXNConfigurationSetToken (
     FXNConfiguration* configuration,
     const char* token
 );
@@ -225,7 +225,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetToken (
  @param acceleration
  Acceleration.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetAcceleration (
+FXN_API FXNStatus FXNConfigurationGetAcceleration (
     FXNConfiguration* configuration,
     FXNAcceleration* acceleration
 );
@@ -243,7 +243,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetAcceleration (
  @param acceleration
  Acceleration used for making predictions predictions.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetAcceleration (
+FXN_API FXNStatus FXNConfigurationSetAcceleration (
     FXNConfiguration* configuration,
     FXNAcceleration acceleration
 );
@@ -251,18 +251,19 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetAcceleration (
 /*!
  @function FXNConfigurationGetDevice
 
- @abstract Get the compute device used for ML model inference.
+ @abstract Get the compute device used for compute acceleration.
 
- @discussion Get the compute device used for ML model inference.
+ @discussion Get the compute device used for compute acceleration.
 
  @param configuration
  Predictor configuration.
 
  @param device
- Compute device used for ML model inference.
- The type of this device is platform-dependent (see https://docs.fxn.ai).
+ Compute device.
+ The type of this device is platform-dependent.
+ See https://docs.fxn.ai/workflows/realtime#specifying-the-acceleration-device for more information.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetDevice (
+FXN_API FXNStatus FXNConfigurationGetDevice (
     FXNConfiguration* configuration,
     void** device
 );
@@ -270,19 +271,20 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationGetDevice (
 /*!
  @function FXNConfigurationSetDevice
 
- @abstract Specify the compute device used for ML model inference.
+ @abstract Specify the compute device used for compute acceleration.
 
- @discussion Specify the compute device used for ML model inference.
+ @discussion Specify the compute device used for compute acceleration.
 
  @param configuration
  Predictor configuration.
 
  @param device
- Compute device used for ML model inference.
- The type of this device is platform-dependent (see https://docs.fxn.ai).
+ Compute device.
+ The type of this device is platform-dependent.
  Pass `NULL` to use the default compute device.
+ See https://docs.fxn.ai/workflows/realtime#specifying-the-acceleration-device for more information.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetDevice (
+FXN_API FXNStatus FXNConfigurationSetDevice (
     FXNConfiguration* configuration,
     void* device
 );
@@ -303,7 +305,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationSetDevice (
  @param path
  Resource path.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNConfigurationAddResource (
+FXN_API FXNStatus FXNConfigurationAddResource (
     FXNConfiguration* configuration,
     const char* type,
     const char* path

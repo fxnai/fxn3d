@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include <Function/FXNAPI.h>
+#include <Function/FXNStatus.h>
 
 #define FXN_VERSION_MAJOR 0
 #define FXN_VERSION_MINOR 0
-#define FXN_VERSION_PATCH 31
+#define FXN_VERSION_PATCH 32
 
 /*!
  @function FXNGetVersion
@@ -23,4 +23,4 @@
 
  @returns Function version string.
 */
-FXN_BRIDGE FXN_EXPORT const char* FXN_API FXNGetVersion ();
+FXN_API const char* FXNGetVersion ();

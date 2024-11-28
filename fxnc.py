@@ -44,6 +44,14 @@ def main (): # CHECK # Linux # Android AAR
             "path": LIB_PATH_BASE / "macOS" / "Function.dylib"
         },
         {
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/libFunction-linux-arm64.so",
+            "path": LIB_PATH_BASE / "Linux" / "arm64" / "libFunction.so"
+        },
+        {
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/libFunction-linux-x86_64.so",
+            "path": LIB_PATH_BASE / "Linux" / "x86_64" / "libFunction.so"
+        },
+        {
             "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-win-x86_64.dll",
             "path": LIB_PATH_BASE / "Windows" / "x86_64" / "Function.dll"
         },

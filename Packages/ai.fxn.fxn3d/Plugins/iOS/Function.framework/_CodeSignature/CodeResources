@@ -4,49 +4,45 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Headers/FXNAPI.h</key>
-		<data>
-		7vYfxFEAIid64exuxj7xg8+T/8s=
-		</data>
 		<key>Headers/FXNConfiguration.h</key>
 		<data>
-		ICWxCkmKDkZ0M0OLyTPw4UKY0Yo=
+		vi6d0xKWHyNzqMBMUXJGY2HJFzM=
 		</data>
 		<key>Headers/FXNPrediction.h</key>
 		<data>
-		ioLmgvbptzJ2VbDWVsoLdsnVp7A=
+		2fFsxWtaG3mCLWMqB2izJNv/3Kk=
 		</data>
 		<key>Headers/FXNPredictionStream.h</key>
 		<data>
-		PRv213AjegcC/exGmE+6u7RoX9g=
+		ej8Wsw8mGuh+NtQzLt6nh6S2w6o=
 		</data>
 		<key>Headers/FXNPredictor.h</key>
 		<data>
-		YYpLYdh+fZO4NbAu7W4wj9e0r7I=
+		f6jBqg6UzXmq155j93LH203/AQ0=
 		</data>
 		<key>Headers/FXNStatus.h</key>
 		<data>
-		x1OJKox0Svbazwk1iBLkV6cdoJw=
+		AA+ld73LvCBVVZMAKOZOQfnHbBk=
 		</data>
 		<key>Headers/FXNValue.h</key>
 		<data>
-		SdHVYtHVOTyAeP93Au8bzEGRMog=
+		yQlPR7neoqDKW5WInpWr+eQD4KM=
 		</data>
 		<key>Headers/FXNValueMap.h</key>
 		<data>
-		1mq3+PSn6vgWdQms5uZljHb8vgs=
+		+SlnOKMNSx5XZzilvcTEXHqvi1w=
 		</data>
 		<key>Headers/FXNVersion.h</key>
 		<data>
-		lG6x+o9dejGUmZdhFzOnJiVfySw=
+		0UwzKo+yVbmWQE5jnxGOs6ues2w=
 		</data>
 		<key>Headers/Function.h</key>
 		<data>
-		3OL2WLYnh0ihWd8kdWbV82QdBXI=
+		du3JLMX4qQnTpe6Qlmi7oy6BEbw=
 		</data>
 		<key>Info.plist</key>
 		<data>
-		Xn5nvMV/yqOsTm4GD1dlWKV6gz8=
+		+tOY9vuc/9inMbKCOj/umUkg/q4=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -59,74 +55,67 @@
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Headers/FXNAPI.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			mgodewW6rvH3sqi/y5sUfpJalYezvHKrvFImKIESKHs=
-			</data>
-		</dict>
 		<key>Headers/FXNConfiguration.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			R919NZ9YYBBbKQzUaYXb1kFGtKv2rhvIoMT5s8SC7M0=
+			rxomNKqmEsLq03h9UGn61d5ICrewWHJAI2IbGlo+MTQ=
 			</data>
 		</dict>
 		<key>Headers/FXNPrediction.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eLSqRMEo0q2fLhH5rZ4BPbOlOm67X95TooWeWg2JmrA=
+			VoWXAogQwrAko+wn9fc/7WL2wQDkDP9j0wM6acUqHM0=
 			</data>
 		</dict>
 		<key>Headers/FXNPredictionStream.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			FTCPUInMx+EeCEqySX41QKSq6OgpVRMxxOubBhYF4nM=
+			/Rrat4FKimyfhcUTxxFZrlMMN7qg14EY13bMG+qN01c=
 			</data>
 		</dict>
 		<key>Headers/FXNPredictor.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			BXFMyV7o0E7LfEJU4MLShCPHqOzeBS7xTxXJzQehlfc=
+			4GjIZ0OKG48erfRWtk6VFf1l6VSJ+8w0DOuyFss9r2k=
 			</data>
 		</dict>
 		<key>Headers/FXNStatus.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ZLNTA1PMDmZMCRM7vzjKw8MP6Xnw0MEvMnYGb+bwKjk=
+			+yncG+Le2lLWxGg9LC9B2vCNYPuSMpSpY1vx2jisSfk=
 			</data>
 		</dict>
 		<key>Headers/FXNValue.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			5GYZuSjOKF20B1JeUTnEzvSoaTVG7tTC+6Ly7v44IZc=
+			IEamblrtPqwpzaKuRgdFddPw5WdMceKkqQkrXJ6EDTs=
 			</data>
 		</dict>
 		<key>Headers/FXNValueMap.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			iXV9U7WfIh7JKAK74Gq/Cb8wvRjA7+xYpi2zIDuTisk=
+			4DDRdpWDAsVdpGIEx+WupHbLh2f8RpEMgEWuQsJA8T0=
 			</data>
 		</dict>
 		<key>Headers/FXNVersion.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			7poBKnKULMTh1vpOcQb7+KKUORMTxrEsBcXr7XiAX3U=
+			H78bju7xTQbhgmLfDLV6DbV0Rzu3qEo1W+HQQStMuQ0=
 			</data>
 		</dict>
 		<key>Headers/Function.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			T5Ywd6C9ddzi+fozUjNKAKP9xAXkbp8mjw+ai3RUfj8=
+			GhYkXEK8Nr3oYQEwcVs3SZMoWXPvXgILmGMXrdLKRV0=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

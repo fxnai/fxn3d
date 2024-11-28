@@ -137,7 +137,7 @@ typedef struct FXNValue FXNValue;
  @param value
  Value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueRelease (FXNValue* value);
+FXN_API FXNStatus FXNValueRelease (FXNValue* value);
 #pragma endregion
 
 
@@ -155,7 +155,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueRelease (FXNValue* value);
  @param data
  Opaque pointer to value data.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetData (
+FXN_API FXNStatus FXNValueGetData (
     FXNValue* value,
     void** data
 );
@@ -173,7 +173,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetData (
  @param type
  Value data type.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetType (
+FXN_API FXNStatus FXNValueGetType (
     FXNValue* value,
     FXNDtype* type
 );
@@ -192,7 +192,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetType (
  @param dimensions
  Number of dimensions for a given value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetDimensions (
+FXN_API FXNStatus FXNValueGetDimensions (
     FXNValue* value,
     int32_t* dimensions
 );
@@ -213,7 +213,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetDimensions (
  @param shapeLen
  Length of the destination array in elements.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetShape (
+FXN_API FXNStatus FXNValueGetShape (
     FXNValue* value,
     int32_t* shape,
     int32_t shapeLen
@@ -250,7 +250,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueGetShape (
  @param value
  Created value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateArray (
+FXN_API FXNStatus FXNValueCreateArray (
     void* data,
     const int32_t* shape,
     int32_t dims,
@@ -272,7 +272,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateArray (
  @param value
  Created value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateString (
+FXN_API FXNStatus FXNValueCreateString (
     const char* data,
     FXNValue** value
 );
@@ -290,7 +290,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateString (
  @param value
  Created value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateList (
+FXN_API FXNStatus FXNValueCreateList (
     const char* data,
     FXNValue** value
 );
@@ -308,7 +308,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateList (
  @param value
  Created value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateDict (
+FXN_API FXNStatus FXNValueCreateDict (
     const char* data,
     FXNValue** value
 );
@@ -342,7 +342,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateDict (
  The value `type` will be `FXN_DTYPE_IMAGE`.
  The value `shape` will be `(H,W,C)`.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateImage (
+FXN_API FXNStatus FXNValueCreateImage (
     const uint8_t* pixelBuffer,
     int32_t width,
     int32_t height,
@@ -370,7 +370,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateImage (
  @param value
  Created value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateBinary (
+FXN_API FXNStatus FXNValueCreateBinary (
     void* buffer,
     int32_t bufferLen, // CHECK // max buffer size becomes 2GB
     FXNValueFlags flags,
@@ -387,5 +387,5 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateBinary (
  @param value
  Created value.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueCreateNull (FXNValue** value);
+FXN_API FXNStatus FXNValueCreateNull (FXNValue** value);
 #pragma endregion

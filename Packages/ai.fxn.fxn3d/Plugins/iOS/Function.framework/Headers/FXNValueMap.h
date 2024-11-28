@@ -35,7 +35,7 @@ typedef struct FXNValueMap FXNValueMap;
  @param map
  Created value map. MUST NOT be `NULL`.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapCreate (FXNValueMap** map);
+FXN_API FXNStatus FXNValueMapCreate (FXNValueMap** map);
 
 /*!
  @function FXNValueMapRelease
@@ -48,7 +48,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapCreate (FXNValueMap** map);
  @param map
  Prediction value map.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapRelease (FXNValueMap* map);
+FXN_API FXNStatus FXNValueMapRelease (FXNValueMap* map);
 #pragma endregion
 
 
@@ -66,7 +66,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapRelease (FXNValueMap* map);
  @param size
  Output size. MUST NOT be `NULL`.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapGetSize (
+FXN_API FXNStatus FXNValueMapGetSize (
     FXNValueMap* map,
     int32_t* size
 );
@@ -90,7 +90,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapGetSize (
  @param size
  Size of destination buffer.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapGetKey (
+FXN_API FXNStatus FXNValueMapGetKey (
     FXNValueMap* map,
     int32_t index,
     char* key,
@@ -115,7 +115,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapGetKey (
 
  @returns `FXN_OK` if the value map contains a value for the given key else `FXN_ERROR_INVALID_ARGUMENT`.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapGetValue (
+FXN_API FXNStatus FXNValueMapGetValue (
     FXNValueMap* map,
     const char* key,
     FXNValue** value
@@ -140,7 +140,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapGetValue (
  @param value
  Value. Pass `NULL` to remove the value from the map if present.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNValueMapSetValue (
+FXN_API FXNStatus FXNValueMapSetValue (
     FXNValueMap* map,
     const char* key,
     FXNValue* value

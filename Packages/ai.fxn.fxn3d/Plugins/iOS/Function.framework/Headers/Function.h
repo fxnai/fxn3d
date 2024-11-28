@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <Function/FXNAPI.h>
 #include <Function/FXNStatus.h>
 #include <Function/FXNValue.h>
 #include <Function/FXNValueMap.h>

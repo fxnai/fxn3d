@@ -35,7 +35,7 @@ typedef struct FXNPrediction FXNPrediction;
  @param prediction
  Prediction.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionRelease (FXNPrediction* prediction);
+FXN_API FXNStatus FXNPredictionRelease (FXNPrediction* prediction);
 #pragma endregion
 
 
@@ -56,7 +56,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionRelease (FXNPrediction* pre
  @param size
  Destination buffer size.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetID (
+FXN_API FXNStatus FXNPredictionGetID (
     FXNPrediction* prediction,
     char* destination,
     int32_t size
@@ -75,7 +75,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetID (
  @param latency
  Prediction latency in milliseconds.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetLatency (
+FXN_API FXNStatus FXNPredictionGetLatency (
     FXNPrediction* prediction,
     double* latency
 );
@@ -93,7 +93,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetLatency (
  @param map
  Prediction output value map. Do NOT release this value map as it is owned by the prediction.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetResults (
+FXN_API FXNStatus FXNPredictionGetResults (
     FXNPrediction* prediction,
     FXNValueMap** map
 );
@@ -117,7 +117,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetResults (
  @returns `FXN_OK` if an error has been copied.
  `FXN_ERROR_INVALID_OPERATION` if no error exists.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetError (
+FXN_API FXNStatus FXNPredictionGetError (
     FXNPrediction* prediction,
     char* error,
     int32_t size
@@ -139,7 +139,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetError (
  @param size
  Destination buffer size.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetLogs (
+FXN_API FXNStatus FXNPredictionGetLogs (
     FXNPrediction* prediction,
     char* logs,
     int32_t size
@@ -158,7 +158,7 @@ FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetLogs (
  @param length
  Logs length.
 */
-FXN_BRIDGE FXN_EXPORT FXNStatus FXN_API FXNPredictionGetLogLength (
+FXN_API FXNStatus FXNPredictionGetLogLength (
     FXNPrediction* prediction,
     int32_t* length
 );

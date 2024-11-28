@@ -65,10 +65,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages/ai.fxn.fxn3d/Unity/FunctionUnity.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Unity/Internal/FunctionInfo.cs" />
-    <Compile Include="Packages/ai.fxn.fxn3d/Unity/API/PredictionCacheClient.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Unity/Internal/FunctionSettings.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Unity/Internal/FunctionInfo.cs" />
     <Compile Include="Packages/ai.fxn.fxn3d/Unity/API/UnityClient.cs" />
+    <Compile Include="Packages/ai.fxn.fxn3d/Unity/API/PredictionCacheClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Packages/ai.fxn.fxn3d/Unity/Function.Unity.asmdef" />

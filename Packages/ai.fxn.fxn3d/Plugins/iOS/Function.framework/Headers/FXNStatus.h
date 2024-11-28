@@ -8,7 +8,11 @@
 
 #pragma once
 
-#include <Function/FXNAPI.h>
+#ifdef __cplusplus
+    #define FXN_API extern "C"
+#else
+    #define FXN_API extern
+#endif
 
 #pragma region --Enumerations--
 /*!
