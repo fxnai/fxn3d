@@ -31,7 +31,7 @@ namespace Function.Services {
         /// </summary>
         /// <param name="tag">Predictor tag.</param>
         /// <returns>Whether the predictor is preloaded.</returns>
-        public bool Ready (string tag) => cache.ContainsKey(tag);
+        public bool IsReady (string tag) => cache.ContainsKey(tag);
 
         /// <summary>
         /// Create a prediction.
