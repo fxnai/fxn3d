@@ -11,7 +11,11 @@ namespace Function.Editor.Build {
 
     internal sealed class LinuxBuildHandler : BuildHandler {
 
-        protected override BuildTarget target => BuildTarget.StandaloneLinux64;
+        protected override BuildTarget[] targets => new [] {
+            BuildTarget.StandaloneLinux64,
+            BuildTarget.LinuxHeadlessSimulation,
+            BuildTarget.EmbeddedLinux,
+        };
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
             var projectSettings = FunctionProjectSettings.instance;

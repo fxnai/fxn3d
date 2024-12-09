@@ -28,7 +28,7 @@ namespace Function.Editor.Build {
             "android-x86_64"
         };
 
-        protected override BuildTarget target => BuildTarget.Android;
+        protected override BuildTarget[] targets => new [] { BuildTarget.Android };
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
             var projectSettings = FunctionProjectSettings.instance;

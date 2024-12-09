@@ -32,7 +32,7 @@ namespace Function.Editor.Build {
             "macos-x86_64"
         };
 
-        protected override BuildTarget target => BuildTarget.StandaloneOSX;
+        protected override BuildTarget[] targets => new [] { BuildTarget.StandaloneOSX };
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
             // Create settings
@@ -68,7 +68,7 @@ namespace Function.Editor.Build {
 
         void IPostprocessBuildWithReport.OnPostprocessBuild (BuildReport report) {
             // Check platform
-            if (report.summary.platform != target)
+            if (!targets.Contains(report.summary.platform))
                 return;
             // Check cache
             if (cache == null)

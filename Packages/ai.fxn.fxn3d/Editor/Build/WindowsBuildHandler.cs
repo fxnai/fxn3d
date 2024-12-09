@@ -11,7 +11,7 @@ namespace Function.Editor.Build {
 
     internal sealed class WindowsBuildHandler : BuildHandler {
 
-        protected override BuildTarget target => BuildTarget.StandaloneWindows64;
+        protected override BuildTarget[] targets => new [] { BuildTarget.StandaloneWindows64 };
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
             var projectSettings = FunctionProjectSettings.instance;

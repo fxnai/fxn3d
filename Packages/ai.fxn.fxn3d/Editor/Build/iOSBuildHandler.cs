@@ -29,7 +29,7 @@ namespace Function.Editor.Build {
         private List<CachedPrediction> cache;
         private const string ClientId = @"ios-arm64";
 
-        protected override BuildTarget target => BuildTarget.iOS;
+        protected override BuildTarget[] targets => new [] { BuildTarget.iOS };
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
             var projectSettings = FunctionProjectSettings.instance;
@@ -59,7 +59,7 @@ namespace Function.Editor.Build {
         }
 
         void IPostprocessBuildWithReport.OnPostprocessBuild (BuildReport report) {
-            if (report.summary.platform != target)
+            if (!targets.Contains(report.summary.platform))
                 return;
             if (cache == null)
                 return;

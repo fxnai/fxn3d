@@ -29,7 +29,7 @@ namespace Function.Editor.Build {
             public string[] tags;
         }
 
-        protected abstract BuildTarget target { get; }
+        protected abstract BuildTarget[] targets { get; }
         public virtual int callbackOrder => -1_000_000; // run very early, but not too early ;)
 
         protected abstract FunctionSettings CreateSettings (BuildReport report);
@@ -69,7 +69,7 @@ namespace Function.Editor.Build {
         protected const string CachePath = @"Assets/__FXN_DELETE_THIS__";
 
         void IPreprocessBuildWithReport.OnPreprocessBuild (BuildReport report) {
-            if (report.summary.platform != target)
+            if (!targets.Contains(report.summary.platform))
                 return;
             var settings = CreateSettings(report);
             EditorApplication.update += FailureListener;

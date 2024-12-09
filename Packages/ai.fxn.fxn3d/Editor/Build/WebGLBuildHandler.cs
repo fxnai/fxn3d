@@ -16,7 +16,7 @@ namespace Function.Editor.Build {
 
     internal sealed class WebGLBuildHandler : BuildHandler {
 
-        protected override BuildTarget target => BuildTarget.WebGL;
+        protected override BuildTarget[] targets => new [] { BuildTarget.WebGL };
         private static string[] EM_ARGS => new [] {
             @"-Wl,-uFXN_WEBGL_INIT",
             @"-Xlinker --features=mutable-globals,sign-ext,simd128",
