@@ -25,7 +25,6 @@ namespace Function.Editor.Build {
         private static readonly string[] ClientIds = new [] {
             "android-armeabi-v7a",
             "android-arm64-v8a",
-            "android-x86",
             "android-x86_64"
         };
 

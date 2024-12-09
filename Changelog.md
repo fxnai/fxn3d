@@ -3,6 +3,7 @@
 + Added `fxn.Predictions.IsReady` method to check whether a predictor is loaded and ready to make predictions.
 + Fixed `Function.dylib` macOS plugin missing when building universal macOS apps from Unity.
 + Upgraded to Function C 0.0.32.
++ Removed support for the Android `x86` platform architecture.
 
 ## 0.0.30
 + Added `FunctionAPIException` exception class for explicitly catching API errors.
