@@ -42,8 +42,14 @@ namespace Function.Editor.Build {
                 var predictions = embed.tags
                     .Select(tag => {
                         try {
-                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: ClientId, configurationId: @"")).Result;
-                            return new CachedPrediction { clientId = ClientId, prediction = prediction };
+                            var prediction = Task.Run(() => fxn.Predictions.Create(
+                                tag,
+                                clientId: ClientId,
+                                configurationId: @""
+                            )).Result;
+                            var cached = CachedPrediction.FromPrediction(prediction);
+                            cached.clientId = ClientId;
+                            return cached;
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
@@ -67,8 +73,8 @@ namespace Function.Editor.Build {
             Directory.CreateDirectory(frameworkDir);
             var client = new DotNetClient(Function.URL);
             var frameworks = new List<string>();
-            foreach (var cachedPrediction in cache) {
-                foreach (var resource in cachedPrediction.prediction.resources) {
+            foreach (var prediction in cache)
+                foreach (var resource in prediction.resources) {
                     if (resource.type != @"dso")
                         continue;
                     var dsoPath = Path.GetTempFileName();
@@ -80,7 +86,6 @@ namespace Function.Editor.Build {
                     ZipFile.ExtractToDirectory(dsoPath, frameworkDir, true);
                     frameworks.Add(resource.name);
                 }
-            }
         #if UNITY_IOS
             var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);
             var project = new PBXProject();

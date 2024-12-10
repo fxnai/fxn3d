@@ -12,9 +12,9 @@ namespace Function.API {
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using UnityEngine;
     using Services;
     using Types;
-    using UnityEngine;
 
     /// <summary>
     /// Function API client for Unity Engine.
@@ -28,11 +28,21 @@ namespace Function.API {
         /// Cached prediction.
         /// </summary>
         [Serializable, Preserve]
-        public sealed class CachedPrediction {
-            #pragma warning disable 8618
-            public string clientId;
-            public Prediction prediction;
-            #pragma warning restore 8618
+        public sealed class CachedPrediction : Prediction {
+            public string? clientId;
+            public string? configurationId;
+
+            public static CachedPrediction FromPrediction (Prediction prediction) => new () {
+                id = prediction.id,
+                tag = prediction.tag,
+                created = prediction.created,
+                results = prediction.results,
+                latency = prediction.latency,
+                error = prediction.error,
+                logs = prediction.logs,
+                resources = prediction.resources,
+                configuration = prediction.configuration,
+            };
         }
         #endregion
 
@@ -76,19 +86,19 @@ namespace Function.API {
 
         #region --Operations--
         private readonly List<CachedPrediction> cache;
-        private static string CachePath => Application.isEditor ?
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @".fxn", @"cache") :
-            Path.Combine(Application.persistentDataPath, @"fxn", @"cache");
+        private static string CacheRoot => Application.isEditor ?
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @".fxn") :
+            Path.Combine(Application.persistentDataPath, @"fxn");
+        private static string CachePath => Path.Combine(CacheRoot, @"cache");
 
         private bool TryLoadPredictionFromCache (
             Dictionary<string, object?> payload,
             out Prediction? prediction
         ) {
             prediction = null;
-            var entry = GetCachedPrediction(payload);
-            if (entry == null)
+            var @partial = GetCachedPrediction(payload);
+            if (@partial == null)
                 return false;
-            var @partial = entry.prediction;
             var configuration = PlayerPrefs.GetString(@partial.id, @"");
             if (string.IsNullOrEmpty(configuration))
                 return false;
@@ -108,19 +118,19 @@ namespace Function.API {
             return true;
         }
 
-        private async Task<Prediction?> CreateAndCachePrediction (
+        private async Task<Prediction?> CreateAndCachePrediction ( // INCOMPLETE // Use the FS instead
             Dictionary<string, object?> payload,
             Dictionary<string, string>? headers
         ) {
             payload = new Dictionary<string, object?>(payload);
-            var entry = GetCachedPrediction(payload);
-            if (entry != null)
-                payload.Add(@"predictionId", entry.prediction.id);
+            var @partial = GetCachedPrediction(payload);
+            if (@partial != null)
+                payload.Add(@"predictionId", @partial.id);
             var prediction = await base.Request<Prediction>(@"POST", @"/predictions", payload, headers);
             if (prediction != null) {
                 prediction.resources = await Task.WhenAll(prediction.resources.Select(GetCachedResource));
-                if (entry != null) {
-                    PlayerPrefs.SetString(entry.prediction.id, prediction.configuration);
+                if (@partial != null) {
+                    PlayerPrefs.SetString(@partial.id, prediction.configuration);
                     PlayerPrefs.Save();
                 }
             }
@@ -130,8 +140,8 @@ namespace Function.API {
         private CachedPrediction? GetCachedPrediction (Dictionary<string, object?> payload) {
             var tag = payload.TryGetValue(@"tag", out var t) ? t as string : null;
             var clientId = payload.TryGetValue(@"clientId", out var id) ? id as string : null; 
-            var entry = cache.FirstOrDefault(p => p.prediction.tag == tag && p.clientId == clientId);
-            return entry;
+            var prediction = cache.FirstOrDefault(p => p.tag == tag && p.clientId == clientId);
+            return prediction;
         }
 
         private async Task<PredictionResource> GetCachedResource (PredictionResource resource) {

@@ -42,8 +42,14 @@ namespace Function.Editor.Build {
                     .Select((pair) => {
                         var (clientId, tag) = pair;
                         try {
-                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: clientId, configurationId: @"")).Result;
-                            return new CachedPrediction { clientId = clientId, prediction = prediction };
+                            var prediction = Task.Run(() => fxn.Predictions.Create(
+                                tag,
+                                clientId: clientId,
+                                configurationId: @""
+                            )).Result;
+                            var cached = CachedPrediction.FromPrediction(prediction);
+                            cached.clientId = clientId;
+                            return cached;
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
@@ -61,15 +67,15 @@ namespace Function.Editor.Build {
         void IPostGenerateGradleAndroidProject.OnPostGenerateGradleAndroidProject (string projectPath) {
             if (cache == null)
                 return;
-            foreach (var cachedPrediction in cache) {
+            foreach (var prediction in cache) {
                 // Check
-                var arch = cachedPrediction.clientId.Replace("android-", string.Empty).Replace(":", string.Empty);
+                var arch = prediction.clientId.Replace("android-", string.Empty).Replace(":", string.Empty);
                 var libDir = Path.Combine(projectPath, @"src", @"main", @"jniLibs", arch);
                 if (!Directory.Exists(libDir))
                     continue;
                 // Fetch resources
                 var client = new DotNetClient(Function.URL);
-                var resources = cachedPrediction.prediction.resources.Where(res => res.type == @"dso");
+                var resources = prediction.resources.Where(res => res.type == @"dso");
                 foreach (var resource in resources) {
                     var libName = Path.GetFileName(PredictionService.GetResourcePath(resource, libDir));
                     var path = Path.ChangeExtension(Path.Combine(libDir, libName), @".so");

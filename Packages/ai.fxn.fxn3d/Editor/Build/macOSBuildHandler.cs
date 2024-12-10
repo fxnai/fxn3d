@@ -48,8 +48,14 @@ namespace Function.Editor.Build {
                     .Select((pair) => {
                         var (clientId, tag) = pair;
                         try {
-                            var prediction = Task.Run(() => fxn.Predictions.Create(tag, clientId: clientId, configurationId: @"")).Result;
-                            return new CachedPrediction { clientId = clientId, prediction = prediction };
+                            var prediction = Task.Run(() => fxn.Predictions.Create(
+                                tag,
+                                clientId: clientId,
+                                configurationId: @""
+                            )).Result;
+                            var cached = CachedPrediction.FromPrediction(prediction);
+                            cached.clientId = clientId;
+                            return cached;
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
@@ -83,8 +89,8 @@ namespace Function.Editor.Build {
             // Embed
             var frameworks = new List<string>();
             var client = new DotNetClient(Function.URL);
-            foreach (var cachedPrediction in cache) {
-                var dso = cachedPrediction.prediction.resources.First(res => res.type == @"dso");
+            foreach (var prediction in cache) {
+                var dso = prediction.resources.First(res => res.type == @"dso");
                 var dsoName = Path.GetFileName(PredictionService.GetResourcePath(dso, outputPath));
                 var dsoPath = Path.Combine(frameworkDir, dsoName);
                 using var dsoStream = Task.Run(async () => await client.Download(dso.url)).Result;
