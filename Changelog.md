@@ -1,3 +1,6 @@
+## 0.0.32
+*INCOMPLETE*
+
 ## 0.0.31
 + Added support for Linux `x86_64`.
 + Added `fxn.Predictions.IsReady` method to check whether a predictor is loaded and ready to make predictions.
