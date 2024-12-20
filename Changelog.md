@@ -1,5 +1,6 @@
 ## 0.0.32
 + Fixed `fxn.Predictions.Create` method failing in some release builds on Android.
++ Upgraded to Function C 0.0.34.
 
 ## 0.0.31
 + Added support for Linux `x86_64`.
