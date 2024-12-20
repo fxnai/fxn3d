@@ -74,6 +74,11 @@ namespace Function.API {
                 await Task.Yield();
             // Check error
             var responseStr = client.downloadHandler.text;
+            if (client.responseCode == 0)
+                throw new FunctionAPIException(
+                    @"Failed to get response from server. Check that you have an internet connection.",
+                    (int)client.responseCode
+                );
             if (client.responseCode >= 400) {
                 var errorPayload = JsonConvert.DeserializeObject<ErrorResponse>(responseStr);
                 var error = errorPayload?.errors?[0]?.message ?? @"An unknown error occurred";

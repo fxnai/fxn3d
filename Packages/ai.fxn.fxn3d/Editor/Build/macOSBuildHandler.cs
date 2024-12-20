@@ -16,7 +16,7 @@ namespace Function.Editor.Build {
     using UnityEditor.Build.Reporting;
     using API;
     using Services;
-    using CachedPrediction = API.PredictionCacheClient.CachedPrediction;
+    using Types;
     using FunctionSettings = Internal.FunctionSettings;
 
     #if UNITY_STANDALONE_OSX
@@ -53,8 +53,7 @@ namespace Function.Editor.Build {
                                 clientId: clientId,
                                 configurationId: @""
                             )).Result;
-                            var cached = CachedPrediction.FromPrediction(prediction);
-                            cached.clientId = clientId;
+                            var cached = new CachedPrediction(prediction, clientId);
                             return cached;
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");

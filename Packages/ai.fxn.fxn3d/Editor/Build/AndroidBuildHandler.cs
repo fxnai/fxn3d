@@ -16,16 +16,16 @@ namespace Function.Editor.Build {
     using UnityEditor.Build.Reporting;
     using API;
     using Services;
-    using CachedPrediction = API.PredictionCacheClient.CachedPrediction;
+    using Types;
     using FunctionSettings = Internal.FunctionSettings;
 
     internal sealed class AndroidBuildHandler : BuildHandler, IPostGenerateGradleAndroidProject {
 
         private static List<CachedPrediction> cache;
-        private static readonly string[] ClientIds = new [] {
-            "android-armeabi-v7a",
-            "android-arm64-v8a",
-            "android-x86_64"
+        private static Dictionary<AndroidArchitecture, string> ArchToClientId = new () {
+            [AndroidArchitecture.ARMv7]     = @"android-armeabi-v7a",
+            [AndroidArchitecture.ARM64]     = @"android-arm64-v8a",
+            [AndroidArchitecture.X86_64]    = @"android-x86_64",
         };
 
         protected override BuildTarget[] targets => new [] { BuildTarget.Android };
@@ -34,31 +34,31 @@ namespace Function.Editor.Build {
             var projectSettings = FunctionProjectSettings.instance;
             var settings = FunctionSettings.Create(projectSettings.accessKey);
             var embeds = GetEmbeds();
-            var cache = new List<CachedPrediction>();
-            foreach (var embed in embeds) {
-                var client = new DotNetClient(embed.url, embed.accessKey);
-                var fxn = new Function(client);
-                var predictions = (from tag in embed.tags from clientId in ClientIds select (clientId, tag))
-                    .Select((pair) => {
-                        var (clientId, tag) = pair;
+            var clientIds = ArchToClientId
+                .Where(pair => PlayerSettings.Android.targetArchitectures.HasFlag(pair.Key))
+                .Select(pair => pair.Value)
+                .ToArray();
+            var cache = embeds
+                .SelectMany(embed => {
+                    var client = new DotNetClient(embed.url, embed.accessKey);
+                    var fxn = new Function(client);
+                    var predictions = clientIds.SelectMany(clientId => embed.tags.Select(tag => {
                         try {
                             var prediction = Task.Run(() => fxn.Predictions.Create(
                                 tag,
                                 clientId: clientId,
                                 configurationId: @""
                             )).Result;
-                            var cached = CachedPrediction.FromPrediction(prediction);
-                            cached.clientId = clientId;
-                            return cached;
+                            return new CachedPrediction(prediction, clientId);
                         } catch (Exception ex) {
                             Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
                             return null;
                         }
-                    })
-                    .Where(pred => pred != null)
-                    .ToArray();
-                cache.AddRange(predictions);
-            }
+                    }));
+                    return predictions;
+                })
+                .Where(pred => pred != null)
+                .ToList();
             settings.cache = cache;
             AndroidBuildHandler.cache = cache;
             return settings;

@@ -14,7 +14,7 @@ namespace Function.Types {
     /// Function user.
     /// </summary>
     [Preserve, Serializable]
-    public sealed class User {
+    public class User {
 
         /// <summary>
         /// Username.

@@ -13,6 +13,7 @@ namespace Function.API {
     using System.Linq;
     using System.Threading.Tasks;
     using UnityEngine;
+    using Newtonsoft.Json;
     using Services;
     using Types;
 
@@ -22,30 +23,6 @@ namespace Function.API {
     /// Furthermore, this handles partial prediction caching for edge predictors.
     /// </summary>
     internal sealed class PredictionCacheClient : UnityClient {
-
-        #region --Types--
-        /// <summary>
-        /// Cached prediction.
-        /// </summary>
-        [Serializable, Preserve]
-        public sealed class CachedPrediction : Prediction {
-            public string? clientId;
-            public string? configurationId;
-
-            public static CachedPrediction FromPrediction (Prediction prediction) => new () {
-                id = prediction.id,
-                tag = prediction.tag,
-                created = prediction.created,
-                results = prediction.results,
-                latency = prediction.latency,
-                error = prediction.error,
-                logs = prediction.logs,
-                resources = prediction.resources,
-                configuration = prediction.configuration,
-            };
-        }
-        #endregion
-
 
         #region --Client API--
         /// <summary>
@@ -75,11 +52,54 @@ namespace Function.API {
             Dictionary<string, object?>? payload = default,
             Dictionary<string, string>? headers = default
         ) where T : class {
-            if (method != @"POST" || path != @"/predictions" || payload == null)
+            // Check payload
+            var tag = payload?.TryGetValue(@"tag", out var t) ?? false ? t as string : null;
+            var clientId = payload?.TryGetValue(@"clientId", out var id) ?? false ? id as string : null;
+            var configurationId = payload?.TryGetValue(@"configurationId", out var configuration) ?? false ?
+                configuration as string :
+                null;
+            if (
+                method != @"POST"                       ||
+                path != @"/predictions"                 ||
+                string.IsNullOrEmpty(tag)               ||
+                string.IsNullOrEmpty(clientId)          ||
+                string.IsNullOrEmpty(configurationId)
+            )
                 return await base.Request<T>(method, path, payload, headers);
-            if (TryLoadPredictionFromCache(payload, out var pred))
-                return pred as T;
-            return await CreateAndCachePrediction(payload, headers) as T;
+            // Get cached prediction
+            var sanitizedTag = tag.Substring(1).Replace("/", "_");
+            var cachePath = Path.Combine(
+                PredictorCachePath,
+                clientId,
+                configurationId,
+                $"{sanitizedTag}.json"
+            );
+            var cachedPrediction = TryLoadCachedPrediction(cachePath);
+            if (cachedPrediction != null)
+                return cachedPrediction as T;
+            // Create prediction
+            var predictionId = cache.FirstOrDefault(p => p.tag == tag && p.clientId == clientId)?.id;
+            var prediction = await base.Request<Prediction>(
+                method: @"POST",
+                path: @"/predictions",
+                payload: new () {
+                    [@"tag"] = tag,
+                    [@"clientId"] = clientId,
+                    [@"configurationId"] = configurationId,
+                    [@"predictionId"] = predictionId,
+                },
+                headers
+            );
+            prediction!.resources = await Task.WhenAll(prediction.resources.Select(GetCachedResource));
+            // Write
+            var predictionJson = JsonConvert.SerializeObject(
+                new CachedPrediction(prediction, clientId),
+                Formatting.Indented
+            );
+            Directory.CreateDirectory(Path.GetDirectoryName(cachePath));
+            File.WriteAllText(cachePath, predictionJson);
+            // Return
+            return prediction as T;
         }
         #endregion
 
@@ -89,63 +109,11 @@ namespace Function.API {
         private static string CacheRoot => Application.isEditor ?
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @".fxn") :
             Path.Combine(Application.persistentDataPath, @"fxn");
-        private static string CachePath => Path.Combine(CacheRoot, @"cache");
-
-        private bool TryLoadPredictionFromCache (
-            Dictionary<string, object?> payload,
-            out Prediction? prediction
-        ) {
-            prediction = null;
-            var @partial = GetCachedPrediction(payload);
-            if (@partial == null)
-                return false;
-            var configuration = PlayerPrefs.GetString(@partial.id, @"");
-            if (string.IsNullOrEmpty(configuration))
-                return false;
-            var resources = @partial.resources.Select(res => new PredictionResource {
-                type = res.type,
-                url = $"file://{PredictionService.GetResourcePath(res, CachePath)}"
-            }).ToArray();
-            if (resources.Any(res => !File.Exists(new Uri(res.url).LocalPath)))
-                return false;
-            prediction = new Prediction {
-                id = @partial.id,
-                tag = @partial.tag,
-                created = @partial.created,
-                resources = resources,
-                configuration = configuration
-            };
-            return true;
-        }
-
-        private async Task<Prediction?> CreateAndCachePrediction ( // INCOMPLETE // Use the FS instead
-            Dictionary<string, object?> payload,
-            Dictionary<string, string>? headers
-        ) {
-            payload = new Dictionary<string, object?>(payload);
-            var @partial = GetCachedPrediction(payload);
-            if (@partial != null)
-                payload.Add(@"predictionId", @partial.id);
-            var prediction = await base.Request<Prediction>(@"POST", @"/predictions", payload, headers);
-            if (prediction != null) {
-                prediction.resources = await Task.WhenAll(prediction.resources.Select(GetCachedResource));
-                if (@partial != null) {
-                    PlayerPrefs.SetString(@partial.id, prediction.configuration);
-                    PlayerPrefs.Save();
-                }
-            }
-            return prediction;
-        }
-
-        private CachedPrediction? GetCachedPrediction (Dictionary<string, object?> payload) {
-            var tag = payload.TryGetValue(@"tag", out var t) ? t as string : null;
-            var clientId = payload.TryGetValue(@"clientId", out var id) ? id as string : null; 
-            var prediction = cache.FirstOrDefault(p => p.tag == tag && p.clientId == clientId);
-            return prediction;
-        }
+        private static string ResourceCachePath => Path.Combine(CacheRoot, @"cache");
+        private static string PredictorCachePath => Path.Combine(CacheRoot, @"predictors");
 
         private async Task<PredictionResource> GetCachedResource (PredictionResource resource) {
-            var path = PredictionService.GetResourcePath(resource, CachePath);
+            var path = PredictionService.GetResourcePath(resource, ResourceCachePath);
             if (!File.Exists(path)) {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 using var dataStream = await Download(resource.url);
@@ -153,6 +121,24 @@ namespace Function.API {
                 dataStream.CopyTo(fileStream);
             }
             return new PredictionResource { type = resource.type, url = $"file://{path}" };
+        }
+
+        private static Prediction? TryLoadCachedPrediction (string path) {
+            if (!File.Exists(path))
+                return null;
+            var json = File.ReadAllText(path);
+            var prediction = JsonConvert.DeserializeObject<Prediction>(json)!;
+            var resources = prediction.resources.Select(res => new PredictionResource {
+                type = res.type,
+                url = $"file://{PredictionService.GetResourcePath(res, ResourceCachePath)}",
+                name = res.name
+            }).ToArray();
+            if (!resources.All(res => File.Exists(new Uri(res.url).LocalPath))) {
+                File.Delete(path);
+                return null;
+            }
+            prediction.resources = resources;
+            return prediction;
         }
         #endregion
     }

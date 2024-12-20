@@ -1,4 +1,5 @@
 ## 0.0.32
++ Function can now make predictions fully offline after a predictor has been cached on-device.
 + Fixed `fxn.Predictions.Create` method failing in some release builds on Android.
 + Upgraded to Function C 0.0.34.
 

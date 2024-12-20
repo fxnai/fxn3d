@@ -66,9 +66,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Tests/Runtime/FxncVersionTest.cs" />
-    <Compile Include="Assets/Tests/Runtime/EdgeFunctionTest.cs" />
     <Compile Include="Assets/Tests/Runtime/StreamingTest.cs" />
     <Compile Include="Assets/Tests/Runtime/InspectBuildCacheTest.cs" />
+    <Compile Include="Assets/Tests/Runtime/GreetingTest.cs" />
     <Compile Include="Assets/Tests/Runtime/SystemInfoTest.cs" />
     <Compile Include="Assets/Tests/Runtime/ImageTest.cs" />
     <Compile Include="Assets/Tests/Runtime/AccessKeyTest.cs" />

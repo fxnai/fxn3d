@@ -9,7 +9,7 @@ namespace Function.Internal {
 
     using System.Collections.Generic;
     using UnityEngine;
-    using CachedPrediction = API.PredictionCacheClient.CachedPrediction;
+    using Types;
 
     /// <summary>
     /// Function settings for the current Unity project.
@@ -33,7 +33,9 @@ namespace Function.Internal {
         /// <summary>
         /// Settings instance for this project.
         /// </summary>
+        #pragma warning disable 8618
         public static FunctionSettings Instance;
+        #pragma warning restore 8618
 
         /// <summary>
         /// Create Function settings.
