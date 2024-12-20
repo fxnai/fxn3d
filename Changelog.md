@@ -1,5 +1,5 @@
 ## 0.0.32
-*INCOMPLETE*
++ Fixed `fxn.Predictions.Create` method failing in some release builds on Android.
 
 ## 0.0.31
 + Added support for Linux `x86_64`.
