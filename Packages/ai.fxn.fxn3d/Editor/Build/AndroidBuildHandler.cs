@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2024 NatML Inc. All rights reserved.
+*   Copyright © 2025 NatML Inc. All rights reserved.
 */
 
 namespace Function.Editor.Build {
@@ -51,7 +51,10 @@ namespace Function.Editor.Build {
                             )).Result;
                             return new CachedPrediction(prediction, clientId);
                         } catch (Exception ex) {
-                            Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
+                            Debug.LogException(new InvalidOperationException(
+                                $"Function: Failed to embed {tag} predictor. Predictions with this predictor will likely fail at runtime.",
+                                ex
+                            ));
                             return null;
                         }
                     }));
@@ -75,14 +78,22 @@ namespace Function.Editor.Build {
                     continue;
                 // Fetch resources
                 var client = new DotNetClient(Function.URL);
-                var resources = prediction.resources.Where(res => res.type == @"dso");
-                foreach (var resource in resources) {
-                    var baseName = Path.GetFileName(PredictionService.GetResourcePath(resource, libDir));
-                    var libName = $"lib{baseName}.so";
-                    var path = Path.Combine(libDir, libName);
-                    using var dsoStream = Task.Run(async () => await client.Download(resource.url)).Result;
-                    using var fileStream = File.Create(path);
-                    dsoStream.CopyTo(fileStream);
+                foreach (var resource in prediction.resources) {
+                    try {
+                        if (resource.type != @"dso")
+                            continue;
+                        var baseName = Path.GetFileName(PredictionService.GetResourcePath(resource, libDir));
+                        var libName = $"lib{baseName}.so";
+                        var path = Path.Combine(libDir, libName);
+                        using var dsoStream = Task.Run(() => client.Download(resource.url)).Result;
+                        using var fileStream = File.Create(path);
+                        dsoStream.CopyTo(fileStream);
+                    } catch (AggregateException ex) {
+                        Debug.LogException(new InvalidOperationException(
+                            $"Function: Failed to embed prediction resource for {prediction.tag} predictor. Predictions with this predictor will likely fail at runtime.",
+                            ex.InnerException
+                        ));
+                    }
                 }
             }
             cache = null;

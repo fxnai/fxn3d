@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2024 NatML Inc. All rights reserved.
+*   Copyright © 2025 NatML Inc. All rights reserved.
 */
 
 #nullable enable
@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCompany(@"NatML Inc.")]
 [assembly: AssemblyTitle(@"Function.Runtime")]
 [assembly: AssemblyVersion(Function.Function.Version)]
-[assembly: AssemblyCopyright(@"Copyright © 2024 NatML Inc. All Rights Reserved.")]
+[assembly: AssemblyCopyright(@"Copyright © 2025 NatML Inc. All Rights Reserved.")]
 [assembly: InternalsVisibleTo(@"Function.Unity")]
 [assembly: InternalsVisibleTo(@"Function.Editor")]
 [assembly: InternalsVisibleTo(@"Function.Tests.Editor")]

@@ -1,5 +1,5 @@
 ## 0.0.33
-*INCOMPLETE*
++ Fixed prediction embedding errors causing Unity build to fail.
 
 ## 0.0.32
 + Function can now make predictions fully offline after a predictor has been cached on-device.

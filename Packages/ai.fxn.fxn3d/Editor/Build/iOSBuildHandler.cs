@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2024 NatML Inc. All rights reserved.
+*   Copyright © 2025 NatML Inc. All rights reserved.
 */
 
 namespace Function.Editor.Build {
@@ -50,7 +50,10 @@ namespace Function.Editor.Build {
                             var cached = new CachedPrediction(prediction, ClientId);
                             return cached;
                         } catch (Exception ex) {
-                            Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
+                            Debug.LogException(new InvalidOperationException(
+                                $"Function: Failed to embed {tag} predictor. Predictions with this predictor will likely fail at runtime.",
+                                ex
+                            ));
                             return null;
                         }
                     })
@@ -74,16 +77,23 @@ namespace Function.Editor.Build {
             var frameworks = new List<string>();
             foreach (var prediction in cache)
                 foreach (var resource in prediction.resources) {
-                    if (resource.type != @"dso")
-                        continue;
-                    var dsoPath = Path.GetTempFileName();
-                    {
-                        using var dsoStream = Task.Run(async () => await client.Download(resource.url)).Result;
-                        using var fileStream = File.Create(dsoPath);
-                        dsoStream.CopyTo(fileStream);
+                    try {
+                        if (resource.type != @"dso")
+                            continue;
+                        var dsoPath = Path.GetTempFileName();
+                        {
+                            using var dsoStream = Task.Run(() => client.Download(resource.url)).Result;
+                            using var fileStream = File.Create(dsoPath);
+                            dsoStream.CopyTo(fileStream);
+                        }
+                        ZipFile.ExtractToDirectory(dsoPath, frameworkDir, true);
+                        frameworks.Add(resource.name);
+                    } catch (AggregateException ex) {
+                        Debug.LogException(new InvalidOperationException(
+                            $"Function: Failed to embed prediction resource for {prediction.tag} predictor. Predictions with this predictor will likely fail at runtime.",
+                            ex.InnerException
+                        ));
                     }
-                    ZipFile.ExtractToDirectory(dsoPath, frameworkDir, true);
-                    frameworks.Add(resource.name);
                 }
         #if UNITY_IOS
             var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);

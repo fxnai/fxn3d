@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2024 NatML Inc. All rights reserved.
+*   Copyright © 2025 NatML Inc. All rights reserved.
 */
 
 namespace Function.Editor {

@@ -1,9 +1,20 @@
 /* 
 *   Function
-*   Copyright © 2024 NatML Inc. All rights reserved.
+*   Copyright © 2025 NatML Inc. All rights reserved.
 */
 
 #nullable enable
+
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+[assembly: AssemblyCompany(@"NatML Inc")]
+[assembly: AssemblyTitle(@"Function.Unity")]
+[assembly: AssemblyVersion(Function.Function.Version)]
+[assembly: AssemblyCopyright(@"Copyright © 2025 NatML Inc. All Rights Reserved.")]
+[assembly: InternalsVisibleTo(@"Function.Editor")]
+[assembly: InternalsVisibleTo(@"Function.Tests.Editor")]
+[assembly: InternalsVisibleTo(@"Function.Tests.Runtime")]
 
 namespace Function {
 

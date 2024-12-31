@@ -1,6 +1,6 @@
 /* 
 *   Function
-*   Copyright © 2024 NatML Inc. All rights reserved.
+*   Copyright © 2025 NatML Inc. All rights reserved.
 */
 
 namespace Function.Editor.Build {
@@ -56,7 +56,10 @@ namespace Function.Editor.Build {
                             var cached = new CachedPrediction(prediction, clientId);
                             return cached;
                         } catch (Exception ex) {
-                            Debug.LogWarning($"Function: Failed to embed {tag} with error: {ex.Message}. Edge predictions with this predictor will likely fail at runtime.");
+                            Debug.LogException(new InvalidOperationException(
+                                $"Function: Failed to embed {tag} predictor. Predictions with this predictor will likely fail at runtime.",
+                                ex
+                            ));
                             return null;
                         }
                     })
@@ -88,37 +91,46 @@ namespace Function.Editor.Build {
             // Embed
             var frameworks = new List<string>();
             var client = new DotNetClient(Function.URL);
-            foreach (var prediction in cache) {
-                var dso = prediction.resources.First(res => res.type == @"dso");
-                var dsoName = Path.GetFileName(PredictionService.GetResourcePath(dso, outputPath));
-                var dsoPath = Path.Combine(frameworkDir, dsoName);
-                using var dsoStream = Task.Run(async () => await client.Download(dso.url)).Result;
-                using var fileStream = File.Create(dsoPath);
-                dsoStream.CopyTo(fileStream);
-                frameworks.Add(dsoName);
-            }
+            foreach (var prediction in cache)
+                foreach (var resource in prediction.resources) {
+                    try {
+                        if (resource.type != @"dso")
+                            continue;
+                        var dsoName = Path.GetFileName(PredictionService.GetResourcePath(resource, outputPath));
+                        var dsoPath = Path.Combine(frameworkDir, dsoName);
+                        using var dsoStream = Task.Run(() => client.Download(resource.url)).Result;
+                        using var fileStream = File.Create(dsoPath);
+                        dsoStream.CopyTo(fileStream);
+                        frameworks.Add(dsoName);
+                    } catch (AggregateException ex) {
+                        Debug.LogException(new InvalidOperationException(
+                            $"Function: Failed to embed prediction resource for {prediction.tag} predictor. Predictions with this predictor will likely fail at runtime.",
+                            ex.InnerException
+                        ));
+                    }
+                }
             // Check Xcode project
             if (isApp)
                 return;
-            #if UNITY_STANDALONE_OSX
-                // Load Xcode project
-                var projectName = new DirectoryInfo(outputPath).Name + ".xcodeproj";
-                var pbxPath = Path.Combine(outputPath, projectName,  @"project.pbxproj");
-                var project = new PBXProject();
-                project.ReadFromFile(pbxPath);
-                // Add frameworks
-                var targetGuid = project.GetUnityMainTargetGuid();
-                foreach (var framework in frameworks) {
-                    var frameworkGuid = project.AddFile(
-                        $"{Application.productName}/Frameworks/Function/" + framework,
-                        "Frameworks/" + framework,
-                        PBXSourceTree.Source
-                    );
-                    project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
-                }
-                // Write
-                project.WriteToFile(pbxPath);
-            #endif
+        #if UNITY_STANDALONE_OSX
+            // Load Xcode project
+            var projectName = new DirectoryInfo(outputPath).Name + ".xcodeproj";
+            var pbxPath = Path.Combine(outputPath, projectName,  @"project.pbxproj");
+            var project = new PBXProject();
+            project.ReadFromFile(pbxPath);
+            // Add frameworks
+            var targetGuid = project.GetUnityMainTargetGuid();
+            foreach (var framework in frameworks) {
+                var frameworkGuid = project.AddFile(
+                    $"{Application.productName}/Frameworks/Function/" + framework,
+                    "Frameworks/" + framework,
+                    PBXSourceTree.Source
+                );
+                project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
+            }
+            // Write
+            project.WriteToFile(pbxPath);
+        #endif
             // Empty cache
             cache = null;
         }
