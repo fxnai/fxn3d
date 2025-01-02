@@ -1,5 +1,5 @@
 ## 0.0.34
-*INCOMPLETE*
++ Removed `FunctionUnity.StreamingAssetsToAbsolutePath` method.
 
 ## 0.0.33
 + Fixed prediction embedding errors causing Unity build to fail.

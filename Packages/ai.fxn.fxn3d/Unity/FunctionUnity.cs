@@ -130,31 +130,6 @@ namespace Function {
             texture.Apply();
             return texture;
         }
-
-        /// <summary>
-        /// Convert a `StreamingAssets` path to an absolute path accessible on the file system.
-        /// This function will perform any necessary copying to ensure that the file is accessible.
-        /// </summary>
-        /// <param name="relativePath">Relative path to target file in `StreamingAssets` folder.</param>
-        /// <returns>Absolute path to file or `null` if the file cannot be found.</returns>
-        public static async Task<string?> StreamingAssetsToAbsolutePath (string relativePath) {
-            var fullPath = Path.Combine(Application.streamingAssetsPath, relativePath);
-            if (Application.platform != RuntimePlatform.Android)
-                return File.Exists(fullPath) ? fullPath : null;
-            var persistentPath = Path.Combine(Application.persistentDataPath, relativePath);
-            if (File.Exists(persistentPath))
-                return persistentPath;
-            var directory = Path.GetDirectoryName(persistentPath);
-            Directory.CreateDirectory(directory);
-            using var request = UnityWebRequest.Get(fullPath);
-            request.SendWebRequest();
-            while (!request.isDone)
-                await Task.Yield();
-            if (request.result != UnityWebRequest.Result.Success)
-                return null;
-            File.WriteAllBytes(persistentPath, request.downloadHandler.data);
-            return persistentPath;
-        }
         #endregion
     }
 }
