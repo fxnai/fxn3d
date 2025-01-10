@@ -21,6 +21,7 @@ namespace Function {
 
     using System;
     using API;
+    using Beta;
     using Services;
 
     /// <summary>
@@ -63,6 +64,11 @@ namespace Function {
         public readonly PredictionService Predictions;
 
         /// <summary>
+        /// Beta client for incubating features.
+        /// </summary>
+        public readonly BetaClient Beta;
+
+        /// <summary>
         /// Create a Function client.
         /// </summary>
         /// <param name="accessKey">Function access key.</param>
@@ -83,6 +89,7 @@ namespace Function {
             this.Users = new UserService(client);
             this.Predictors = new PredictorService(client);
             this.Predictions = new PredictionService(client);
+            this.Beta = new BetaClient(client);
         }
         #endregion
 

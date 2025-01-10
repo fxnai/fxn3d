@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.unity.feature.development": "1.0.2",
-    "com.unity.ide.vscode": "1.2.5",
     "com.unity.multiplayer.center": "1.0.0",
     "com.unity.test-framework": "2.0.1-exp.2",
     "com.unity.toolchain.macos-x86_64-linux-x86_64": "2.0.10",
