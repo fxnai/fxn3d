@@ -79,8 +79,8 @@ namespace Function {
             var rowStride = texture.width * channels;
             var bufferSize = rowStride * texture.height;
             pixelBuffer ??= new byte[bufferSize];
-            if (pixelBuffer.Length != bufferSize)
-                throw new InvalidOperationException($"Texture cannot be converted to a Function image because pixel buffer length was expected to be {bufferSize} but got {pixelBuffer.Length}");
+            if (pixelBuffer.Length < bufferSize)
+                throw new InvalidOperationException($"Texture cannot be converted to a Function image because pixel buffer length was expected to be greater than or equal to {bufferSize} but got {pixelBuffer.Length}");
             fixed (void* dst = pixelBuffer)
                 UnsafeUtility.MemCpyStride(
                     dst,

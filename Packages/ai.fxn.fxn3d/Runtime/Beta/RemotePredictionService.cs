@@ -42,7 +42,7 @@ namespace Function.Beta.Services {
                 name: pair.Key,
                 value: await ToValue(pair.Value, pair.Key)
             )))).ToDictionary(pair => pair.name, pair => pair.value);
-            var prediction = (await client.Request<Prediction>(
+            var prediction = (await client.Request<RemotePrediction>(
                 method: @"POST",
                 path: $"/predictions/remote",
                 payload: new () {
@@ -52,13 +52,15 @@ namespace Function.Beta.Services {
                     [@"clientId"] = Configuration.ClientId,
                 }
             ))!;
-            if (prediction.results != null)
-                prediction.results = await Task.WhenAll(prediction.results
-                    .Select(r => (r as JObject)!)
-                    .Select(j => j.ToObject<Value>()!)
-                    .Select(ToObject)
-                );
-            return prediction;
+            return new Prediction {
+                id = prediction.id,
+                tag = prediction.tag,
+                created = prediction.created,
+                results = prediction.results != null ?await Task.WhenAll(prediction.results.Select(ToObject)) : null,
+                latency = prediction.latency,
+                error = prediction.error,
+                logs = prediction.logs,
+            };
         }
         #endregion
 
@@ -171,9 +173,15 @@ namespace Function.Beta.Services {
             return await client.Download(url);
         }
 
+        [Preserve, Serializable]
         private class CreateValueResponse {
             public string? uploadUrl;
             public string? downloadUrl;
+        }
+
+        [Preserve, Serializable]
+        private class RemotePrediction : Prediction {
+            public new Value[]? results;
         }
         #endregion
     }
