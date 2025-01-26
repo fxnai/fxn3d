@@ -1,5 +1,6 @@
 ## 0.0.35
-*INCOMPLETE*
++ Refactored `PredictorStatus.Provisioning` enumeration member to `Compiling`.
++ Removed `Parameter.defaultValue` field.
 
 ## 0.0.34
 + Added `fxn.Beta.Predictions.Remote.Create` method for creating predictions that run on remote servers.

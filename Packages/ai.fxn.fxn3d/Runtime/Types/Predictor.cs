@@ -130,11 +130,6 @@ namespace Function.Types {
         /// Parameter value choices for enumeration parameters.
         /// </summary>
         public EnumerationMember[]? enumeration;
-
-        /// <summary>
-        /// Parameter default value.
-        /// </summary>
-        public object? defaultValue;
     }
 
     /// <summary>
@@ -176,10 +171,10 @@ namespace Function.Types {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PredictorStatus : int {
         /// <summary>
-        /// Predictor is being provisioned.
+        /// Predictor is being compiled.
         /// </summary>
-        [EnumMember(Value = @"PROVISIONING")]
-        Provisioning = 0,
+        [EnumMember(Value = @"COMPILING")]
+        Compiling = 0,
         /// <summary>
         /// Predictor is active.
         /// </summary>

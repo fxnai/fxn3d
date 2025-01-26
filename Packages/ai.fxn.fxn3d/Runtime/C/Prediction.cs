@@ -50,7 +50,7 @@ namespace Function.C {
             get {
                 prediction.GetPredictionLogLength(out var length).Throw();
                 var logs = new StringBuilder(length + 1);
-                prediction.GetPredictionLogs(logs, logs.Capacity).Throw();
+                prediction.GetPredictionLogs(logs, logs.Capacity);
                 return logs.ToString();
             }
         }
