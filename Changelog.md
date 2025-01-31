@@ -1,3 +1,6 @@
+## 0.0.36
+*INCOMPLETE*
+
 ## 0.0.35
 + Fixed DEX errors when building for Android on Unity 2022 LTS.
 + Refactored `PredictorStatus.Provisioning` enumeration member to `Compiling`.
