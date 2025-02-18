@@ -1,5 +1,5 @@
 ## 0.0.36
-*INCOMPLETE*
++ Added experimental support for Apple Vision Pro (visionOS).
 
 ## 0.0.35
 + Fixed DEX errors when building for Android on Unity 2022 LTS.

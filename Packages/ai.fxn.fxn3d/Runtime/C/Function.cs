@@ -19,7 +19,7 @@ namespace Function.C {
     internal static unsafe class Function {
 
         public const string Assembly =
-        #if (UNITY_IOS || UNITY_WEBGL) && !UNITY_EDITOR
+        #if (UNITY_IOS || UNITY_VISIONOS || UNITY_WEBGL) && !UNITY_EDITOR
         @"__Internal";
         #else
         @"Function";

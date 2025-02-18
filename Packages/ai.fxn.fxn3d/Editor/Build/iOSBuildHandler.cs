@@ -27,15 +27,20 @@ namespace Function.Editor.Build {
     internal sealed class iOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
         private List<CachedPrediction> cache;
-        private const string ClientId = @"ios-arm64";
+        private const string iOSClientId = @"ios-arm64";
+        private const string visionOSClientId = @"visionos-arm64";
 
-        protected override BuildTarget[] targets => new [] { BuildTarget.iOS };
+        protected override BuildTarget[] targets => new [] {
+            BuildTarget.iOS,
+            BuildTarget.VisionOS
+        };
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
             var projectSettings = FunctionProjectSettings.instance;
             var settings = FunctionSettings.Create(projectSettings.accessKey);
             var embeds = GetEmbeds();
             var cache = new List<CachedPrediction>();
+            var clientId = report.summary.platform == BuildTarget.VisionOS ? visionOSClientId : iOSClientId;
             foreach (var embed in embeds) {
                 var client = new DotNetClient(embed.url, embed.accessKey);
                 var fxn = new Function(client);
@@ -44,10 +49,10 @@ namespace Function.Editor.Build {
                         try {
                             var prediction = Task.Run(() => fxn.Predictions.Create(
                                 tag,
-                                clientId: ClientId,
+                                clientId: clientId,
                                 configurationId: @""
                             )).Result;
-                            var cached = new CachedPrediction(prediction, ClientId);
+                            var cached = new CachedPrediction(prediction, clientId);
                             return cached;
                         } catch (Exception ex) {
                             Debug.LogException(new InvalidOperationException(
@@ -95,7 +100,7 @@ namespace Function.Editor.Build {
                         ));
                     }
                 }
-        #if UNITY_IOS
+        #if UNITY_IOS || UNITY_VISIONOS
             var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);
             var project = new PBXProject();
             project.ReadFromFile(pbxPath);

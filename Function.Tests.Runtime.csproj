@@ -59,7 +59,7 @@
     <UnityVersion>6000.0.28f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.5/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/yusuf/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.1.0/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.28f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.28f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.28f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
@@ -84,10 +84,6 @@
     </Reference>
     <Reference Include="UnityEngine.ARModule">
       <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/Unity.app/Contents/Managed/UnityEngine/UnityEngine.ARModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AccessibilityModule">
-      <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/Unity.app/Contents/Managed/UnityEngine/UnityEngine.AccessibilityModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AndroidJNIModule">
@@ -474,6 +470,10 @@
       <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEditor.VisionOS.Extensions">
+      <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/PlaybackEngines/VisionOSPlayer/UnityEditor.VisionOS.Extensions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEditor.Android.Extensions">
       <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll</HintPath>
       <Private>False</Private>
@@ -516,6 +516,14 @@
     </Reference>
     <Reference Include="Unity.Android.Gradle">
       <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/PlaybackEngines/AndroidPlayer/Unity.Android.Gradle.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+      <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/PlaybackEngines/VisionOSPlayer/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEditor.Apple.Extensions.Common">
+      <HintPath>/Applications/Unity/Hub/Editor/6000.0.28f1/PlaybackEngines/VisionOSPlayer/UnityEditor.Apple.Extensions.Common.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
