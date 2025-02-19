@@ -1,5 +1,5 @@
 ## 0.0.37
-*INCOMPLETE*
++ Fixed compiler error when compiling for visionOS.
 
 ## 0.0.36
 + Added experimental support for Apple Vision Pro (visionOS).

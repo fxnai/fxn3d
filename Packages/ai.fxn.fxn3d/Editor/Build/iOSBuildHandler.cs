@@ -19,7 +19,7 @@ namespace Function.Editor.Build {
     using Types;
     using FunctionSettings = Internal.FunctionSettings;
 
-#if UNITY_IOS
+#if UNITY_IOS || UNITY_VISIONOS
     using UnityEditor.iOS.Xcode;
     using UnityEditor.iOS.Xcode.Extensions;
 #endif
