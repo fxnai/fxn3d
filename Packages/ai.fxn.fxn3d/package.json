@@ -1,6 +1,6 @@
 {
     "name": "ai.fxn.fxn3d",
-    "version": "0.0.37",
+    "version": "0.0.38",
     "displayName": "Function",
     "description": "Run AI prediction functions in Unity Engine.",
     "unity": "2022.3",
