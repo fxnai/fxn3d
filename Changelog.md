@@ -1,5 +1,5 @@
 ## 0.0.38
-*INCOMPLETE*
++ Fixed predictor embedding failing when building for visionOS.
 
 ## 0.0.37
 + Fixed compiler error when compiling for visionOS.

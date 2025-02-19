@@ -101,14 +101,21 @@ namespace Function.Editor.Build {
                     }
                 }
         #if UNITY_IOS || UNITY_VISIONOS
-            var pbxPath = PBXProject.GetPBXProjectPath(report.summary.outputPath);
+            var xcodeProjectName = report.summary.platform == BuildTarget.VisionOS ?
+                @"Unity-VisionOS.xcodeproj" : // Unity needs to fix `PBXProject::GetPBXProjectPath`
+                @"Unity-iPhone.xcodeproj";
+            var pbxPath = Path.Combine(
+                report.summary.outputPath,
+                xcodeProjectName,
+                @"project.pbxproj"
+            );
             var project = new PBXProject();
             project.ReadFromFile(pbxPath);
             var targetGuid = project.GetUnityMainTargetGuid();
             foreach (var framework in frameworks) {
                 var frameworkGuid = project.AddFile(
-                    "Frameworks/Function/" + framework,
-                    "Frameworks/" + framework,
+                    @"Frameworks/Function/" + framework,
+                    @"Frameworks/" + framework,
                     PBXSourceTree.Source
                 );
                 project.AddFileToEmbedFrameworks(targetGuid, frameworkGuid);
