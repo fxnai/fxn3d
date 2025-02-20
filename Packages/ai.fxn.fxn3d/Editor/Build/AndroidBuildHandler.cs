@@ -50,11 +50,8 @@ namespace Function.Editor.Build {
                                 configurationId: @""
                             )).Result;
                             return new CachedPrediction(prediction, clientId);
-                        } catch (Exception ex) {
-                            Debug.LogException(new InvalidOperationException(
-                                $"Function: Failed to embed {tag} predictor. Predictions with this predictor will likely fail at runtime.",
-                                ex
-                            ));
+                        } catch (AggregateException ex) {
+                            Debug.LogWarning($"Function: Failed to embed {tag} predictor with error: {ex.InnerException}. Predictions with this predictor will likely fail at runtime.");
                             return null;
                         }
                     }));
@@ -89,10 +86,7 @@ namespace Function.Editor.Build {
                         using var fileStream = File.Create(path);
                         dsoStream.CopyTo(fileStream);
                     } catch (AggregateException ex) {
-                        Debug.LogException(new InvalidOperationException(
-                            $"Function: Failed to embed prediction resource for {prediction.tag} predictor. Predictions with this predictor will likely fail at runtime.",
-                            ex.InnerException
-                        ));
+                        Debug.LogWarning($"Function: Failed to embed prediction resource for {prediction.tag} predictor with error: {ex.InnerException}. Predictions with this predictor will likely fail at runtime.");
                     }
                 }
             }

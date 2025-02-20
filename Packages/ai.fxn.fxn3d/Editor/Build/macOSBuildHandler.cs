@@ -53,13 +53,9 @@ namespace Function.Editor.Build {
                                 clientId: clientId,
                                 configurationId: @""
                             )).Result;
-                            var cached = new CachedPrediction(prediction, clientId);
-                            return cached;
-                        } catch (Exception ex) {
-                            Debug.LogException(new InvalidOperationException(
-                                $"Function: Failed to embed {tag} predictor. Predictions with this predictor will likely fail at runtime.",
-                                ex
-                            ));
+                            return new CachedPrediction(prediction, clientId);
+                        } catch (AggregateException ex) {
+                            Debug.LogWarning($"Function: Failed to embed {tag} predictor with error: {ex.InnerException}. Predictions with this predictor will likely fail at runtime.");
                             return null;
                         }
                     })
@@ -103,10 +99,7 @@ namespace Function.Editor.Build {
                         dsoStream.CopyTo(fileStream);
                         frameworks.Add(dsoName);
                     } catch (AggregateException ex) {
-                        Debug.LogException(new InvalidOperationException(
-                            $"Function: Failed to embed prediction resource for {prediction.tag} predictor. Predictions with this predictor will likely fail at runtime.",
-                            ex.InnerException
-                        ));
+                        Debug.LogWarning($"Function: Failed to embed prediction resource for {prediction.tag} predictor with error: {ex.InnerException}. Predictions with this predictor will likely fail at runtime.");
                     }
                 }
             // Check Xcode project

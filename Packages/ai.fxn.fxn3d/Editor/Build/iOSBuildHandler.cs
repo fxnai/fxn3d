@@ -27,20 +27,19 @@ namespace Function.Editor.Build {
     internal sealed class iOSBuildHandler : BuildHandler, IPostprocessBuildWithReport {
 
         private List<CachedPrediction> cache;
-        private const string iOSClientId = @"ios-arm64";
-        private const string visionOSClientId = @"visionos-arm64";
-
-        protected override BuildTarget[] targets => new [] {
-            BuildTarget.iOS,
-            BuildTarget.VisionOS
+        private static readonly Dictionary<BuildTarget, string> ClientIds = new () {
+            [BuildTarget.iOS] = @"ios-arm64",
+            [BuildTarget.VisionOS] = @"visionos-arm64"
         };
+
+        protected override BuildTarget[] targets => ClientIds.Keys.ToArray();
 
         protected override FunctionSettings CreateSettings (BuildReport report) {
             var projectSettings = FunctionProjectSettings.instance;
             var settings = FunctionSettings.Create(projectSettings.accessKey);
             var embeds = GetEmbeds();
             var cache = new List<CachedPrediction>();
-            var clientId = report.summary.platform == BuildTarget.VisionOS ? visionOSClientId : iOSClientId;
+            var clientId = ClientIds[report.summary.platform];
             foreach (var embed in embeds) {
                 var client = new DotNetClient(embed.url, embed.accessKey);
                 var fxn = new Function(client);
@@ -52,13 +51,9 @@ namespace Function.Editor.Build {
                                 clientId: clientId,
                                 configurationId: @""
                             )).Result;
-                            var cached = new CachedPrediction(prediction, clientId);
-                            return cached;
-                        } catch (Exception ex) {
-                            Debug.LogException(new InvalidOperationException(
-                                $"Function: Failed to embed {tag} predictor. Predictions with this predictor will likely fail at runtime.",
-                                ex
-                            ));
+                            return new CachedPrediction(prediction, clientId);
+                        } catch (AggregateException ex) {
+                            Debug.LogWarning($"Function: Failed to embed {tag} predictor with error: {ex.InnerException}. Predictions with this predictor will likely fail at runtime.");
                             return null;
                         }
                     })
@@ -94,10 +89,7 @@ namespace Function.Editor.Build {
                         ZipFile.ExtractToDirectory(dsoPath, frameworkDir, true);
                         frameworks.Add(resource.name);
                     } catch (AggregateException ex) {
-                        Debug.LogException(new InvalidOperationException(
-                            $"Function: Failed to embed prediction resource for {prediction.tag} predictor. Predictions with this predictor will likely fail at runtime.",
-                            ex.InnerException
-                        ));
+                        Debug.LogWarning($"Function: Failed to embed prediction resource for {prediction.tag} predictor with error: {ex.InnerException}. Predictions with this predictor will likely fail at runtime.");
                     }
                 }
         #if UNITY_IOS || UNITY_VISIONOS

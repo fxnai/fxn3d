@@ -1,5 +1,6 @@
 ## 0.0.38
 + Fixed predictor embedding failing when building for visionOS.
++ Fixed failed predictor embedding causing builds to fail.
 
 ## 0.0.37
 + Fixed compiler error when compiling for visionOS.
