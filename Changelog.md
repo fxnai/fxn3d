@@ -1,3 +1,9 @@
+## 0.0.39
++ Added `Predictor.access` field for inspecting predictor access mode.
++ Refactored `AccessMode` enumeration to `PredictorAccess`.
++ Removed `Predictor.error` field.
++ Removed `PredictorStatus.Invalid` enumeration member.
+
 ## 0.0.38
 + Fixed predictor embedding failing when building for visionOS.
 + Fixed failed predictor embedding causing builds to fail.

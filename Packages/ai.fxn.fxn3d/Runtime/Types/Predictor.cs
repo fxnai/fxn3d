@@ -33,6 +33,11 @@ namespace Function.Types {
         /// Predictor name.
         /// </summary>
         public string name;
+
+        /// <summary>
+        /// Predictor description.
+        /// </summary>
+        public string description;
         
         /// <summary>
         /// Predictor status.
@@ -40,15 +45,15 @@ namespace Function.Types {
         public PredictorStatus status;
 
         /// <summary>
+        /// Predictor access.
+        /// </summary>
+        public PredictorAccess access;
+
+        /// <summary>
         /// Date created.
         /// </summary>
         [JsonConverter(typeof(IsoDateTimeConverter))]
         public DateTime created;
-
-        /// <summary>
-        /// Predictor description.
-        /// </summary>
-        public string? description;
 
         /// <summary>
         /// Predictor card.
@@ -65,12 +70,6 @@ namespace Function.Types {
         /// Predictor signature.
         /// </summary>
         public Signature? signature;
-
-        /// <summary>
-        /// Predictor provisioning error.
-        /// This is populated when the predictor status is `INVALID`.
-        /// </summary>
-        public string? error;
 
         /// <summary>
         /// Predictor license URL.
@@ -149,17 +148,17 @@ namespace Function.Types {
     }
 
     /// <summary>
-    /// Access mode.
+    /// Predictor access mode.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum AccessMode : int {
+    public enum PredictorAccess : int {
         /// <summary>
-        /// Resource can be accessed by any user.
+        /// Predictor is public.
         /// </summary>
         [EnumMember(Value = @"PUBLIC")]
         Public = 0,
         /// <summary>
-        /// Resource can only be accessed by the owner.
+        /// Predictor is private to the user or organization.
         /// </summary>
         [EnumMember(Value = @"PRIVATE")]
         Private = 1,
@@ -180,11 +179,6 @@ namespace Function.Types {
         /// </summary>
         [EnumMember(Value = @"ACTIVE")]
         Active = 1,
-        /// <summary>
-        /// Predictor is invalid.
-        /// </summary>
-        [EnumMember(Value = @"INVALID")]
-        Invalid = 2,
         /// <summary>
         /// Predictor is archived.
         /// </summary>
