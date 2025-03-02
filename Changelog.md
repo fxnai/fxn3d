@@ -1,5 +1,6 @@
 ## 0.0.39
 + Added `Predictor.access` field for inspecting predictor access mode.
++ Fixed linker errors due to native library being disabled when building for iOS and visionOS.
 + Refactored `AccessMode` enumeration to `PredictorAccess`.
 + Removed `Predictor.error` field.
 + Removed `PredictorStatus.Invalid` enumeration member.
