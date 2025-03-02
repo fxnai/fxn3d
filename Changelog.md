@@ -1,3 +1,6 @@
+## 0.0.40
+*INCOMPLETE*
+
 ## 0.0.39
 + Added `Predictor.access` field for inspecting predictor access mode.
 + Fixed linker errors due to native library being disabled when building for iOS and visionOS.
