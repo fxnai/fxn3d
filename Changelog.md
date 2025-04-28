@@ -1,5 +1,5 @@
 ## 0.0.40
-*INCOMPLETE*
++ Upgraded to Function C 0.0.35.
 
 ## 0.0.39
 + Added `Predictor.access` field for inspecting predictor access mode.

@@ -9,7 +9,7 @@ from requests import get
 from shutil import unpack_archive
 
 parser = ArgumentParser()
-parser.add_argument("--version", type=str, default=None)
+parser.add_argument("--version", type=str, required=True)
 
 def _download_fxnc (url: str, path: Path):
     # Download
@@ -24,20 +24,14 @@ def _download_fxnc (url: str, path: Path):
         path.unlink()
         print(f"Extracted {path}")
 
-def _get_latest_version () -> str:
-    response = get(f"https://api.github.com/repos/fxnai/fxnc/releases/latest")
-    response.raise_for_status()
-    release = response.json()
-    return release["tag_name"]
-
 def main (): # CHECK # Linux # Android AAR
     args = parser.parse_args()
-    version = args.version if args.version else _get_latest_version()
+    version = args.version
     LIB_PATH_BASE = Path("Packages") / "ai.fxn.fxn3d" / "Plugins"
     LIBS = [
         {
-            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-ios-iphoneos.framework.zip",
-            "path": LIB_PATH_BASE / "iOS" / "Function.framework.zip"
+            "url": f"https://cdn.fxn.ai/fxnc/{version}/Function.xcframework.zip",
+            "path": LIB_PATH_BASE / "iOS" / "Function.xcframework.zip"
         },
         {
             "url": f"https://cdn.fxn.ai/fxnc/{version}/Function-macos.dylib",

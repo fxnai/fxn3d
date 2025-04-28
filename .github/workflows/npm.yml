@@ -12,8 +12,13 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
     - uses: actions/checkout@v2
+
     - uses: actions/setup-node@v2
       with:
         registry-url: "https://registry.npmjs.org"
+
+    - name: Pull Function C
+      run: python3 fxnc.py --version 0.0.35
+
     - run: npm publish --access public
       working-directory: Packages/ai.fxn.fxn3d
