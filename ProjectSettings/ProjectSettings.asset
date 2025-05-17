@@ -599,7 +599,7 @@ PlayerSettings:
     m_Formats: 00000000
   - serializedVersion: 3
     m_BuildTarget: WebGL
-    m_Formats: 00000000
+    m_Formats: 05000000
   playModeTestRunnerEnabled: 0
   runPlayModeTestAsEditModeTest: 0
   actionOnDotNetUnhandledException: 1
@@ -843,7 +843,7 @@ PlayerSettings:
   webGLShowDiagnostics: 0
   webGLDataCaching: 1
   webGLDebugSymbols: 0
-  webGLEmscriptenArgs: '                                                                                                                                                                                      
+  webGLEmscriptenArgs: '                                                                                                                                                                                       
     -Wl,-uFXN_WEBGL_PUSH -Wl,-uFXN_WEBGL_INIT -Xlinker --features=mutable-globals,sign-ext,simd128
     -lembind -sEXTRA_EXPORTED_RUNTIME_METHODS=FS -Wl,-uFXN_WEBGL_POP'
   webGLModulesDirectory: 
