@@ -1,3 +1,6 @@
+## 0.0.41
+*INCOMPLETE*
+
 ## 0.0.40
 + Fixed rare `TypeLoadException: VTable setup of type T failed` exception when building from Unity.
 + Removed `fxn.Predictions.IsReady` method. You must manually track whether a predictor is loaded.
