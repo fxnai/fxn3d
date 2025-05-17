@@ -1,5 +1,6 @@
 ## 0.0.40
-+ Upgraded to Function C 0.0.35.
++ Fixed rare `TypeLoadException: VTable setup of type T failed` exception when building from Unity.
++ Upgraded to Function C 0.0.36.
 
 ## 0.0.39
 + Added `Predictor.access` field for inspecting predictor access mode.

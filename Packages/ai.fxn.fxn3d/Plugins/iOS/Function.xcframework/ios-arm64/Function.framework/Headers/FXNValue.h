@@ -18,58 +18,61 @@
  @abstract Value data type.
 
  @constant FXN_DTYPE_NULL
- Value is null or undefined.
+ Null or undefined.
 
  @constant FXN_DTYPE_FLOAT16
- Value is IEEE 754 half precision 16-bit float.
+ IEEE 754 half precision 16-bit float.
 
  @constant FXN_DTYPE_FLOAT32
- Value is IEEE 754 single precision 32-bit float.
+ IEEE 754 single precision 32-bit float.
 
  @constant FXN_DTYPE_FLOAT64
- Value is IEEE 754 double precision 64-bit float.
+ IEEE 754 double precision 64-bit float.
 
  @constant FXN_DTYPE_INT8
- Value is signed 8-bit integer.
+ Signed 8-bit integer.
 
  @constant FXN_DTYPE_INT16
- Value is signed 16-bit integer.
+ Signed 16-bit integer.
 
  @constant FXN_DTYPE_INT32
- Value is signed 32-bit integer.
+ Signed 32-bit integer.
 
  @constant FXN_DTYPE_INT64
- Value is signed 64-bit integer.
+ Signed 64-bit integer.
 
  @constant FXN_DTYPE_UINT8
- Value is unsigned 8-bit integer.
+ Unsigned 8-bit integer.
 
  @constant FXN_DTYPE_UINT16
- Value is unsigned 16-bit integer.
+ Unsigned 16-bit integer.
 
  @constant FXN_DTYPE_UINT32
- Value is unsigned 32-bit integer.
+ Unsigned 32-bit integer.
 
  @constant FXN_DTYPE_UINT64
- Value is unsigned 64-bit integer.
+ Unsigned 64-bit integer.
 
  @constant FXN_DTYPE_BOOL
- Value is 8-bit boolean where zero is `false` and non-zero is `true`.
+ 8-bit boolean where zero is `false` and non-zero is `true`.
 
  @constant FXN_DTYPE_STRING
- Value is a UTF-8 encoded string.
+ UTF-8 encoded string.
 
  @constant FXN_DTYPE_LIST
- Value is a JSON-serializable list.
+ JSON-serializable list.
 
  @constant FXN_DTYPE_DICT
- Value is a JSON-serializable dictionary.
+ JSON-serializable dictionary.
 
  @constant FXN_DTYPE_IMAGE
- Value is a pixel buffer with 8 bits per intensity, interleaved by channel.
+ Pixel buffer with 8 bits per intensity, interleaved by channel.
 
  @constant FXN_DTYPE_BINARY
- Value is a binary blob.
+ Binary blob.
+
+ @constant FXN_DTYPE_BFLOAT16
+ 16-bit brain float.
 */
 enum FXNDtype {
     FXN_DTYPE_NULL      = 0,
@@ -90,6 +93,7 @@ enum FXNDtype {
     FXN_DTYPE_DICT      = 15,
     FXN_DTYPE_IMAGE     = 16,
     FXN_DTYPE_BINARY    = 17,
+    FXN_DTYPE_BFLOAT16  = 18,
 };
 typedef enum FXNDtype FXNDtype;
 

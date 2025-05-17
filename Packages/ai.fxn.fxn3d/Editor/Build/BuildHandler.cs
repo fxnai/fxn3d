@@ -18,6 +18,7 @@ namespace Function.Editor.Build {
     using UnityEditor;
     using UnityEditor.Build;
     using UnityEditor.Build.Reporting;
+    using UnityEngine;
     using Internal;
 
     internal abstract class BuildHandler : IPreprocessBuildWithReport {
@@ -47,8 +48,19 @@ namespace Function.Editor.Build {
                 })
                 .ToArray();
             var customEmbeds = types
-                .SelectMany(type => type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
-                .Where(property => Attribute.IsDefined(property, typeof(EmbedAttribute)) && property.PropertyType == typeof(FunctionClient))
+                .SelectMany(type => { // thanks Jamie!
+                    try {
+                        return type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                    }
+                    catch (Exception ex) {
+                        Debug.LogWarning($"Function: Failed to inspect type {type} for predictor embeds with exception: {ex.Message}. Predictions might fail at runtime.");
+                        return new PropertyInfo[0];
+                    }
+                })
+                .Where(property =>
+                    Attribute.IsDefined(property, typeof(EmbedAttribute)) &&
+                    property.PropertyType == typeof(FunctionClient)
+                )
                 .Select(property  => {
                     var attribute = property.GetCustomAttribute<EmbedAttribute>();
                     var getter = CreateDelegateForProperty<FunctionClient>(property);
