@@ -1,3 +1,6 @@
+## 0.0.42
+*INCOMPLETE*
+
 ## 0.0.41
 + Added support for WebAssembly 2023 in Unity 6.1+.
 
