@@ -1,5 +1,5 @@
 ## 0.0.41
-*INCOMPLETE*
++ Added support for WebAssembly 2023 in Unity 6.1+.
 
 ## 0.0.40
 + Fixed rare `TypeLoadException: VTable setup of type T failed` exception when building from Unity.

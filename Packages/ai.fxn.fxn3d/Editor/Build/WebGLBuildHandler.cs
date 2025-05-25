@@ -19,7 +19,6 @@ namespace Function.Editor.Build {
         protected override BuildTarget[] targets => new [] { BuildTarget.WebGL };
         private static string[] EM_ARGS => new [] {
             @"-Wl,-uFXN_WEBGL_INIT",
-            @"-Xlinker --features=mutable-globals,sign-ext,simd128",
             @"-lembind",
             @"-sEXTRA_EXPORTED_RUNTIME_METHODS=FS",
         };
