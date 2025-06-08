@@ -21,7 +21,7 @@ namespace Function.Editor {
     /// <summary>
     /// Function settings for the current Unity project.
     /// </summary>
-    [FilePath(@"UserSettings/Function.asset", FilePathAttribute.Location.ProjectFolder)]
+    [FilePath(@"ProjectSettings/Function.asset", FilePathAttribute.Location.ProjectFolder)]
     internal sealed class FunctionProjectSettings : ScriptableSingleton<FunctionProjectSettings> {
 
         #region --Client API--

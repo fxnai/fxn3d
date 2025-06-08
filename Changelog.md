@@ -1,5 +1,5 @@
 ## 0.0.42
-*INCOMPLETE*
++ Added `PredictorAccess.Unlisted` enumeration member for public predictors excluded from discovery.
 
 ## 0.0.41
 + Added support for WebAssembly 2023 in Unity 6.1+.

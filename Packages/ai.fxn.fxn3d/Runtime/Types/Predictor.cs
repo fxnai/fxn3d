@@ -155,13 +155,18 @@ namespace Function.Types {
         /// <summary>
         /// Predictor is public.
         /// </summary>
-        [EnumMember(Value = @"PUBLIC")]
+        [EnumMember(Value = @"public")]
         Public = 0,
         /// <summary>
         /// Predictor is private to the user or organization.
         /// </summary>
-        [EnumMember(Value = @"PRIVATE")]
+        [EnumMember(Value = @"private")]
         Private = 1,
+        /// <summary>
+        /// Predictor is public but unlisted from discovery.
+        /// </summary>
+        [EnumMember(Value = @"unlisted")]
+        Unlisted = 2,
     }
 
     /// <summary>
@@ -172,17 +177,17 @@ namespace Function.Types {
         /// <summary>
         /// Predictor is being compiled.
         /// </summary>
-        [EnumMember(Value = @"COMPILING")]
+        [EnumMember(Value = @"compiling")]
         Compiling = 0,
         /// <summary>
         /// Predictor is active.
         /// </summary>
-        [EnumMember(Value = @"ACTIVE")]
+        [EnumMember(Value = @"active")]
         Active = 1,
         /// <summary>
         /// Predictor is archived.
         /// </summary>
-        [EnumMember(Value = @"ARCHIVED")]
+        [EnumMember(Value = @"archived")]
         Archived = 3,
     }
 }
